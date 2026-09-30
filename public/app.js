@@ -30,3 +30,62 @@ document.querySelectorAll('.video-frame[data-video]').forEach((box) => {
     f.focus();
   });
 });
+
+// Mobile menu
+(() => {
+  const btn = document.querySelector('.nav-toggle');
+  const nav = document.getElementById('main-nav');
+  if (!btn || !nav) return;
+  document.documentElement.classList.add('js');
+  btn.addEventListener('click', () => {
+    const open = btn.getAttribute('aria-expanded') !== 'true';
+    btn.setAttribute('aria-expanded', String(open));
+    document.body.classList.toggle('nav-open', open);
+    btn.lastChild.textContent = open ? 'Close' : 'Menu';
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.body.classList.contains('nav-open')) {
+      btn.setAttribute('aria-expanded', 'false'); document.body.classList.remove('nav-open'); btn.lastChild.textContent = 'Menu'; btn.focus();
+    }
+  });
+})();
+
+// Homepage pitch: boats paddle from their goal lines into position, then the pass is drawn
+(() => {
+  const svg = document.querySelector('.hero-pitch svg');
+  if (!svg || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+  const boats = [...svg.querySelectorAll('.hp-boat')].map((g) => ({
+    g, text: g.querySelector('text'),
+    a: g.dataset.from.split(',').map(Number), b: g.dataset.to.split(',').map(Number),
+  }));
+  const ball = svg.querySelector('.hp-ball');
+  const pass = svg.querySelector('.hp-pass');
+  const [bx0, by0] = ball.dataset.from.split(',').map(Number);
+  const bx1 = Number(ball.getAttribute('cx')), by1 = Number(ball.getAttribute('cy'));
+  const ease = (t) => 1 - Math.pow(1 - t, 3);
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const place = (bt, t) => {
+    const x = lerp(bt.a[0], bt.b[0], t), y = lerp(bt.a[1], bt.b[1], t);
+    const d = ((bt.b[2] - bt.a[2]) % 360 + 540) % 360 - 180;
+    const ang = bt.a[2] + d * t;
+    bt.g.setAttribute('transform', `translate(${x} ${y}) rotate(${ang})`);
+    bt.text.setAttribute('transform', `rotate(${-ang})`);
+  };
+  boats.forEach((bt) => place(bt, 0));
+  ball.setAttribute('cx', bx0); ball.setAttribute('cy', by0);
+  pass.classList.add('hidden');
+  const DUR = 1800, t0 = performance.now() + 300;
+  const frame = (now) => {
+    let done = true;
+    boats.forEach((bt, i) => {
+      const t = Math.min(1, Math.max(0, (now - t0 - (i % 5) * 70) / DUR));
+      if (t < 1) done = false;
+      place(bt, ease(t));
+    });
+    const tb = ease(Math.min(1, Math.max(0, (now - t0 - 500) / DUR)));
+    ball.setAttribute('cx', lerp(bx0, bx1, tb)); ball.setAttribute('cy', lerp(by0, by1, tb));
+    if (!done || tb < 1) requestAnimationFrame(frame);
+    else pass.classList.remove('hidden');
+  };
+  requestAnimationFrame(frame);
+})();

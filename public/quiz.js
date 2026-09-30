@@ -153,7 +153,7 @@
     const correctName = item.kind === 'sig-which' ? SIG.byId[item.a].name : item.a;
     fb.appendChild(document.createTextNode(right ? item.why : `The answer is: ${correctName}. ${item.why}`));
     root.appendChild(fb);
-    const next = h('button', 'btn primary quiz-next', i + 1 < qs.length ? 'Next question →' : 'See my score');
+    const next = h('button', 'btn primary quiz-next', i + 1 < qs.length ? 'Next question' : 'See my score');
     next.type = 'button';
     next.addEventListener('click', () => { i += 1; if (i < qs.length) show(); else finish(); });
     root.appendChild(next);
@@ -174,7 +174,7 @@
     res.appendChild(h('p', 'quiz-verdict', verdict));
     if (best > 0 && score <= best) res.appendChild(h('p', 'small-note', `Your best score on this device: ${Math.max(best, score)} / 10`));
     else if (score > best && best > 0) res.appendChild(h('p', 'small-note', 'New personal best!'));
-    const again = h('button', 'btn primary', 'New quiz: 10 new questions');
+    const again = h('button', 'btn primary', 'Try 10 new questions');
     again.type = 'button';
     again.addEventListener('click', start);
     const actions = h('p', 'lead-actions'); actions.appendChild(again);

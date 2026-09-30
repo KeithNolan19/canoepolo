@@ -28,6 +28,9 @@ if (IS_PROD && (!ADMIN_PASSWORD || ADMIN_PASSWORD.length < 12 || !SESSION_SECRET
 const adminHash = bcrypt.hashSync(ADMIN_PASSWORD || 'change-me-please', 10);
 if (!ADMIN_PASSWORD) console.warn('WARNING: no ADMIN_PASSWORD set — using "change-me-please" (development only).');
 
+// Changes on every deploy, so browsers fetch fresh CSS/JS (they are cached for a day otherwise)
+const ASSET_V = Date.now().toString(36);
+
 const app = express();
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '..', 'views'));
@@ -65,6 +68,7 @@ app.use((req, res, next) => {
   Object.assign(res.locals, {
     COUNTRIES, LEVELS, DIVISIONS, STATUSES, flag, BASE_URL, CREATE_TOURNAMENT_URL,
     csrf: req.session.csrf,
+    assetV: ASSET_V,
     isAdmin: !!req.session.admin,
     path: req.path,
     fmtRange,

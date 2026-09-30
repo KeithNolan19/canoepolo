@@ -7,27 +7,23 @@
   <meta name="description" content="<%= typeof metaDescription !== 'undefined' ? metaDescription : 'The home of international canoe polo (kayak polo): tournaments, videos, rules, refereeing and ways to get involved, for players, coaches, referees, volunteers and clubs.' %>">
   <meta property="og:title" content="<%= title %> | canoepolo.eu">
   <meta property="og:site_name" content="canoepolo.eu">
-  <meta name="theme-color" content="#0b2545">
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/fonts/fonts.css">
-  <link rel="stylesheet" href="/style.css">
+  <meta name="theme-color" content="#07294a">
+  <link rel="icon" href="/favicon.svg?v=<%= assetV %>" type="image/svg+xml">
+  <link rel="preload" href="/fonts/archivo-latin-wdth-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/fonts/fonts.css?v=<%= assetV %>">
+  <link rel="stylesheet" href="/style.css?v=<%= assetV %>">
   <link rel="alternate" type="text/calendar" title="Canoe polo tournaments" href="/calendar.ics">
 </head>
 <body>
-<div class="utility">
-  <div class="wrap utility-inner">
-    <span>The home of international canoe polo</span>
-    <span class="utility-links"><a href="/calendar.ics">Subscribe to calendar</a><a href="<%= CREATE_TOURNAMENT_URL %>" target="_blank" rel="noopener">Create a tournament ↗</a></span>
-  </div>
-</div>
+<a class="skip" href="#content">Skip to content</a>
 <header class="site-header">
   <div class="wrap bar">
     <a class="brand" href="/" aria-label="canoepolo.eu home">
-      <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" fill="none" stroke="currentColor" stroke-width="2"/><rect x="9" y="8" width="22" height="13" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 14h22M16 8v13M24 8v13" stroke="currentColor" stroke-width="1" opacity=".6"/><path d="M4 31c4-3 8-3 12 0s8 3 12 0 6-2 8-1" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="15" fill="#ffc629"/><path d="M3.5 12.5c6 2.4 18.8 2.4 25 0M3.5 19.5c6-2.4 18.8-2.4 25 0M16 1c-4.5 4.6-4.5 25.4 0 30" fill="none" stroke="#07294a" stroke-width="1.8"/></svg>
       <span class="brand-name">canoepolo<span>.eu</span></span>
     </a>
-    <nav class="main-nav" aria-label="Main">
-      <a href="/" class="nav-home <%= path === '/' ? 'on' : '' %>">Home</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-nav"><span class="nav-toggle-bars" aria-hidden="true"></span>Menu</button>
+    <nav class="main-nav" id="main-nav" aria-label="Main">
       <a href="/tournaments" class="<%= path.startsWith('/tournaments') || path === '/past' ? 'on' : '' %>">Tournaments</a>
       <a href="/watch" class="<%= path === '/watch' ? 'on' : '' %>">Watch</a>
       <a href="/learn" class="<%= ['/learn', '/rules', '/tactics'].includes(path) ? 'on' : '' %>">Learn</a>
@@ -36,7 +32,8 @@
       <a href="/shop" class="<%= path === '/shop' ? 'on' : '' %>">Shop</a>
       <a href="/about" class="<%= path === '/about' ? 'on' : '' %>">About</a>
       <% if (isAdmin) { %><a href="/admin" class="<%= path.startsWith('/admin') ? 'on' : '' %>">Admin</a><% } %>
+      <a class="nav-cta" href="/tournaments">Find a tournament</a>
     </nav>
   </div>
 </header>
-<main class="<%= typeof fullWidth !== 'undefined' && fullWidth ? 'full' : 'wrap' %>">
+<main id="content" class="<%= typeof fullWidth !== 'undefined' && fullWidth ? 'full' : 'wrap' %>">

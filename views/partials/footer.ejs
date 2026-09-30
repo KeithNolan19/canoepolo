@@ -1,17 +1,18 @@
 </main>
 <footer class="site-footer">
   <div class="wrap footer-grid">
-    <div>
+    <div class="footer-about">
       <p class="footer-brand">canoepolo<span>.eu</span></p>
-      <p>The home of international canoe polo. For players, coaches, referees, volunteers, clubs and fans: the whole canoe polo family.</p>
+      <p>The home of international canoe polo, for players, coaches, referees, volunteers, clubs and fans.</p>
+      <p><a class="footer-mail" href="mailto:info@canoepolo.eu">info@canoepolo.eu</a></p>
     </div>
     <div>
       <h2>Tournaments</h2>
       <ul>
         <li><a href="/tournaments">Upcoming tournaments</a></li>
         <li><a href="/past">Past tournaments</a></li>
-        <li><a href="/calendar.ics">Subscribe to calendar</a></li>
-        <li><a href="<%= CREATE_TOURNAMENT_URL %>" target="_blank" rel="noopener">Create a tournament ↗</a></li>
+        <li><a href="/calendar.ics">Subscribe to the calendar</a></li>
+        <li><a href="<%= CREATE_TOURNAMENT_URL %>" target="_blank" rel="noopener">Run a tournament on Kayakers.nl</a></li>
         <li><a href="/about#listing">List a tournament</a></li>
       </ul>
     </div>
@@ -33,11 +34,14 @@
         <li><a href="/support">Support and funding</a></li>
         <li><a href="/shop">Shop</a></li>
         <li><a href="/about">About</a></li>
-        <li><a href="/api/tournaments">Data feed (JSON)</a></li>
       </ul>
     </div>
   </div>
+  <div class="wrap footer-base">
+    <span>Made by the canoe polo family.</span>
+    <a href="/api/tournaments">Tournament data feed</a>
+  </div>
 </footer>
-<script src="/app.js"></script>
+<script src="/app.js?v=<%= assetV %>"></script>
 </body>
 </html>
