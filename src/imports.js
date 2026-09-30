@@ -75,6 +75,30 @@ const BATCHES = [
   },
 ];
 
+BATCHES.push({
+  id: 'late-2026-worldwide-2026-10-01',
+  tournaments: [
+    {
+      name: 'Paddle Europe Canoe Polo Club Championships 2026',
+      start_date: '2026-10-02', end_date: '2026-10-04',
+      city: 'Milan', country: 'IT',
+      level: 'Continental Championships',
+      description: 'The European Club Championships: the top clubs from each European country\'s national championships play for the continental club title.',
+      source_url: 'https://paddleworldwide.com/competitions/2026-paddle-europe-canoe-polo-club-championships-2856',
+      website_url: 'https://paddleworldwide.com/competitions/2026-paddle-europe-canoe-polo-club-championships-2856',
+    },
+    {
+      name: 'Pylkwier 2026',
+      start_date: '2026-10-03', end_date: '2026-10-04',
+      city: 'Leeuwarden', country: 'NL',
+      level: 'Club / Friendly',
+      divisions: ['Open', 'U18'],
+      description: 'Club tournament in Friesland with first, second and third division classes and a youth class.',
+      source_url: 'https://www.kanopolo.nl/breedtesport/toernooien/',
+    },
+  ],
+});
+
 function run() {
   const done = new Set(db.prepare('SELECT id FROM imports').all().map((r) => r.id));
   const exists = db.prepare('SELECT id FROM tournaments WHERE lower(name) = lower(?) AND start_date = ?');
