@@ -1,0 +1,43 @@
+<%- include('../partials/header') %>
+
+<div class="admin-head">
+  <h1>Tournaments</h1>
+  <div class="actions">
+    <a class="btn primary" href="/admin/new">+ Add tournament</a>
+    <form method="post" action="/admin/logout" class="inline">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <button class="btn" type="submit">Log out</button>
+    </form>
+  </div>
+</div>
+
+<% if (msg) { %><div class="notice green"><%= msg %></div><% } %>
+
+<% if (!tournaments.length) { %>
+  <div class="empty"><p>No tournaments yet. Click <strong>+ Add tournament</strong> to create the first one.</p></div>
+<% } else { %>
+<div class="table-wrap">
+<table class="admin-table">
+  <thead><tr><th>Dates</th><th>Name</th><th>Where</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  <% tournaments.forEach(t => { %>
+    <tr class="<%= t.end_date < today ? 'past' : '' %>">
+      <td class="nowrap"><%= fmtRange(t.start_date, t.end_date) %></td>
+      <td><a href="/tournaments/<%= t.slug %>"><%= t.name %></a><% if (t.featured) { %> <span class="badge">Featured</span><% } %></td>
+      <td><%= flag(t.country) %> <%= t.city %></td>
+      <td><span class="status <%= t.status %>"><%= t.status %></span></td>
+      <td class="nowrap row-actions">
+        <a class="btn small" href="/admin/edit/<%= t.id %>">Edit</a>
+        <form method="post" action="/admin/delete/<%= t.id %>" class="inline" data-confirm="Delete “<%= t.name %>”? This cannot be undone.">
+          <input type="hidden" name="_csrf" value="<%= csrf %>">
+          <button class="btn small danger" type="submit">Delete</button>
+        </form>
+      </td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<% } %>
+
+<%- include('../partials/footer') %>

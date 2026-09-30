@@ -1,0 +1,18 @@
+<%- include('partials/header', { fullWidth: true }) %>
+
+<div class="page-banner">
+  <div class="wrap">
+    <p class="crumbs"><a href="/">Home</a> / Shop</p>
+    <h1>Shop</h1>
+  </div>
+</div>
+
+<div class="wrap narrow-page">
+  <% if (shopImage) { %><img class="page-photo" src="<%= shopImage %>" alt="canoepolo.eu kit"><% } %>
+  <h2 class="sub-head">Opening soon</h2>
+  <p>We're putting together kit and merchandise for players and clubs. If you'd like to know when the shop opens, send us an email.</p>
+  <!-- TODO: put your real contact email below -->
+  <p><a class="btn primary" href="mailto:info@canoepolo.eu?subject=Shop">Email us</a></p>
+</div>
+
+<%- include('partials/footer') %>

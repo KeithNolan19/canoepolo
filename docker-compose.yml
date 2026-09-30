@@ -1,0 +1,33 @@
+# Runs two things on your Droplet:
+#   app   - the canoepolo.eu website (Node.js)
+#   caddy - the web server in front of it; gets free HTTPS certificates automatically
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      BASE_URL: https://${DOMAIN}
+    volumes:
+      - app-data:/app/data          # the database lives here and survives updates
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on: [app]
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  app-data:
+  caddy-data:
+  caddy-config:

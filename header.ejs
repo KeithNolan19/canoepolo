@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %> | canoepolo.eu</title>
+  <meta name="description" content="<%= typeof metaDescription !== 'undefined' ? metaDescription : 'International canoe polo (kayak polo) tournament calendar. Find upcoming tournaments, past events and where to play next.' %>">
+  <meta property="og:title" content="<%= title %> | canoepolo.eu">
+  <meta property="og:site_name" content="canoepolo.eu">
+  <meta name="theme-color" content="#0b2545">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/fonts/fonts.css">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="alternate" type="text/calendar" title="Canoe polo tournaments" href="/calendar.ics">
+</head>
+<body>
+<div class="utility">
+  <div class="wrap utility-inner">
+    <span>International canoe polo tournament calendar</span>
+    <span class="utility-links"><a href="/calendar.ics">Subscribe to calendar</a><a href="<%= CREATE_TOURNAMENT_URL %>" target="_blank" rel="noopener">Create a tournament on Kayakers.nl</a></span>
+  </div>
+</div>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="/" aria-label="canoepolo.eu home">
+      <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" fill="none" stroke="currentColor" stroke-width="2"/><rect x="9" y="8" width="22" height="13" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 14h22M16 8v13M24 8v13" stroke="currentColor" stroke-width="1" opacity=".6"/><path d="M4 31c4-3 8-3 12 0s8 3 12 0 6-2 8-1" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      <span class="brand-name">canoepolo<span>.eu</span></span>
+    </a>
+    <nav class="main-nav" aria-label="Main">
+      <a href="/" class="nav-home <%= path === '/' ? 'on' : '' %>">Home</a>
+      <a href="/tournaments" class="<%= path.startsWith('/tournaments') ? 'on' : '' %>">Future<span class="nav-long">tournaments</span></a>
+      <a href="/past" class="<%= path === '/past' ? 'on' : '' %>">Past<span class="nav-long">tournaments</span></a>
+      <a href="/support" class="<%= path === '/support' ? 'on' : '' %>">Support<span class="nav-long">&amp; funding</span></a>
+      <a href="/shop" class="<%= path === '/shop' ? 'on' : '' %>">Shop</a>
+      <a href="/about" class="<%= path === '/about' ? 'on' : '' %>">About</a>
+      <a class="nav-create" href="<%= CREATE_TOURNAMENT_URL %>" target="_blank" rel="noopener">Create tournament<span class="ext" aria-hidden="true">↗</span></a>
+      <% if (isAdmin) { %><a href="/admin" class="<%= path.startsWith('/admin') ? 'on' : '' %>">Admin</a><% } %>
+    </nav>
+  </div>
+</header>
+<main class="<%= typeof fullWidth !== 'undefined' && fullWidth ? 'full' : 'wrap' %>">

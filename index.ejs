@@ -1,0 +1,50 @@
+<%- include('partials/header', { fullWidth: true }) %>
+
+<div class="page-banner">
+  <div class="wrap">
+    <p class="crumbs"><a href="/">Home</a> / <%= when === 'past' ? 'Past tournaments' : 'Future tournaments' %></p>
+    <h1><%= when === 'past' ? 'Past tournaments' : 'Future tournaments' %></h1>
+  </div>
+</div>
+
+<div class="wrap">
+  <form class="filters" method="get" action="<%= when === 'past' ? '/past' : '/tournaments' %>" data-autosubmit>
+    <label class="f-search"><span>Search</span><input type="search" name="q" value="<%= filters.q %>" placeholder="Name, city or venue"></label>
+    <label><span>Country</span>
+      <select name="country">
+        <option value="">All countries</option>
+        <% countries.forEach(c => { %><option value="<%= c %>" <%= filters.country === c ? 'selected' : '' %>><%= COUNTRIES[c] || c %></option><% }) %>
+      </select>
+    </label>
+    <label><span>Level</span>
+      <select name="level">
+        <option value="">All levels</option>
+        <% LEVELS.forEach(l => { %><option <%= filters.level === l ? 'selected' : '' %>><%= l %></option><% }) %>
+      </select>
+    </label>
+    <label><span>Division</span>
+      <select name="division">
+        <option value="">All divisions</option>
+        <% DIVISIONS.forEach(d => { %><option <%= filters.division === d ? 'selected' : '' %>><%= d %></option><% }) %>
+      </select>
+    </label>
+    <label><span>Month</span><input type="month" name="month" value="<%= filters.month %>"></label>
+    <div class="f-actions">
+      <button type="submit">Apply</button>
+      <% if (filters.q || filters.country || filters.level || filters.division || filters.month) { %>
+        <a href="<%= when === 'past' ? '/past' : '/tournaments' %>">Reset</a>
+      <% } %>
+    </div>
+  </form>
+
+  <p class="count"><%= tournaments.length %> tournament<%= tournaments.length === 1 ? '' : 's' %><%= when === 'past' ? ', most recent first' : ', soonest first' %></p>
+
+  <% if (!tournaments.length) { %>
+    <p class="none">No tournaments match these filters.<% if (when === 'upcoming') { %> Organising one? <a href="<%= CREATE_TOURNAMENT_URL %>" target="_blank" rel="noopener">Create it on Kayakers.nl</a> and <a href="/about#listing">send us the link</a>.<% } %></p>
+  <% } else { %>
+    <% const rows = when === 'past' ? tournaments : [...tournaments].sort((a, b) => a.start_date.localeCompare(b.start_date)); %>
+    <%- include('partials/fixtures', { rows, monthHeaders: true }) %>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

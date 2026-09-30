@@ -1,0 +1,10 @@
+<%- include('../partials/header') %>
+<form class="panel narrow" method="post" action="/admin/login">
+  <h1>Admin login</h1>
+  <% if (error) { %><div class="notice red"><%= error %></div><% } %>
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <label>Username <input name="username" autocomplete="username" required></label>
+  <label>Password <input name="password" type="password" autocomplete="current-password" required></label>
+  <button class="btn primary" type="submit">Log in</button>
+</form>
+<%- include('../partials/footer') %>

@@ -1,0 +1,37 @@
+<%- include('partials/header', { fullWidth: true }) %>
+
+<div class="page-banner">
+  <div class="wrap">
+    <p class="crumbs"><a href="/">Home</a> / About</p>
+    <h1>About canoepolo.eu</h1>
+  </div>
+</div>
+
+<div class="wrap narrow-page prose">
+  <p>canoepolo.eu is a free calendar of canoe polo (kayak polo) tournaments. It's here so players, clubs and national teams can see what's on and plan their season.</p>
+
+  <h2 id="create">Create a tournament</h2>
+  <p>New to organising? <a href="<%= CREATE_TOURNAMENT_URL %>" target="_blank" rel="noopener">Kayakers.nl</a> lets you host a canoe polo tournament online for free, with team registration, match schedules and live results. Register for a free account there, create your tournament, then send us the link so we can list it here.</p>
+  <p><a class="btn primary" href="<%= CREATE_TOURNAMENT_URL %>" target="_blank" rel="noopener">Create a tournament on Kayakers.nl ↗</a></p>
+
+  <h2 id="listing">List a tournament</h2>
+  <p>Organising a tournament? Email us with:</p>
+  <ul>
+    <li>Tournament name and dates</li>
+    <li>Venue, city and country</li>
+    <li>Divisions (e.g. Men, Women, U21, Masters)</li>
+    <li>Registration link or website, entry fee and closing date</li>
+    <li>A contact name and email</li>
+  </ul>
+  <!-- TODO: put your real contact email below -->
+  <p><a class="btn primary" href="mailto:info@canoepolo.eu?subject=Tournament%20listing">Email info@canoepolo.eu</a></p>
+
+  <h2>Follow the calendar</h2>
+  <p>Add this link to Google Calendar, Apple Calendar or Outlook and new tournaments will appear automatically:</p>
+  <p><code><%= BASE_URL %>/calendar.ics</code></p>
+
+  <h2>Data feed</h2>
+  <p>Clubs and developers can use the public data feed at <a href="/api/tournaments"><code>/api/tournaments</code></a> (filters: <code>country</code>, <code>level</code>, <code>division</code>, <code>month</code>, <code>q</code>, <code>when=past</code>).</p>
+</div>
+
+<%- include('partials/footer') %>

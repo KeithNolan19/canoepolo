@@ -1,0 +1,24 @@
+<%# Fixtures table. Expects: rows (tournaments), monthHeaders (bool) %>
+<table class="fixtures">
+  <thead>
+    <tr><th class="col-date">Date</th><th>Tournament</th><th class="col-loc">Location</th><th class="col-level">Level</th></tr>
+  </thead>
+  <tbody>
+  <% let lastMonth = ''; rows.forEach(t => {
+       const m = t.start_date.slice(0, 7);
+       if (monthHeaders && m !== lastMonth) { lastMonth = m; %>
+    <tr class="month-row"><th colspan="4" scope="colgroup"><%= fmtDate(t.start_date, { month: 'long', year: 'numeric' }) %></th></tr>
+  <% } %>
+    <tr class="<%= t.status === 'cancelled' ? 'is-cancelled' : '' %> <%= t.featured ? 'is-featured' : '' %>">
+      <td class="col-date"><span class="nowrap"><%= fmtRange(t.start_date, t.end_date) %></span></td>
+      <td class="col-name">
+        <a href="/tournaments/<%= t.slug %>"><%= t.name %></a>
+        <% if (t.status === 'cancelled') { %><span class="flag-label cancelled">Cancelled</span><% } %>
+        <% if (t.divisions.length) { %><span class="divs"><%= t.divisions.join(', ') %></span><% } %>
+      </td>
+      <td class="col-loc"><span class="flag"><%= flag(t.country) %></span> <%= t.city %>, <%= t.country_name %></td>
+      <td class="col-level"><%= t.level %></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>

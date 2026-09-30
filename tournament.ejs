@@ -1,0 +1,59 @@
+<%- include('partials/header', { fullWidth: true, metaDescription: `${t.name}, ${t.city}, ${t.country_name}, ${fmtRange(t.start_date, t.end_date)}. Canoe polo tournament.` }) %>
+<% const isPast = t.end_date < today; %>
+
+<div class="page-banner event-banner">
+  <div class="wrap">
+    <p class="crumbs"><a href="/">Home</a> / <a href="<%= isPast ? '/past' : '/tournaments' %>"><%= isPast ? 'Past tournaments' : 'Future tournaments' %></a></p>
+    <p class="event-level"><%= t.level %></p>
+    <h1><%= t.name %></h1>
+    <p class="event-meta">
+      <span><%= fmtRange(t.start_date, t.end_date) %></span>
+      <span><%= flag(t.country) %> <%= [t.venue, t.city, t.country_name].filter(Boolean).join(', ') %></span>
+    </p>
+  </div>
+</div>
+
+<div class="wrap event-grid">
+  <article class="event-main">
+    <% if (t.status === 'cancelled') { %><div class="notice red">This tournament has been cancelled.</div><% } %>
+    <% if (t.status === 'draft') { %><div class="notice">Draft. Only visible to you while logged in as admin.</div><% } %>
+
+    <h2 class="sub-head">Tournament details</h2>
+    <table class="info-table">
+      <tr><th scope="row">Dates</th><td><%= fmtRange(t.start_date, t.end_date) %></td></tr>
+      <% if (t.venue) { %><tr><th scope="row">Venue</th><td><%= t.venue %></td></tr><% } %>
+      <tr><th scope="row">Location</th><td><%= flag(t.country) %> <%= t.city %>, <%= t.country_name %></td></tr>
+      <tr><th scope="row">Level</th><td><%= t.level %></td></tr>
+      <% if (t.divisions.length) { %><tr><th scope="row">Divisions</th><td><%= t.divisions.join(', ') %></td></tr><% } %>
+      <% if (t.entry_fee) { %><tr><th scope="row">Entry fee</th><td><%= t.entry_fee %></td></tr><% } %>
+      <% if (t.registration_deadline) { %><tr><th scope="row">Registration closes</th><td><%= fmtDate(t.registration_deadline) %><% if (t.registration_deadline < today) { %> <span class="flag-label cancelled">Closed</span><% } %></td></tr><% } %>
+    </table>
+
+    <% if (t.description) { %>
+    <h2 class="sub-head">Information</h2>
+    <div class="description">
+      <% t.description.split(/\n{2,}/).forEach(p => { %><p><%= p %></p><% }) %>
+    </div>
+    <% } %>
+
+    <% if (isAdmin) { %><p><a class="btn outline" href="/admin/edit/<%= t.id %>">Edit this tournament</a></p><% } %>
+  </article>
+
+  <aside class="event-side">
+    <div class="side-block">
+      <h2>Take part</h2>
+      <% if (t.registration_url && t.status !== 'cancelled' && !isPast) { %><a class="btn primary block-btn" href="<%= t.registration_url %>" target="_blank" rel="noopener">Register a team</a><% } %>
+      <% if (t.website_url) { %><a class="btn outline block-btn" href="<%= t.website_url %>" target="_blank" rel="noopener">Official website</a><% } %>
+      <% if (!isPast) { %><a class="btn outline block-btn" href="/tournaments/<%= t.slug %>/calendar.ics">Add to calendar</a><% } %>
+    </div>
+    <% if (t.contact_name || t.contact_email) { %>
+    <div class="side-block">
+      <h2>Organiser</h2>
+      <% if (t.contact_name) { %><p><%= t.contact_name %></p><% } %>
+      <% if (t.contact_email) { %><p><a href="mailto:<%= t.contact_email %>"><%= t.contact_email %></a></p><% } %>
+    </div>
+    <% } %>
+  </aside>
+</div>
+
+<%- include('partials/footer') %>

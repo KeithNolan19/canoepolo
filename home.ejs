@@ -1,0 +1,87 @@
+<%- include('partials/header', { fullWidth: true }) %>
+
+<section class="lead <%= heroImage ? 'has-photo' : 'no-photo' %>">
+  <% if (heroImage) { %>
+  <figure class="lead-photo">
+    <img src="<%= heroImage %>" alt="Canoe polo match">
+    <% if (heroCredit) { %><figcaption><%= heroCredit %></figcaption><% } %>
+  </figure>
+  <% } %>
+  <div class="wrap">
+    <div class="lead-panel">
+      <h1>International canoe polo tournaments</h1>
+      <p>Club tournaments, national leagues and championships in one place, so you can plan your season and find where to play next.</p>
+      <p class="lead-actions">
+        <a class="btn primary" href="/tournaments">Browse future tournaments</a>
+        <a class="btn outline" href="<%= CREATE_TOURNAMENT_URL %>" target="_blank" rel="noopener">Create a tournament <span aria-hidden="true">↗</span></a>
+      </p>
+    </div>
+  </div>
+</section>
+
+<div class="wrap home-grid">
+  <div class="home-main">
+    <section class="block">
+      <div class="block-head">
+        <h2>Upcoming tournaments</h2>
+        <a href="/tournaments">Full calendar</a>
+      </div>
+      <% if (nextUp.length) { %>
+        <%- include('partials/fixtures', { rows: nextUp, monthHeaders: false }) %>
+      <% } else { %>
+        <p class="none">No tournaments listed yet. <a href="<%= CREATE_TOURNAMENT_URL %>" target="_blank" rel="noopener">Create one on Kayakers.nl</a> or <a href="/about#listing">tell us about one</a>.</p>
+      <% } %>
+    </section>
+
+    <% if (recent.length) { %>
+    <section class="block">
+      <div class="block-head">
+        <h2>Recently played</h2>
+        <a href="/past">All past tournaments</a>
+      </div>
+      <ul class="recent">
+        <% recent.forEach(t => { %>
+        <li>
+          <span class="recent-date"><%= fmtDate(t.end_date) %></span>
+          <a href="/tournaments/<%= t.slug %>"><%= t.name %></a>
+          <span class="recent-loc"><%= flag(t.country) %> <%= t.city %></span>
+        </li>
+        <% }) %>
+      </ul>
+    </section>
+    <% } %>
+  </div>
+
+  <aside class="home-side">
+    <section class="side-block">
+      <h2>Sections</h2>
+      <ul class="side-links">
+        <li><a href="/tournaments">Future tournaments <span><%= stats.upcoming %></span></a></li>
+        <li><a href="/past">Past tournaments <span><%= stats.past %></span></a></li>
+        <li><a href="/support">Support and funding <span>Grants</span></a></li>
+        <li><a href="/shop">Shop <span>Soon</span></a></li>
+        <li><a href="/about">About canoepolo.eu</a></li>
+      </ul>
+    </section>
+
+    <% if (countryCounts.length) { %>
+    <section class="side-block">
+      <h2>By country</h2>
+      <ul class="side-links">
+        <% countryCounts.forEach(([code, n]) => { %>
+        <li><a href="/tournaments?country=<%= code %>"><%= flag(code) %> <%= COUNTRIES[code] || code %> <span><%= n %></span></a></li>
+        <% }) %>
+      </ul>
+    </section>
+    <% } %>
+
+    <section class="side-block side-note">
+      <h2>Organising a tournament?</h2>
+      <p>Create and run your tournament for free on Kayakers.nl: registrations, schedule and live results.</p>
+      <p><a href="<%= CREATE_TOURNAMENT_URL %>" target="_blank" rel="noopener">Create a tournament on Kayakers.nl ↗</a></p>
+      <p class="small">Already set up? <a href="/about#listing">Send us the link</a> and we'll list it here.</p>
+    </section>
+  </aside>
+</div>
+
+<%- include('partials/footer') %>

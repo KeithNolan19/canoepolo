@@ -1,0 +1,96 @@
+<%- include('partials/header', { fullWidth: true, metaDescription: 'Support and funding for canoe polo clubs and teams: who to contact, ways to raise money, and grant routes in Europe, Ireland and the UK.' }) %>
+<% const ext = (url) => url ? `href="${url}" target="_blank" rel="noopener"` : ''; %>
+
+<div class="page-banner">
+  <div class="wrap">
+    <p class="crumbs"><a href="/">Home</a> / Support and funding</p>
+    <h1>Support and funding</h1>
+  </div>
+</div>
+
+<div class="wrap support-grid">
+  <nav class="support-toc" aria-label="On this page">
+    <h2>On this page</h2>
+    <ol>
+      <li><a href="#help">Finding support</a></li>
+      <li><a href="#fundraising">Raising money</a></li>
+      <li><a href="#grants">Grant routes</a>
+        <ol>
+          <% GRANTS.forEach(g => { %><li><a href="#<%= g.id %>"><%= g.region %></a></li><% }) %>
+        </ol>
+      </li>
+      <li><a href="#tips">Applying for a grant</a></li>
+    </ol>
+  </nav>
+
+  <div class="support-main">
+    <p class="intro-text">Running a canoe polo club or taking a team abroad costs money: boats, goals, pool or lake time, coaching courses and travel. This page collects the people who can help and the main ways clubs fund themselves.</p>
+
+    <section id="help" class="support-section">
+      <h2 class="sub-head">Finding support</h2>
+      <p>Your national federation is the best first contact. Most have club development staff who can help with coaching, safeguarding, insurance and funding applications.</p>
+      <table class="data-table">
+        <thead><tr><th>Organisation</th><th>Covers</th><th>How they can help</th></tr></thead>
+        <tbody>
+        <% ORGANISATIONS.forEach(o => { %>
+          <tr>
+            <td class="dt-name"><a <%- ext(o.url) %>><%= o.name %></a></td>
+            <td class="dt-area"><%= o.area %></td>
+            <td><%= o.help %></td>
+          </tr>
+        <% }) %>
+        </tbody>
+      </table>
+      <p class="small-note">Also worth contacting: your local council's sports officer, nearby clubs (for shared training, spare boats and referees) and universities with canoe polo teams.</p>
+    </section>
+
+    <section id="fundraising" class="support-section">
+      <h2 class="sub-head">Raising money</h2>
+      <p>Most clubs combine a few regular income sources with one or two bigger fundraisers a year.</p>
+      <dl class="idea-list">
+        <% FUNDRAISING.forEach(f => { %>
+          <div><dt><%= f.title %></dt><dd><%= f.text %></dd></div>
+        <% }) %>
+      </dl>
+    </section>
+
+    <section id="grants" class="support-section">
+      <h2 class="sub-head">Grant routes</h2>
+      <p>Grants for sport change often. Amounts and dates below were last checked in <strong><%= LAST_CHECKED %></strong>. Always confirm on the funder's own website before applying.</p>
+
+      <% GRANTS.forEach(g => { %>
+      <h3 id="<%= g.id %>" class="region-head"><%= g.region %></h3>
+      <% if (g.note) { %><p class="small-note"><%= g.note %></p><% } %>
+      <table class="data-table grants">
+        <thead><tr><th>Programme</th><th>Who it's for</th><th>Amount</th><th>Timing</th></tr></thead>
+        <tbody>
+        <% g.items.forEach(i => { %>
+          <tr>
+            <td class="dt-name"><% if (i.url) { %><a <%- ext(i.url) %>><%= i.name %></a><% } else { %><%= i.name %><% } %></td>
+            <td><%= i.who %></td>
+            <td class="dt-amount"><%= i.amount || '–' %></td>
+            <td class="dt-when"><%= i.when || '–' %></td>
+          </tr>
+        <% }) %>
+        </tbody>
+      </table>
+      <% }) %>
+    </section>
+
+    <section id="tips" class="support-section">
+      <h2 class="sub-head">Applying for a grant</h2>
+      <ol class="tips">
+        <% TIPS.forEach(t => { %><li><%= t %></li><% }) %>
+      </ol>
+    </section>
+
+    <aside class="side-note support-cta">
+      <h2>Know a fund we've missed?</h2>
+      <p>If your club has had a grant or found a good fundraising idea, tell us and we'll add it so other clubs can benefit.</p>
+      <!-- TODO: put your real contact email below -->
+      <p><a href="mailto:info@canoepolo.eu?subject=Funding%20suggestion">Email a suggestion</a></p>
+    </aside>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,78 @@
+<%- include('../partials/header') %>
+<% const v = (k) => (t[k] == null ? '' : t[k]); %>
+
+<p class="back"><a href="/admin">← Back to admin</a></p>
+<form class="panel" method="post" action="<%= action %>">
+  <h1><%= title %></h1>
+
+  <% if (errors.length) { %>
+    <div class="notice red"><strong>Please fix:</strong><ul><% errors.forEach(e => { %><li><%= e %></li><% }) %></ul></div>
+  <% } %>
+
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+
+  <fieldset>
+    <legend>Basics</legend>
+    <label class="full">Tournament name * <input name="name" value="<%= v('name') %>" maxlength="150" required></label>
+    <label>Start date * <input type="date" name="start_date" value="<%= v('start_date') %>" required></label>
+    <label>End date <input type="date" name="end_date" value="<%= v('end_date') %>"></label>
+    <label>Level
+      <select name="level"><% LEVELS.forEach(l => { %><option <%= v('level') === l ? 'selected' : '' %>><%= l %></option><% }) %></select>
+    </label>
+    <label>Status
+      <select name="status">
+        <option value="published" <%= v('status') === 'published' ? 'selected' : '' %>>Published (visible)</option>
+        <option value="draft" <%= v('status') === 'draft' ? 'selected' : '' %>>Draft (hidden)</option>
+        <option value="cancelled" <%= v('status') === 'cancelled' ? 'selected' : '' %>>Cancelled (shown as cancelled)</option>
+      </select>
+    </label>
+    <label class="check full"><input type="checkbox" name="featured" value="1" <%= t.featured ? 'checked' : '' %>> Featured (pinned to top of the list)</label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Location</legend>
+    <label>City * <input name="city" value="<%= v('city') %>" required></label>
+    <label>Country *
+      <select name="country" required>
+        <option value="">Choose…</option>
+        <% Object.entries(COUNTRIES).sort((a,b) => a[1].localeCompare(b[1])).forEach(([code, name]) => { %>
+          <option value="<%= code %>" <%= v('country') === code ? 'selected' : '' %>><%= flag(code) %> <%= name %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label class="full">Venue <input name="venue" value="<%= v('venue') %>" placeholder="e.g. National Watersports Centre"></label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Divisions</legend>
+    <div class="checks full">
+      <% DIVISIONS.forEach(d => { %>
+        <label class="check"><input type="checkbox" name="divisions" value="<%= d %>" <%= (t.divisions || []).includes(d) ? 'checked' : '' %>> <%= d %></label>
+      <% }) %>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Registration &amp; links</legend>
+    <label class="full">Official website <input type="url" name="website_url" value="<%= v('website_url') %>" placeholder="https://"></label>
+    <label class="full">Registration link <input type="url" name="registration_url" value="<%= v('registration_url') %>" placeholder="https://"></label>
+    <label>Registration deadline <input type="date" name="registration_deadline" value="<%= v('registration_deadline') %>"></label>
+    <label>Entry fee <input name="entry_fee" value="<%= v('entry_fee') %>" placeholder="e.g. €250 per team"></label>
+    <label>Contact name <input name="contact_name" value="<%= v('contact_name') %>"></label>
+    <label>Contact email <input type="email" name="contact_email" value="<%= v('contact_email') %>"></label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Description</legend>
+    <label class="full">Details for players (leave a blank line between paragraphs)
+      <textarea name="description" rows="8"><%= v('description') %></textarea>
+    </label>
+  </fieldset>
+
+  <div class="actions">
+    <button class="btn primary" type="submit">Save tournament</button>
+    <a class="btn" href="/admin">Cancel</a>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>
