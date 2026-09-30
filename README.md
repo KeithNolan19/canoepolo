@@ -92,7 +92,17 @@ Put real canoe polo photos in `public/images/` (instructions in `public/images/R
 
 Only use photos you took or have permission to use. Without `hero.jpg` the homepage simply shows the navy intro panel.
 
-## Updating the site after code changes
+## Automatic updates (recommended)
+
+Switch this on once and the server checks GitHub every 5 minutes and deploys new code by itself. In the Droplet Console:
+
+cd ~/canoepolo
+git pull
+sudo bash deploy/enable-auto-update.sh
+
+It asks for your GitHub token once and keeps it in a root-only file on the server. When the token expires, make a new one and run the script again. See what happened: tail -n 30 /var/log/canoepolo-auto-update.log. Switch off: sudo rm /etc/cron.d/canoepolo-auto-update
+
+Updating the site after code changes
 
 Change files on GitHub (you can edit directly in the browser), then in the Droplet Console:
 
