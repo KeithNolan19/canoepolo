@@ -75,6 +75,9 @@ Delete any other `A` records for `@` or `www` (registrars often add a "parking" 
 - **Add / edit tournaments:** <https://canoepolo.eu/admin>
 - **Status options:** *Published* (visible), *Draft* (hidden, only you see it), *Cancelled* (stays visible, crossed out)
 - **Featured:** pins a tournament to the top of the list
+- **Watch page videos:** https://canoepolo.eu/admin → **Videos** tab. Paste any YouTube link, pick a section, and tick *Featured* for the big video at the top.
+- **Rules page:** text lives in `src/rules.js` (update it when new ICF rules come out)
+- **Tactics board:** runs entirely in the visitor's browser (`public/tactics.js`); presets are at the top of that file
 - **About page / contact email:** edit `views/about.ejs` (currently says `info@canoepolo.eu`)
 
 ## Adding photos

@@ -1,0 +1,98 @@
+<%- include('partials/header', { fullWidth: true, metaDescription: 'Canoe polo rules in plain English: pitch and goals, the five-second and shot clock rules, tackles, the goalkeeper, cards and kit, with links to the official ICF rules.' }) %>
+
+<div class="page-banner">
+  <div class="wrap">
+    <p class="crumbs"><a href="/">Home</a> / Rules</p>
+    <h1>Canoe polo rules</h1>
+  </div>
+</div>
+
+<div class="wrap support-grid">
+  <nav class="support-toc" aria-label="On this page">
+    <h2>On this page</h2>
+    <ol>
+      <li><a href="#facts">Quick facts</a></li>
+      <li><a href="#pitch">The pitch</a></li>
+      <% SECTIONS.forEach(s => { %><li><a href="#<%= s.id %>"><%= s.title %></a></li><% }) %>
+      <li><a href="#words">Words you'll hear</a></li>
+      <li><a href="#official">Official documents</a></li>
+    </ol>
+  </nav>
+
+  <div class="support-main">
+    <p class="intro-text">Canoe polo is five-a-side water polo played in kayaks. Teams pass, dribble and shoot with their hands (and sometimes their paddles) at a goal hanging two metres above the water. This page explains the main rules in plain English.</p>
+    <p class="small-note">A summary of the <%= RULES_EDITION %>, last checked <%= LAST_CHECKED %>. Where anything differs, <a href="#official">the official rules</a> and the referees decide.</p>
+
+    <section id="facts" class="support-section">
+      <h2 class="sub-head">Quick facts</h2>
+      <ul class="fact-grid">
+        <% FACTS.forEach(f => { %><li><strong><%= f.big %></strong><span><%= f.label %></span></li><% }) %>
+      </ul>
+    </section>
+
+    <section id="pitch" class="support-section">
+      <h2 class="sub-head">The pitch</h2>
+      <figure class="pitch-figure">
+        <svg viewBox="-4 -4 43 31" role="img" aria-labelledby="pitch-title pitch-desc">
+          <title id="pitch-title">Canoe polo pitch seen from above</title>
+          <desc id="pitch-desc">A 35 by 23 metre rectangle of water with a goal in the middle of each 23 metre end, a centre line and dashed lines 6 metres from each goal line.</desc>
+          <rect x="0" y="0" width="35" height="23" class="pf-water"/>
+          <rect x="0" y="0" width="35" height="23" class="pf-edge"/>
+          <line x1="17.5" y1="0" x2="17.5" y2="23" class="pf-line"/>
+          <line x1="6" y1="0" x2="6" y2="23" class="pf-line pf-dash"/>
+          <line x1="29" y1="0" x2="29" y2="23" class="pf-line pf-dash"/>
+          <rect x="-0.5" y="10.75" width="0.5" height="1.5" class="pf-goal"/>
+          <rect x="35" y="10.75" width="0.5" height="1.5" class="pf-goal"/>
+          <g class="pf-dim">
+            <line x1="0" y1="-1.8" x2="35" y2="-1.8"/><line x1="0" y1="-2.4" x2="0" y2="-1.2"/><line x1="35" y1="-2.4" x2="35" y2="-1.2"/>
+            <text x="17.5" y="-2.4" text-anchor="middle">35 m</text>
+            <line x1="36.8" y1="0" x2="36.8" y2="23"/><line x1="36.2" y1="0" x2="37.4" y2="0"/><line x1="36.2" y1="23" x2="37.4" y2="23"/>
+            <text x="38.1" y="11.5" text-anchor="middle" transform="rotate(90 38.1 11.5)">23 m</text>
+            <text x="3" y="24.6" text-anchor="middle">6 m</text>
+            <text x="32" y="24.6" text-anchor="middle">6 m</text>
+            <text x="17.5" y="24.6" text-anchor="middle">centre line</text>
+            <text x="-0.8" y="11.8" text-anchor="end">goal</text>
+          </g>
+        </svg>
+        <figcaption>Seen from above. The goals are 1.5 m wide and 1 m high, with the bottom edge 2 m above the water. There must be at least 3 m of clear space above the water across the whole pitch.</figcaption>
+      </figure>
+      <p><a class="btn" href="/tactics">Open the tactics board</a></p>
+    </section>
+
+    <% SECTIONS.forEach(s => { %>
+    <section id="<%= s.id %>" class="support-section">
+      <h2 class="sub-head"><%= s.title %></h2>
+      <dl class="rule-list">
+        <% s.items.forEach(i => { %><div><dt><%= i.h %></dt><dd><%= i.t %></dd></div><% }) %>
+      </dl>
+    </section>
+    <% }) %>
+
+    <section id="words" class="support-section">
+      <h2 class="sub-head">Words you'll hear</h2>
+      <dl class="idea-list">
+        <% GLOSSARY.forEach(([w, d]) => { %><div><dt><%= w %></dt><dd><%= d %></dd></div><% }) %>
+      </dl>
+    </section>
+
+    <section id="official" class="support-section">
+      <h2 class="sub-head">Official documents</h2>
+      <p>The International Canoe Federation (now branded Paddle Worldwide) writes the rules used at World and European Championships. National federations usually follow them, sometimes with small changes for domestic leagues.</p>
+      <table class="data-table">
+        <tbody>
+        <% DOCUMENTS.forEach(d => { %>
+          <tr><td class="dt-name"><a href="<%= d.url %>" target="_blank" rel="noopener"><%= d.name %> ↗</a></td><td><%= d.note %></td></tr>
+        <% }) %>
+        </tbody>
+      </table>
+    </section>
+
+    <aside class="side-note support-cta">
+      <h2>Want to learn by watching?</h2>
+      <p>The best way to understand the rules is to watch a top-level game with them in mind.</p>
+      <p><a href="/watch">Watch highlights and finals</a></p>
+    </aside>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

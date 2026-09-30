@@ -1,0 +1,43 @@
+<%- include('../partials/header') %>
+
+<%- include('tabs', { tab: 'videos' }) %>
+
+<div class="admin-head">
+  <h1>Videos</h1>
+  <div class="actions">
+    <a class="btn primary" href="/admin/videos/new">+ Add video</a>
+    <a class="btn" href="/watch">View Watch page</a>
+  </div>
+</div>
+
+<% if (msg) { %><div class="notice green"><%= msg %></div><% } %>
+<p class="small-note">These appear on the <a href="/watch">Watch</a> page. The one marked Featured is shown large at the top.</p>
+
+<% if (!videos.length) { %>
+  <div class="empty"><p>No videos yet. Click <strong>+ Add video</strong> and paste a YouTube link.</p></div>
+<% } else { %>
+<div class="table-wrap">
+<table class="admin-table">
+  <thead><tr><th></th><th>Title</th><th>Section</th><th>Date</th><th></th></tr></thead>
+  <tbody>
+  <% videos.forEach(v => { %>
+    <tr>
+      <td class="admin-thumb"><img src="https://i.ytimg.com/vi/<%= v.youtube_id %>/default.jpg" alt="" width="80" height="60" loading="lazy"></td>
+      <td><a href="https://www.youtube.com/watch?v=<%= v.youtube_id %>" target="_blank" rel="noopener"><%= v.title %></a><% if (v.featured) { %> <span class="badge">Featured</span><% } %><br><span class="small-note"><%= v.event %></span></td>
+      <td><%= CATEGORIES[v.category] %></td>
+      <td class="nowrap"><%= fmtDate(v.video_date) %></td>
+      <td class="nowrap row-actions">
+        <a class="btn small" href="/admin/videos/edit/<%= v.id %>">Edit</a>
+        <form method="post" action="/admin/videos/delete/<%= v.id %>" class="inline" data-confirm="Remove “<%= v.title %>” from the Watch page?">
+          <input type="hidden" name="_csrf" value="<%= csrf %>">
+          <button class="btn small danger" type="submit">Delete</button>
+        </form>
+      </td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<% } %>
+
+<%- include('../partials/footer') %>

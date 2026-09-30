@@ -1,0 +1,44 @@
+<%- include('../partials/header') %>
+
+<p class="back"><a href="/admin/videos">← Back to videos</a></p>
+
+<form method="post" action="<%= action %>" class="panel">
+  <h1><%= title %></h1>
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+
+  <% if (errors.length) { %>
+    <div class="notice red"><strong>Please fix:</strong><ul><% errors.forEach(e => { %><li><%= e %></li><% }) %></ul></div>
+  <% } %>
+
+  <fieldset>
+    <legend>Video</legend>
+    <label class="full">YouTube link
+      <input name="youtube_url" required value="<%= v.youtube_url || (v.youtube_id ? 'https://www.youtube.com/watch?v=' + v.youtube_id : '') %>" placeholder="https://www.youtube.com/watch?v=…">
+      <span class="small-note">Open the video on YouTube and copy the address from the address bar, or use Share → Copy link.</span>
+    </label>
+    <label class="full">Title
+      <input name="title" required maxlength="140" value="<%= v.title || '' %>" placeholder="e.g. Men's final: Germany v France">
+    </label>
+    <label class="full">Event (optional)
+      <input name="event" maxlength="140" value="<%= v.event || '' %>" placeholder="e.g. 2026 Canoe Polo World Championships, Duisburg">
+    </label>
+    <label>Section
+      <select name="category">
+        <% Object.entries(CATEGORIES).forEach(([k, label]) => { %>
+          <option value="<%= k %>" <%= v.category === k ? 'selected' : '' %>><%= label %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Date (for sorting, newest first)
+      <input type="date" name="video_date" value="<%= v.video_date || '' %>">
+    </label>
+    <label class="check full"><input type="checkbox" name="featured" value="1" <%= v.featured ? 'checked' : '' %>> Featured: show this one large at the top of the Watch page</label>
+  </fieldset>
+
+  <div class="actions">
+    <button type="submit" class="btn primary">Save video</button>
+    <a class="btn" href="/admin/videos">Cancel</a>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

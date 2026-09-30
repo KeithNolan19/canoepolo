@@ -10,6 +10,7 @@ const bcrypt = require('bcryptjs');
 const T = require('./tournaments');
 const { COUNTRIES, LEVELS, DIVISIONS, STATUSES, flag, CREATE_TOURNAMENT_URL } = require('./constants');
 const { buildCalendar } = require('./ical');
+const V = require('./videos');
 
 // ---------- Settings (come from the .env file on the server) ----------
 const PORT = Number(process.env.PORT) || 3000;
@@ -38,7 +39,8 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       styleSrc: ["'self'"],
       fontSrc: ["'self'"],
-      imgSrc: ["'self'", 'data:'],
+      imgSrc: ["'self'", 'data:', 'https://i.ytimg.com'],
+      frameSrc: ['https://www.youtube-nocookie.com'],
       scriptSrc: ["'self'"],
       formAction: ["'self'"],
       upgradeInsecureRequests: IS_PROD ? [] : null,
@@ -164,6 +166,15 @@ app.get('/calendar.ics', (req, res) => {
 
 app.get('/about', (req, res) => res.render('about', { title: 'About' }));
 
+// Watch: highlights and full games (videos are managed in the admin panel)
+app.get('/watch', (req, res) => res.render('watch', { title: 'Watch canoe polo', ...V.byCategory(), CATEGORIES: V.CATEGORIES, CHANNELS: V.CHANNELS }));
+
+// Tactics board (all the work happens in the browser: public/tactics.js)
+app.get('/tactics', (req, res) => res.render('tactics', { title: 'Tactics board' }));
+
+// Rules in plain English
+app.get('/rules', (req, res) => res.render('rules', { title: 'Canoe polo rules', ...require('./rules') }));
+
 // ---------- Public JSON API (for apps, club sites, etc.) ----------
 app.get('/api/tournaments', (req, res) => {
   const when = req.query.when === 'past' ? 'past' : 'upcoming';
@@ -189,7 +200,7 @@ app.get('/robots.txt', (req, res) => res.type('text/plain').send(`User-agent: *\
 
 app.get('/sitemap.xml', (req, res) => {
   const all = [...T.listPublic({ when: 'upcoming', limit: 500 }), ...T.listPublic({ when: 'past', limit: 500 })];
-  const urls = [`${BASE_URL}/`, `${BASE_URL}/tournaments`, `${BASE_URL}/past`, `${BASE_URL}/shop`, `${BASE_URL}/support`, `${BASE_URL}/about`, ...all.map((t) => `${BASE_URL}/tournaments/${t.slug}`)];
+  const urls = [`${BASE_URL}/`, `${BASE_URL}/tournaments`, `${BASE_URL}/past`, `${BASE_URL}/watch`, `${BASE_URL}/tactics`, `${BASE_URL}/rules`, `${BASE_URL}/shop`, `${BASE_URL}/support`, `${BASE_URL}/about`, ...all.map((t) => `${BASE_URL}/tournaments/${t.slug}`)];
   res.type('application/xml').send(
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>${u}</loc></url>`).join('\n')}\n</urlset>\n`,
   );
@@ -268,6 +279,38 @@ app.post('/admin/delete/:id', requireAdmin, checkCsrf, (req, res) => {
   const t = T.getById(Number(req.params.id));
   if (t) T.remove(t.id);
   res.redirect(`/admin?msg=${encodeURIComponent(t ? `Deleted “${t.name}”` : 'Nothing to delete')}`);
+});
+
+// ---------- Admin: videos for the Watch page ----------
+app.get('/admin/videos', requireAdmin, (req, res) => {
+  res.render('admin/videos', { title: 'Videos', videos: V.all(), CATEGORIES: V.CATEGORIES, msg: req.query.msg || '' });
+});
+
+app.get('/admin/videos/new', requireAdmin, (req, res) => {
+  res.render('admin/video-form', { title: 'Add video', v: { category: 'highlights' }, errors: [], action: '/admin/videos/new', CATEGORIES: V.CATEGORIES });
+});
+
+app.get('/admin/videos/edit/:id', requireAdmin, (req, res) => {
+  const v = V.getById(Number(req.params.id));
+  if (!v) return res.status(404).render('404', { title: 'Not found' });
+  res.render('admin/video-form', { title: `Edit: ${v.title}`, v, errors: [], action: `/admin/videos/edit/${v.id}`, CATEGORIES: V.CATEGORIES });
+});
+
+app.post(['/admin/videos/new', '/admin/videos/edit/:id'], requireAdmin, checkCsrf, (req, res) => {
+  const id = req.params.id ? Number(req.params.id) : 0;
+  if (id && !V.getById(id)) return res.status(404).render('404', { title: 'Not found' });
+  const { data, errors } = V.validate(req.body);
+  if (errors.length) {
+    return res.status(400).render('admin/video-form', { title: id ? 'Edit video' : 'Add video', v: data, errors, action: req.originalUrl, CATEGORIES: V.CATEGORIES });
+  }
+  const v = V.save(id, data);
+  res.redirect(`/admin/videos?msg=${encodeURIComponent(`Saved “${v.title}”`)}`);
+});
+
+app.post('/admin/videos/delete/:id', requireAdmin, checkCsrf, (req, res) => {
+  const v = V.getById(Number(req.params.id));
+  if (v) V.remove(v.id);
+  res.redirect(`/admin/videos?msg=${encodeURIComponent(v ? `Removed “${v.title}”` : 'Nothing to remove')}`);
 });
 
 // ---------- Errors ----------
