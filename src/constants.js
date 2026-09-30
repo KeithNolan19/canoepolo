@@ -29,8 +29,5 @@ function flag(code) {
   return String.fromCodePoint(...[...code.toUpperCase()].map((c) => 0x1f1a5 + c.charCodeAt(0)));
 }
 
-// Where the "Create tournament" links go. Organisers register / sign in on Kayakers.nl
-// and host their tournament there. Change this if you want to send them somewhere else.
-const CREATE_TOURNAMENT_URL = 'https://www.kayakers.nl/';
 
-module.exports = { COUNTRIES, LEVELS, DIVISIONS, STATUSES, flag, CREATE_TOURNAMENT_URL };
+module.exports = { COUNTRIES, LEVELS, DIVISIONS, STATUSES, flag };

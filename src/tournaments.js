@@ -97,6 +97,7 @@ function validate(input) {
     description: s('description') || null,
     website_url: s('website_url') || null,
     registration_url: s('registration_url') || null,
+    source_url: s('source_url') || null,
     registration_deadline: s('registration_deadline') || null,
     entry_fee: s('entry_fee') || null,
     contact_name: s('contact_name') || null,
@@ -117,6 +118,7 @@ function validate(input) {
   if (!STATUSES.includes(data.status)) errors.push('Invalid status.');
   if (data.website_url && !isUrl(data.website_url)) errors.push('Website must be a full link starting with https://');
   if (data.registration_url && !isUrl(data.registration_url)) errors.push('Registration link must start with https://');
+  if (data.source_url && !isUrl(data.source_url)) errors.push('Source must be a full link starting with https://');
   if (data.registration_deadline && !isDate(data.registration_deadline)) errors.push('Registration deadline must be a valid date.');
   if (data.contact_email && !isEmail(data.contact_email)) errors.push('Contact email looks wrong.');
   if (data.description && data.description.length > 10000) errors.push('Description is too long.');
@@ -124,12 +126,13 @@ function validate(input) {
 }
 
 function create(data) {
-  const slug = uniqueSlug(slugify(`${data.name}-${data.start_date.slice(0, 4)}`));
+  const year = data.start_date.slice(0, 4);
+  const slug = uniqueSlug(slugify(data.name.includes(year) ? data.name : `${data.name}-${year}`));
   const info = db.prepare(`
     INSERT INTO tournaments (slug, name, start_date, end_date, city, country, venue, level, divisions, description,
-      website_url, registration_url, registration_deadline, entry_fee, contact_name, contact_email, status, featured)
+      website_url, registration_url, source_url, registration_deadline, entry_fee, contact_name, contact_email, status, featured)
     VALUES (@slug, @name, @start_date, @end_date, @city, @country, @venue, @level, @divisions, @description,
-      @website_url, @registration_url, @registration_deadline, @entry_fee, @contact_name, @contact_email, @status, @featured)
+      @website_url, @registration_url, @source_url, @registration_deadline, @entry_fee, @contact_name, @contact_email, @status, @featured)
   `).run({ ...data, slug });
   return getById(info.lastInsertRowid);
 }
@@ -138,7 +141,7 @@ function update(id, data) {
   db.prepare(`
     UPDATE tournaments SET name=@name, start_date=@start_date, end_date=@end_date, city=@city, country=@country,
       venue=@venue, level=@level, divisions=@divisions, description=@description, website_url=@website_url,
-      registration_url=@registration_url, registration_deadline=@registration_deadline, entry_fee=@entry_fee,
+      registration_url=@registration_url, source_url=@source_url, registration_deadline=@registration_deadline, entry_fee=@entry_fee,
       contact_name=@contact_name, contact_email=@contact_email, status=@status, featured=@featured,
       updated_at=datetime('now')
     WHERE id=@id

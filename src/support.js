@@ -12,7 +12,6 @@ const ORGANISATIONS = [
   { name: 'Asian Canoe Confederation', area: 'Asia', url: 'https://asiacanoe.wixsite.com/asian-canoe', help: 'Continental body for Asia, organising the Asian Canoe Polo Championships.' },
   { name: 'Confederation of African Canoe', area: 'Africa', url: 'https://paddlinginafrica.com/', help: 'Continental body for Africa, supporting development of paddlesport across the continent.' },
   { name: 'Oceania Canoe Association', area: 'Oceania', url: 'https://paddleworldwide.com/continental', help: 'Continental body for Australia, New Zealand and the Pacific, including the Oceania canoe polo championships.' },
-  { name: 'Kayakers.nl', area: 'Tournament software, worldwide', url: 'https://www.kayakers.nl/', help: 'Free online tool to run tournaments anywhere: registration, schedules and live results.' },
 ];
 
 // National canoe polo pages: examples from some of the biggest canoe polo countries.
@@ -31,7 +30,7 @@ const NATIONAL = [
 
 // Practical ways for clubs and teams to raise money. These work in any country.
 const FUNDRAISING = [
-  { title: 'Host a tournament', text: 'Entry fees, food stalls and a raffle at a well-run weekend tournament can fund a club for a season. Kayakers.nl handles the admin for free.' },
+  { title: 'Host a tournament', text: 'Entry fees, food stalls and a raffle at a well-run weekend tournament can fund a club for a season. List it here so teams from other countries can find it.' },
   { title: 'Local sponsorship', text: 'Offer local businesses their logo on shirts, boats, goal frames or your website in return for a yearly amount. A one-page sponsor pack with prices makes it easy to say yes.' },
   { title: 'Crowdfunding for travel', text: 'Raising money for a team trip to a continental or World Championships works well on crowdfunding sites. Share photos, the squad list and exactly what the money pays for.' },
   { title: 'Club draw or raffle', text: 'A regular club draw or 50/50 raffle gives steady income. Check local law first: most countries need a permit or licence for lotteries and raffles.' },

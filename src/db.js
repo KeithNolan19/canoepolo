@@ -38,4 +38,11 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_tournaments_country ON tournaments(country);
 `);
 
+// Columns added after launch (safe to run every start)
+const cols = db.prepare('PRAGMA table_info(tournaments)').all().map((c) => c.name);
+if (!cols.includes('source_url')) db.exec('ALTER TABLE tournaments ADD COLUMN source_url TEXT');
+
+// Record of one-time data imports (see src/imports.js)
+db.exec(`CREATE TABLE IF NOT EXISTS imports (id TEXT PRIMARY KEY, applied_at TEXT NOT NULL DEFAULT (datetime('now')))`);
+
 module.exports = db;

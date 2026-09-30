@@ -11,7 +11,7 @@
   <nav class="admin-tabs page-tabs" aria-label="Tournaments">
     <a href="/tournaments" class="<%= when !== 'past' ? 'on' : '' %>">Upcoming</a>
     <a href="/past" class="<%= when === 'past' ? 'on' : '' %>">Past</a>
-    <a href="<%= CREATE_TOURNAMENT_URL %>" target="_blank" rel="noopener">Create a tournament ↗</a>
+    <a href="/about#listing">List a tournament</a>
   </nav>
   <form class="filters" method="get" action="<%= when === 'past' ? '/past' : '/tournaments' %>" data-autosubmit>
     <label class="f-search"><span>Search</span><input type="search" name="q" value="<%= filters.q %>" placeholder="Name, city or venue"></label>
@@ -45,7 +45,7 @@
   <p class="count"><%= tournaments.length %> tournament<%= tournaments.length === 1 ? '' : 's' %><%= when === 'past' ? ', most recent first' : ', soonest first' %></p>
 
   <% if (!tournaments.length) { %>
-    <p class="none">No tournaments match these filters.<% if (when === 'upcoming') { %> Organising one? <a href="<%= CREATE_TOURNAMENT_URL %>" target="_blank" rel="noopener">Create it on Kayakers.nl</a> and <a href="/about#listing">send us the link</a>.<% } %></p>
+    <p class="none">No tournaments match these filters.<% if (when === 'upcoming') { %> Organising one? <a href="/about#listing">Send us the details</a> and we'll list it.<% } %></p>
   <% } else { %>
     <% const rows = when === 'past' ? tournaments : [...tournaments].sort((a, b) => a.start_date.localeCompare(b.start_date)); %>
     <%- include('partials/fixtures', { rows, monthHeaders: true }) %>

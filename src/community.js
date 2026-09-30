@@ -6,7 +6,7 @@ const FAMILY = [
   { title: 'Coaches', text: 'Plan sessions and plays on the tactics board, share them with your squad, and find coaching courses.', links: [['Tactics board', '/tactics'], ['Coaching', '/get-involved#coaches']] },
   { title: 'Referees', text: 'Learn every rule and hand signal, test yourself with the quiz, and find a referee course near you.', links: [['Learn to referee', '/referee'], ['Take the quiz', '/referee/quiz']] },
   { title: 'Volunteers', text: 'Tournaments run on volunteers: table officials, set-up crews, streaming, photography and more.', links: [['Volunteer', '/get-involved#volunteers']] },
-  { title: 'Clubs', text: 'Grants and fundraising ideas, free tournament software, and a place to list your events.', links: [['Support and funding', '/support'], ['List a tournament', '/about#listing']] },
+  { title: 'Clubs', text: 'Grants and fundraising ideas, and a place to list your events for the whole canoe polo world.', links: [['Support and funding', '/support'], ['List a tournament', '/about#listing']] },
   { title: 'Fans', text: 'Highlights, finals and live streams from the World Championships and more.', links: [['Watch', '/watch']] },
 ];
 
@@ -56,7 +56,7 @@ const INVOLVED = [
   {
     id: 'clubs', title: 'Clubs and organisers',
     text: 'Run a tournament, find funding, or just let the canoe polo world know your club exists.',
-    points: ['Run your tournament for free on Kayakers.nl: registration, schedule and live results.', 'Send us your tournament and we\'ll list it on the calendar.', 'See grant routes and fundraising ideas on the support page.'],
+    points: ['Send us your tournament and we\'ll list it on the calendar, so teams from other countries can find it.', 'See grant routes and fundraising ideas on the support page.'],
     links: [['Support and funding', '/support'], ['List a tournament', '/about#listing']],
   },
 ];

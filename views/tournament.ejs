@@ -26,6 +26,7 @@
       <tr><th scope="row">Level</th><td><%= t.level %></td></tr>
       <% if (t.divisions.length) { %><tr><th scope="row">Divisions</th><td><%= t.divisions.join(', ') %></td></tr><% } %>
       <% if (t.entry_fee) { %><tr><th scope="row">Entry fee</th><td><%= t.entry_fee %></td></tr><% } %>
+      <% if (t.source_url) { let host = ''; try { host = new URL(t.source_url).hostname.replace(/^www\./, ''); } catch {} %><tr><th scope="row">Source</th><td><a href="<%= t.source_url %>" target="_blank" rel="noopener"><%= host || 'Announcement' %></a></td></tr><% } %>
       <% if (t.registration_deadline) { %><tr><th scope="row">Registration closes</th><td><%= fmtDate(t.registration_deadline) %><% if (t.registration_deadline < today) { %> <span class="flag-label cancelled">Closed</span><% } %></td></tr><% } %>
     </table>
 

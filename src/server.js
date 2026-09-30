@@ -8,9 +8,10 @@ const rateLimit = require('express-rate-limit');
 const bcrypt = require('bcryptjs');
 
 const T = require('./tournaments');
-const { COUNTRIES, LEVELS, DIVISIONS, STATUSES, flag, CREATE_TOURNAMENT_URL } = require('./constants');
+const { COUNTRIES, LEVELS, DIVISIONS, STATUSES, flag } = require('./constants');
 const { buildCalendar } = require('./ical');
 const V = require('./videos');
+require('./imports').run(); // one-time tournament imports (skips anything already listed)
 const C = require('./community');
 
 // ---------- Settings (come from the .env file on the server) ----------
@@ -66,7 +67,7 @@ app.use(cookieSession({
 app.use((req, res, next) => {
   if (!req.session.csrf) req.session.csrf = crypto.randomBytes(24).toString('hex');
   Object.assign(res.locals, {
-    COUNTRIES, LEVELS, DIVISIONS, STATUSES, flag, BASE_URL, CREATE_TOURNAMENT_URL,
+    COUNTRIES, LEVELS, DIVISIONS, STATUSES, flag, BASE_URL,
     csrf: req.session.csrf,
     assetV: ASSET_V,
     isAdmin: !!req.session.admin,
