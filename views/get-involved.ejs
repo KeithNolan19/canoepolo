@@ -12,7 +12,7 @@
     <h2>On this page</h2>
     <ol>
       <% INVOLVED.forEach(s => { %><li><a href="#<%= s.id %>"><%= s.title %></a></li><% }) %>
-      <li><a href="#federations">National federations</a></li>
+      <li><a href="#federations">Federations worldwide</a></li>
     </ol>
   </nav>
 
@@ -33,8 +33,8 @@
     <% }) %>
 
     <section id="federations" class="support-section">
-      <h2 class="sub-head">National federations</h2>
-      <p>Your national federation is the best place to find clubs, courses and competitions.</p>
+      <h2 class="sub-head">Federations worldwide</h2>
+      <p>Your national federation is the best place to find clubs, courses and competitions. The <a href="https://paddleworldwide.com/national-federations" target="_blank" rel="noopener">Paddle Worldwide directory</a> lists the federation for every country, and your continental association runs championships in your part of the world.</p>
       <table class="data-table">
         <thead><tr><th>Organisation</th><th>Covers</th><th>How they can help</th></tr></thead>
         <tbody>
@@ -47,6 +47,10 @@
         <% }) %>
         </tbody>
       </table>
+      <h3 class="region-head">Canoe polo in some of the biggest polo countries</h3>
+      <ul class="nat-list">
+        <% NATIONAL.forEach(n => { %><li><span><%= n.country %></span><a href="<%= n.url %>" target="_blank" rel="noopener"><%= n.name %></a></li><% }) %>
+      </ul>
     </section>
   </div>
 </div>

@@ -1,4 +1,4 @@
-<%- include('partials/header', { fullWidth: true, metaDescription: 'Support and funding for canoe polo clubs and teams: who to contact, ways to raise money, and grant routes in Europe, Ireland and the UK.' }) %>
+<%- include('partials/header', { fullWidth: true, metaDescription: 'Support and funding for canoe polo clubs and teams anywhere in the world: who to contact, ways to raise money, and where to find grants.' }) %>
 <% const ext = (url) => url ? `href="${url}" target="_blank" rel="noopener"` : ''; %>
 
 <div class="page-banner">
@@ -24,11 +24,11 @@
   </nav>
 
   <div class="support-main">
-    <p class="intro-text">Running a canoe polo club or taking a team abroad costs money: boats, goals, pool or lake time, coaching courses and travel. This page collects the people who can help and the main ways clubs fund themselves.</p>
+    <p class="intro-text">Running a canoe polo club or taking a team abroad costs money: boats, goals, pool or lake time, coaching courses and travel. Wherever you are in the world, this page shows who can help and how clubs fund themselves.</p>
 
     <section id="help" class="support-section">
       <h2 class="sub-head">Finding support</h2>
-      <p>Your national federation is the best first contact. Most have club development staff who can help with coaching, safeguarding, insurance and funding applications.</p>
+      <p>Your national canoe federation is the best first contact. Most have development staff who can help with coaching, safeguarding, insurance and funding applications. Every country's federation is listed in the <a href="https://paddleworldwide.com/national-federations" target="_blank" rel="noopener">Paddle Worldwide directory</a>.</p>
       <table class="data-table">
         <thead><tr><th>Organisation</th><th>Covers</th><th>How they can help</th></tr></thead>
         <tbody>
@@ -41,7 +41,11 @@
         <% }) %>
         </tbody>
       </table>
-      <p class="small-note">Also worth contacting: your local council's sports officer, nearby clubs (for shared training, spare boats and referees) and universities with canoe polo teams.</p>
+      <h3 class="region-head">Canoe polo in some of the biggest polo countries</h3>
+      <ul class="nat-list">
+        <% NATIONAL.forEach(n => { %><li><span><%= n.country %></span><a <%- ext(n.url) %>><%= n.name %></a></li><% }) %>
+      </ul>
+      <p class="small-note">Also worth contacting: your local council's sports office, nearby clubs (for shared training, spare boats and referees) and universities with canoe polo teams.</p>
     </section>
 
     <section id="fundraising" class="support-section">
@@ -56,7 +60,7 @@
 
     <section id="grants" class="support-section">
       <h2 class="sub-head">Grant routes</h2>
-      <p>Grants for sport change often. Amounts and dates below were last checked in <strong><%= LAST_CHECKED %></strong>. Always confirm on the funder's own website before applying.</p>
+      <p>Grants for sport change often. Start with the worldwide and continental routes, then look for the same kinds of fund in your own country. Amounts and dates were last checked in <strong><%= LAST_CHECKED %></strong>. Always confirm on the funder's own website before applying.</p>
 
       <% GRANTS.forEach(g => { %>
       <h3 id="<%= g.id %>" class="region-head"><%= g.region %></h3>

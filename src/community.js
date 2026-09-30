@@ -25,7 +25,7 @@ const INVOLVED = [
   {
     id: 'players', title: 'Start playing',
     text: 'Most clubs welcome beginners and lend boats and kit to start with. Your national federation can point you to the nearest club, and many run taster sessions.',
-    points: ['Ask a local canoe or kayak club if they have a polo section.', 'Universities often have canoe polo teams that train in the pool through the winter.', 'Once you can roll and handle the ball, try a club tournament: most have beginner or development divisions.'],
+    points: ['Ask a local canoe or kayak club if they have a polo section.', 'Universities often have canoe polo teams, many of them training in indoor pools all year round.', 'Once you can roll and handle the ball, try a club tournament: most have beginner or development divisions.'],
     links: [['Find a tournament', '/tournaments'], ['Learn the rules', '/rules']],
   },
   {

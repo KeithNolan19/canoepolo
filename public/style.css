@@ -594,3 +594,10 @@ fieldset .full { grid-column: 1 / -1; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }
+
+/* National canoe polo links (support, get involved) */
+.nat-list { list-style: none; margin: 8px 0 12px; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; }
+.nat-list li { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.nat-list span { color: var(--muted); }
+.nat-list a { font-weight: 600; }
+@media (max-width: 640px) { .nat-list { grid-template-columns: 1fr; } .nat-list li { grid-template-columns: 1fr; gap: 0; } }

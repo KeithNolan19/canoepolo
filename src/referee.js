@@ -4,19 +4,18 @@
 const PATHWAY = [
   { step: 'Learn the rules', text: 'Read the rules list below and the official ICF rules, then test yourself with the quiz until you score 10 out of 10.' },
   { step: 'Take a referee course', text: 'National federations run short theory courses, often online or at tournaments. Ask your club or federation when the next one is.' },
-  { step: 'Pass the written exam', text: 'Usually multiple choice on the ICF rules. In Ireland, for example, it is 50 questions with a 75% pass mark.' },
+  { step: 'Pass the written exam', text: 'Usually a multiple-choice exam on the ICF rules, set by your national federation. Some countries use 50 questions with a 75% pass mark.' },
   { step: 'Referee real games', text: 'Start at club and league tournaments, shadowed by an experienced referee. Tournaments are always short of referees, so you will get plenty of games.' },
   { step: 'Get assessed and graded', text: 'A higher-grade referee watches you in competitive games. Grades are usually reassessed every two years so standards stay high.' },
   { step: 'Go international', text: 'Top national referees can be nominated by their federation for ICF assessment, and referee at European and World Championships.' },
 ];
 
 const CONTACTS = [
-  { name: 'Irish Canoe Polo Committee: become a referee', url: 'https://canoepolo.ie/become-a-referee/' },
-  { name: 'Canoeing Ireland: how to become a referee', url: 'https://www.canoe.ie/disciplines/how-to-become-a-referee/' },
-  { name: 'Paddle UK Canoe Polo: referee grades and assessment', url: 'https://canoepolo.org.uk/refereeing/grades-assessment/' },
-  { name: 'Paddle UK Canoe Polo: referee theory courses', url: 'https://canoepolo.org.uk/referee-theory-courses/' },
-  { name: 'ICF / Paddle Worldwide referee information', url: 'https://paddleworldwide.com/icf-referee-information' },
-];
+  { name: 'Find your national federation (Paddle Worldwide directory)', url: 'https://paddleworldwide.com/national-federations' },
+  { name: 'Paddle Worldwide referee information', url: 'https://paddleworldwide.com/icf-referee-information' },
+  { name: 'Example: Irish Canoe Polo referee pathway', url: 'https://canoepolo.ie/become-a-referee/' },
+  { name: 'Example: Paddle UK referee grades and assessment', url: 'https://canoepolo.org.uk/refereeing/grades-assessment/' },
+]
 
 // The full list of rules, grouped. `call` is what the referee gives.
 const RULES = [
