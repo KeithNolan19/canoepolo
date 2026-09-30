@@ -11,6 +11,9 @@ services:
       BASE_URL: https://${DOMAIN}
     volumes:
       - app-data:/app/data          # the database lives here and survives updates
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }   # keep server logs small
 
   caddy:
     image: caddy:2
@@ -26,6 +29,9 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
       - caddy-config:/config
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }   # keep server logs small
 
 volumes:
   app-data:

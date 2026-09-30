@@ -601,3 +601,6 @@ fieldset .full { grid-column: 1 / -1; }
 .nat-list span { color: var(--muted); }
 .nat-list a { font-weight: 600; }
 @media (max-width: 640px) { .nat-list { grid-template-columns: 1fr; } .nat-list li { grid-template-columns: 1fr; gap: 0; } }
+.footer-legal { display: flex; flex-wrap: wrap; gap: 18px; }
+.legal h3 { font-size: 1.15rem; margin: 26px 0 8px; }
+.legal li { margin-bottom: 8px; }

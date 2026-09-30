@@ -44,7 +44,7 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       styleSrc: ["'self'"],
       fontSrc: ["'self'"],
-      imgSrc: ["'self'", 'data:', 'https://i.ytimg.com'],
+      imgSrc: ["'self'", 'data:'],
       frameSrc: ['https://www.youtube-nocookie.com'],
       scriptSrc: ["'self'"],
       formAction: ["'self'"],
@@ -65,10 +65,11 @@ app.use(cookieSession({
 
 // Helpers available in every page template
 app.use((req, res, next) => {
-  if (!req.session.csrf) req.session.csrf = crypto.randomBytes(24).toString('hex');
+  // Only the admin area uses a cookie. Public visitors get no cookies at all.
+  if (req.path.startsWith('/admin') && !req.session.csrf) req.session.csrf = crypto.randomBytes(24).toString('hex');
   Object.assign(res.locals, {
     COUNTRIES, LEVELS, DIVISIONS, STATUSES, flag, BASE_URL,
-    csrf: req.session.csrf,
+    csrf: req.session.csrf || '',
     assetV: ASSET_V,
     isAdmin: !!req.session.admin,
     path: req.path,
@@ -175,6 +176,28 @@ app.get('/calendar.ics', (req, res) => {
 
 app.get('/about', (req, res) => res.render('about', { title: 'About' }));
 
+// Video thumbnails are fetched from YouTube by our server and cached, so visitors' browsers
+// don't contact Google until they press play.
+const THUMB_DIR = path.join(process.env.DATA_DIR || path.join(__dirname, '..', 'data'), 'thumbs');
+require('fs').mkdirSync(THUMB_DIR, { recursive: true });
+app.get('/thumb/:id/:q.jpg', async (req, res) => {
+  const { id, q } = req.params;
+  if (!/^[A-Za-z0-9_-]{11}$/.test(id) || !['default', 'mqdefault', 'hqdefault'].includes(q)) return res.status(404).end();
+  const file = path.join(THUMB_DIR, `${id}-${q}.jpg`);
+  res.set('Cache-Control', 'public, max-age=604800');
+  if (require('fs').existsSync(file)) return res.type('jpg').sendFile(file);
+  try {
+    const r = await fetch(`https://i.ytimg.com/vi/${id}/${q}.jpg`, { signal: AbortSignal.timeout(8000) });
+    if (!r.ok) return res.status(404).end();
+    const buf = Buffer.from(await r.arrayBuffer());
+    if (buf.length > 2_000_000) return res.status(404).end();
+    require('fs').writeFileSync(file, buf);
+    res.type('jpg').send(buf);
+  } catch {
+    res.status(404).end();
+  }
+});
+
 // Watch: highlights and full games (videos are managed in the admin panel)
 app.get('/watch', (req, res) => res.render('watch', { title: 'Watch canoe polo', ...V.byCategory(), CATEGORIES: V.CATEGORIES, CHANNELS: V.CHANNELS }));
 
@@ -186,6 +209,9 @@ app.get('/learn', (req, res) => res.render('learn', { title: 'Learn canoe polo',
 app.get('/referee', (req, res) => res.render('referee', { title: 'Learn to referee', ...require('./referee'), SIGNALS: require('../public/signals.js').SIGNALS }));
 app.get('/referee/quiz', (req, res) => res.render('referee-quiz', { title: 'Referee quiz' }));
 app.get('/get-involved', (req, res) => res.render('get-involved', { title: 'Get involved', INVOLVED: C.INVOLVED, ORGANISATIONS: require('./support').ORGANISATIONS, NATIONAL: require('./support').NATIONAL }));
+
+app.get('/privacy', (req, res) => res.render('privacy', { title: 'Privacy policy' }));
+app.get('/terms', (req, res) => res.render('terms', { title: 'Terms of use' }));
 
 // Rules in plain English
 app.get('/rules', (req, res) => res.render('rules', { title: 'Canoe polo rules', ...require('./rules') }));
@@ -215,7 +241,7 @@ app.get('/robots.txt', (req, res) => res.type('text/plain').send(`User-agent: *\
 
 app.get('/sitemap.xml', (req, res) => {
   const all = [...T.listPublic({ when: 'upcoming', limit: 500 }), ...T.listPublic({ when: 'past', limit: 500 })];
-  const urls = [`${BASE_URL}/`, `${BASE_URL}/tournaments`, `${BASE_URL}/past`, `${BASE_URL}/watch`, `${BASE_URL}/learn`, `${BASE_URL}/referee`, `${BASE_URL}/referee/quiz`, `${BASE_URL}/get-involved`, `${BASE_URL}/tactics`, `${BASE_URL}/rules`, `${BASE_URL}/shop`, `${BASE_URL}/support`, `${BASE_URL}/about`, ...all.map((t) => `${BASE_URL}/tournaments/${t.slug}`)];
+  const urls = [`${BASE_URL}/`, `${BASE_URL}/tournaments`, `${BASE_URL}/past`, `${BASE_URL}/watch`, `${BASE_URL}/learn`, `${BASE_URL}/referee`, `${BASE_URL}/referee/quiz`, `${BASE_URL}/get-involved`, `${BASE_URL}/tactics`, `${BASE_URL}/rules`, `${BASE_URL}/shop`, `${BASE_URL}/support`, `${BASE_URL}/about`, `${BASE_URL}/privacy`, `${BASE_URL}/terms`, ...all.map((t) => `${BASE_URL}/tournaments/${t.slug}`)];
   res.type('application/xml').send(
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>${u}</loc></url>`).join('\n')}\n</urlset>\n`,
   );

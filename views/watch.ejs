@@ -1,6 +1,6 @@
 <%- include('partials/header', { fullWidth: true, metaDescription: 'Watch canoe polo: highlights, finals and full games from the World Championships, plus videos to learn the game. Streamed by Planet Canoe.' }) %>
 <% const yt = (id) => `https://www.youtube.com/watch?v=${id}`; %>
-<% const thumb = (id, q) => `https://i.ytimg.com/vi/${id}/${q || 'hqdefault'}.jpg`; %>
+<% const thumb = (id, q) => `/thumb/${id}/${q || 'hqdefault'}.jpg`; %>
 
 <div class="page-banner">
   <div class="wrap">
@@ -60,7 +60,7 @@
       <li><a href="<%= c.url %>" target="_blank" rel="noopener"><strong><%= c.name %> ↗</strong><span><%= c.text %></span></a></li>
       <% }) %>
     </ul>
-    <p class="small-note">Videos play from YouTube. Nothing loads from YouTube until you press play.</p>
+    <p class="small-note">Videos play from YouTube. Nothing loads from YouTube until you press play; see our <a href="/privacy#videos">privacy policy</a>.</p>
   </section>
 
   <aside class="side-note support-cta">

@@ -22,7 +22,7 @@
   <tbody>
   <% videos.forEach(v => { %>
     <tr>
-      <td class="admin-thumb"><img src="https://i.ytimg.com/vi/<%= v.youtube_id %>/default.jpg" alt="" width="80" height="60" loading="lazy"></td>
+      <td class="admin-thumb"><img src="/thumb/<%= v.youtube_id %>/default.jpg" alt="" width="80" height="60" loading="lazy"></td>
       <td><a href="https://www.youtube.com/watch?v=<%= v.youtube_id %>" target="_blank" rel="noopener"><%= v.title %></a><% if (v.featured) { %> <span class="badge">Featured</span><% } %><br><span class="small-note"><%= v.event %></span></td>
       <td><%= CATEGORIES[v.category] %></td>
       <td class="nowrap"><%= fmtDate(v.video_date) %></td>
