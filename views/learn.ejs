@@ -1,0 +1,25 @@
+<%- include('partials/header', { fullWidth: true, metaDescription: 'Learn canoe polo: the rules in plain English, how to referee, a referee quiz, a tactics board and how-to videos.' }) %>
+
+<div class="page-banner">
+  <div class="wrap">
+    <p class="crumbs"><a href="/">Home</a> / Learn</p>
+    <h1>Learn canoe polo</h1>
+  </div>
+</div>
+
+<div class="wrap">
+  <p class="intro-text learn-intro">Whether you're about to play your first game, coaching a squad or picking up a whistle, start here.</p>
+  <ul class="learn-hub">
+    <% LEARN.forEach((l, n) => { %>
+    <li><a href="<%= l.url %>"><span class="learn-num"><%= String(n + 1).padStart(2, '0') %></span><strong><%= l.title %></strong><span><%= l.text %></span></a></li>
+    <% }) %>
+  </ul>
+
+  <aside class="side-note support-cta">
+    <h2>Want to learn by doing?</h2>
+    <p>The best way to learn canoe polo is on the water. Find a club and a tournament near you.</p>
+    <p><a href="/get-involved#players">Start playing</a></p>
+  </aside>
+</div>
+
+<%- include('partials/footer') %>

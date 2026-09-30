@@ -1,6 +1,7 @@
 <%- include('partials/header', { fullWidth: true }) %>
+<% const thumb = (id) => `https://i.ytimg.com/vi/${id}/mqdefault.jpg`; %>
 
-<section class="lead <%= heroImage ? 'has-photo' : 'no-photo' %>">
+<section class="lead home-lead <%= heroImage ? 'has-photo' : 'no-photo' %>">
   <% if (heroImage) { %>
   <figure class="lead-photo">
     <img src="<%= heroImage %>" alt="Canoe polo match">
@@ -9,14 +10,37 @@
   <% } %>
   <div class="wrap">
     <div class="lead-panel">
-      <h1>International canoe polo tournaments</h1>
-      <p>Club tournaments, national leagues and championships in one place, so you can plan your season and find where to play next.</p>
+      <p class="event-level">canoepolo.eu</p>
+      <h1>The home of international canoe polo</h1>
+      <p>One place for the whole canoe polo family: players, coaches, referees, volunteers, clubs and fans. Find tournaments, learn the game, watch the best, and get involved.</p>
       <p class="lead-actions">
-        <a class="btn primary" href="/tournaments">Browse future tournaments</a>
-        <a class="btn outline" href="<%= CREATE_TOURNAMENT_URL %>" target="_blank" rel="noopener">Create a tournament <span aria-hidden="true">↗</span></a>
+        <a class="btn primary" href="#family">Find your place</a>
+        <a class="btn outline" href="/tournaments">Upcoming tournaments</a>
       </p>
     </div>
   </div>
+</section>
+
+<div class="stat-strip">
+  <div class="wrap stat-strip-inner">
+    <a href="/tournaments"><strong><%= stats.upcoming %></strong> upcoming tournament<%= stats.upcoming === 1 ? '' : 's' %></a>
+    <a href="/tournaments"><strong><%= stats.countries %></strong> countr<%= stats.countries === 1 ? 'y' : 'ies' %></a>
+    <a href="/watch"><strong><%= stats.videos %></strong> videos to watch</a>
+    <a href="/referee/quiz"><strong>17</strong> referee signals to learn</a>
+  </div>
+</div>
+
+<section class="wrap family" id="family">
+  <div class="block-head"><h2>Something for everyone in canoe polo</h2></div>
+  <ul class="family-grid">
+    <% FAMILY.forEach(f => { %>
+    <li class="family-card">
+      <h3><%= f.title %></h3>
+      <p><%= f.text %></p>
+      <p class="family-links"><% f.links.forEach(([label, href]) => { %><a href="<%= href %>"><%= label %></a><% }) %></p>
+    </li>
+    <% }) %>
+  </ul>
 </section>
 
 <div class="wrap home-grid">
@@ -33,55 +57,86 @@
       <% } %>
     </section>
 
-    <% if (recent.length) { %>
+    <% if (videos.length) { %>
     <section class="block">
       <div class="block-head">
-        <h2>Recently played</h2>
-        <a href="/past">All past tournaments</a>
+        <h2>Watch</h2>
+        <a href="/watch">All videos</a>
       </div>
-      <ul class="recent">
-        <% recent.forEach(t => { %>
-        <li>
-          <span class="recent-date"><%= fmtDate(t.end_date) %></span>
-          <a href="/tournaments/<%= t.slug %>"><%= t.name %></a>
-          <span class="recent-loc"><%= flag(t.country) %> <%= t.city %></span>
+      <ul class="video-grid home-videos">
+        <% videos.forEach(v => { %>
+        <li class="video-card">
+          <a class="video-thumb" href="/watch">
+            <span class="video-frame"><img src="<%= thumb(v.youtube_id) %>" alt="" loading="lazy"><span class="play" aria-hidden="true"></span></span>
+            <h3><%= v.title %></h3>
+          </a>
+          <% if (v.event) { %><p class="video-event"><%= v.event %></p><% } %>
         </li>
         <% }) %>
       </ul>
     </section>
     <% } %>
+
+    <section class="block">
+      <div class="block-head"><h2>Learn the game</h2><a href="/learn">Learning hub</a></div>
+      <ul class="learn-tiles">
+        <li><a href="/rules"><strong>Rules</strong><span>How canoe polo works, in plain English.</span></a></li>
+        <li><a href="/referee/quiz"><strong>Referee quiz</strong><span>10 random questions on rules and hand signals.</span></a></li>
+        <li><a href="/tactics"><strong>Tactics board</strong><span>Draw plays step by step and share them with your team.</span></a></li>
+      </ul>
+    </section>
   </div>
 
   <aside class="home-side">
+    <section class="side-block side-note">
+      <h2>Get involved</h2>
+      <p>Tournaments need referees, table officials, set-up crews and people behind the camera. Clubs need coaches. Find where you fit.</p>
+      <p><a href="/get-involved">Ways to get involved</a></p>
+    </section>
+
+    <% if (recent.length) { %>
     <section class="side-block">
-      <h2>Sections</h2>
+      <h2>Recently played</h2>
       <ul class="side-links">
-        <li><a href="/tournaments">Future tournaments <span><%= stats.upcoming %></span></a></li>
-        <li><a href="/past">Past tournaments <span><%= stats.past %></span></a></li>
-        <li><a href="/support">Support and funding <span>Grants</span></a></li>
-        <li><a href="/shop">Shop <span>Soon</span></a></li>
-        <li><a href="/about">About canoepolo.eu</a></li>
+        <% recent.forEach(t => { %>
+        <li><a href="/tournaments/<%= t.slug %>"><%= t.name %> <span><%= flag(t.country) %></span></a></li>
+        <% }) %>
+        <li><a href="/past">All past tournaments <span>→</span></a></li>
       </ul>
     </section>
+    <% } %>
 
     <% if (countryCounts.length) { %>
     <section class="side-block">
-      <h2>By country</h2>
+      <h2>Tournaments by country</h2>
       <ul class="side-links">
-        <% countryCounts.forEach(([code, n]) => { %>
+        <% countryCounts.slice(0, 8).forEach(([code, n]) => { %>
         <li><a href="/tournaments?country=<%= code %>"><%= flag(code) %> <%= COUNTRIES[code] || code %> <span><%= n %></span></a></li>
         <% }) %>
       </ul>
     </section>
     <% } %>
 
-    <section class="side-block side-note">
-      <h2>Organising a tournament?</h2>
-      <p>Create and run your tournament for free on Kayakers.nl: registrations, schedule and live results.</p>
-      <p><a href="<%= CREATE_TOURNAMENT_URL %>" target="_blank" rel="noopener">Create a tournament on Kayakers.nl ↗</a></p>
-      <p class="small">Already set up? <a href="/about#listing">Send us the link</a> and we'll list it here.</p>
+    <section class="side-block">
+      <h2>For clubs</h2>
+      <ul class="side-links">
+        <li><a href="<%= CREATE_TOURNAMENT_URL %>" target="_blank" rel="noopener">Run a tournament on Kayakers.nl <span>↗</span></a></li>
+        <li><a href="/about#listing">List your tournament here</a></li>
+        <li><a href="/support">Grants and fundraising</a></li>
+        <li><a href="/calendar.ics">Subscribe to the calendar</a></li>
+      </ul>
     </section>
   </aside>
 </div>
+
+<section class="wrap">
+  <div class="community-cta">
+    <div>
+      <h2>Built by the canoe polo family, for the canoe polo family</h2>
+      <p>Got news, results, a club looking for players, or an idea for the site? We'd love to hear from you.</p>
+    </div>
+    <a class="btn primary" href="mailto:info@canoepolo.eu?subject=canoepolo.eu">Get in touch</a>
+  </div>
+</section>
 
 <%- include('partials/footer') %>

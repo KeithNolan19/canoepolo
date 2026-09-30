@@ -1,0 +1,91 @@
+<%- include('partials/header', { fullWidth: true, metaDescription: 'Learn to referee canoe polo: how to become a referee, every rule in plain English, the ICF referee hand signals and a quiz to test yourself.' }) %>
+
+<div class="page-banner">
+  <div class="wrap">
+    <p class="crumbs"><a href="/">Home</a> / <a href="/learn">Learn</a> / Referee</p>
+    <h1>Learn to referee</h1>
+  </div>
+</div>
+
+<div class="wrap support-grid">
+  <nav class="support-toc" aria-label="On this page">
+    <h2>On this page</h2>
+    <ol>
+      <li><a href="#quiz">Test yourself</a></li>
+      <li><a href="#pathway">Becoming a referee</a></li>
+      <li><a href="#signals">Hand signals</a></li>
+      <li><a href="#rules">All the rules</a>
+        <ol><% RULES.forEach(g => { %><li><a href="#<%= g.id %>"><%= g.title %></a></li><% }) %></ol>
+      </li>
+      <li><a href="#tips">On the day</a></li>
+    </ol>
+  </nav>
+
+  <div class="support-main">
+    <p class="intro-text">Every canoe polo game needs two referees, and every tournament needs more of them. Refereeing is the fastest way to really understand the game, it makes you a better player, and good referees get to travel to the biggest championships.</p>
+
+    <section id="quiz" class="quiz-cta">
+      <div>
+        <p class="event-level">Referee quiz</p>
+        <h2>Test yourself: 10 questions</h2>
+        <p>Rules and hand signals, multiple choice. A new random set every time, with your score at the end.</p>
+      </div>
+      <a class="btn primary" href="/referee/quiz">Start the quiz</a>
+    </section>
+
+    <section id="pathway" class="support-section">
+      <h2 class="sub-head">Becoming a referee</h2>
+      <ol class="pathway">
+        <% PATHWAY.forEach((p, i) => { %><li><strong><%= p.step %></strong><span><%= p.text %></span></li><% }) %>
+      </ol>
+      <p>Courses, exams and grades are run by national federations, so the details depend on where you live:</p>
+      <ul class="link-list">
+        <% CONTACTS.forEach(c => { %><li><a href="<%= c.url %>" target="_blank" rel="noopener"><%= c.name %> ↗</a></li><% }) %>
+      </ul>
+      <p class="small-note">Not listed? Ask your national canoe federation's canoe polo committee.</p>
+    </section>
+
+    <section id="signals" class="support-section">
+      <h2 class="sub-head">Hand signals</h2>
+      <p>Referees signal every decision so players, the table and spectators all know what was called. For a foul, show the signal for two seconds, then point to where the free throw or free shot will be taken, with your other arm showing which way the play goes.</p>
+      <ul class="signal-grid">
+        <% SIGNALS.forEach(s => { %>
+        <li><div class="signal-fig" data-signal="<%= s.id %>"></div><h3><%= s.name %></h3><p><%= s.how %></p></li>
+        <% }) %>
+      </ul>
+      <p class="small-note">Drawings are simplified, seen from the front. Signals follow the ICF canoe polo referee signals; chapter 15 of the <a href="/rules#official">official rules</a> is the final word.</p>
+    </section>
+
+    <section id="rules" class="support-section">
+      <h2 class="sub-head">All the rules</h2>
+      <p>Every rule a referee needs, in plain English and grouped by topic. Where a rule is broken, the call shows what the referee gives.</p>
+      <% RULES.forEach((g, gi) => { %>
+      <details class="rule-group" id="<%= g.id %>" <%= gi === 0 ? 'open' : '' %>>
+        <summary><%= g.title %> <span class="count-pill"><%= g.items.length %></span></summary>
+        <ol class="rule-items">
+          <% g.items.forEach(r => { %>
+          <li><%= r.rule %><% if (r.call) { %><span class="rule-call"><%= r.call %></span><% } %></li>
+          <% }) %>
+        </ol>
+      </details>
+      <% }) %>
+      <p class="small-note">A summary of the ICF Canoe Polo Competition Rules for learning. Referees must know the <a href="/rules#official">official text</a>.</p>
+    </section>
+
+    <section id="tips" class="support-section">
+      <h2 class="sub-head">On the day</h2>
+      <ol class="tips">
+        <% TIPS.forEach(t => { %><li><%= t %></li><% }) %>
+      </ol>
+    </section>
+
+    <aside class="side-note support-cta">
+      <h2>Running a tournament and short of referees?</h2>
+      <p>Tell us and we'll help spread the word to referees near you.</p>
+      <p><a href="/get-involved#referees">Find referees and volunteers</a></p>
+    </aside>
+  </div>
+</div>
+
+<script src="/signals.js"></script>
+<%- include('partials/footer') %>

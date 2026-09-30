@@ -1,0 +1,28 @@
+<%- include('partials/header', { fullWidth: true, metaDescription: 'Canoe polo referee quiz: 10 random multiple-choice questions on the rules and referee hand signals, with your score at the end.' }) %>
+
+<div class="page-banner">
+  <div class="wrap">
+    <p class="crumbs"><a href="/">Home</a> / <a href="/learn">Learn</a> / <a href="/referee">Referee</a> / Quiz</p>
+    <h1>Referee quiz</h1>
+  </div>
+</div>
+
+<div class="wrap quiz-wrap">
+  <div id="quiz" class="quiz" aria-live="polite">
+    <div class="quiz-intro">
+      <p class="intro-text">Ten multiple-choice questions on the rules and the referees' hand signals. You get a fresh random set every time, and your score at the end.</p>
+      <ul class="quiz-facts">
+        <li><strong>10</strong> questions</li>
+        <li><strong>4</strong> hand-signal questions</li>
+        <li><strong>1</strong> right answer each</li>
+      </ul>
+      <p><button type="button" class="btn primary" id="quiz-start">Start the quiz</button></p>
+      <noscript><p class="notice red">The quiz needs JavaScript switched on.</p></noscript>
+    </div>
+  </div>
+  <p class="small-note quiz-note">Questions are based on the ICF Canoe Polo Competition Rules. Revise with <a href="/referee#rules">all the rules</a> and the <a href="/referee#signals">hand signals</a>.</p>
+</div>
+
+<script src="/signals.js"></script>
+<script src="/quiz.js"></script>
+<%- include('partials/footer') %>

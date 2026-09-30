@@ -1,4 +1,4 @@
-# canoepolo.eu — International Canoe Polo Tournament Calendar
+# canoepolo.eu — The Home of International Canoe Polo
 
 A small, fast website where you (the admin) post canoe polo tournaments, and players around the world can browse, filter and add them to their calendars.
 
@@ -77,6 +77,8 @@ Delete any other `A` records for `@` or `www` (registrars often add a "parking" 
 - **Featured:** pins a tournament to the top of the list
 - **Watch page videos:** https://canoepolo.eu/admin → **Videos** tab. Paste any YouTube link, pick a section, and tick *Featured* for the big video at the top.
 - **Rules page:** text lives in `src/rules.js` (update it when new ICF rules come out)
+- **Referee section:** `/referee` (pathway, all the rules, hand signals) and `/referee/quiz`. Rules list text is in `src/referee.js`; quiz questions are at the top of `public/quiz.js`; signal drawings in `public/signals.js`
+- **Homepage cards, Learn hub and Get involved page:** text in `src/community.js`
 - **Tactics board:** runs entirely in the visitor's browser (`public/tactics.js`); presets are at the top of that file
 - **About page / contact email:** edit `views/about.ejs` (currently says `info@canoepolo.eu`)
 

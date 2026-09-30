@@ -11,6 +11,7 @@ const T = require('./tournaments');
 const { COUNTRIES, LEVELS, DIVISIONS, STATUSES, flag, CREATE_TOURNAMENT_URL } = require('./constants');
 const { buildCalendar } = require('./ical');
 const V = require('./videos');
+const C = require('./community');
 
 // ---------- Settings (come from the .env file on the server) ----------
 const PORT = Number(process.env.PORT) || 3000;
@@ -112,21 +113,24 @@ function pickFilters(q) {
 }
 
 // ---------- Public pages ----------
-// Landing page
+// Landing page: the home of international canoe polo
 app.get('/', (req, res) => {
   const upcoming = T.listPublic({ when: 'upcoming', limit: 500 });
   const next = [...upcoming].sort((a, b) => a.start_date.localeCompare(b.start_date));
   const past = T.listPublic({ when: 'past', limit: 500 });
   const byCountry = {};
   upcoming.forEach((t) => { byCountry[t.country] = (byCountry[t.country] || 0) + 1; });
+  const allVideos = V.all();
   res.render('home', {
-    title: 'International canoe polo tournaments',
-    nextUp: next.slice(0, 8),
+    title: 'The home of international canoe polo',
+    nextUp: next.slice(0, 6),
     recent: past.slice(0, 4),
+    videos: allVideos.slice(0, 3),
     countryCounts: Object.entries(byCountry).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])),
-    stats: { upcoming: upcoming.length, past: past.length, countries: Object.keys(byCountry).length },
+    stats: { upcoming: upcoming.length, past: past.length, countries: Object.keys(byCountry).length, videos: allVideos.length },
     heroImage: findImage('hero'),
     heroCredit: findCredit('hero'),
+    FAMILY: C.FAMILY,
   });
 });
 
@@ -134,7 +138,7 @@ app.get('/', (req, res) => {
 app.get('/tournaments', (req, res) => {
   const filters = pickFilters(req.query);
   const tournaments = T.listPublic({ ...filters, when: 'upcoming' });
-  res.render('index', { title: 'Future tournaments', tournaments, filters, countries: T.countriesInUse(), when: 'upcoming' });
+  res.render('index', { title: 'Upcoming tournaments', tournaments, filters, countries: T.countriesInUse(), when: 'upcoming' });
 });
 
 app.get('/support', (req, res) => res.render('support', { title: 'Support and funding', ...require('./support') }));
@@ -172,6 +176,12 @@ app.get('/watch', (req, res) => res.render('watch', { title: 'Watch canoe polo',
 // Tactics board (all the work happens in the browser: public/tactics.js)
 app.get('/tactics', (req, res) => res.render('tactics', { title: 'Tactics board' }));
 
+// Learning hub, referee section and quiz, get involved
+app.get('/learn', (req, res) => res.render('learn', { title: 'Learn canoe polo', LEARN: C.LEARN }));
+app.get('/referee', (req, res) => res.render('referee', { title: 'Learn to referee', ...require('./referee'), SIGNALS: require('../public/signals.js').SIGNALS }));
+app.get('/referee/quiz', (req, res) => res.render('referee-quiz', { title: 'Referee quiz' }));
+app.get('/get-involved', (req, res) => res.render('get-involved', { title: 'Get involved', INVOLVED: C.INVOLVED, ORGANISATIONS: require('./support').ORGANISATIONS }));
+
 // Rules in plain English
 app.get('/rules', (req, res) => res.render('rules', { title: 'Canoe polo rules', ...require('./rules') }));
 
@@ -200,7 +210,7 @@ app.get('/robots.txt', (req, res) => res.type('text/plain').send(`User-agent: *\
 
 app.get('/sitemap.xml', (req, res) => {
   const all = [...T.listPublic({ when: 'upcoming', limit: 500 }), ...T.listPublic({ when: 'past', limit: 500 })];
-  const urls = [`${BASE_URL}/`, `${BASE_URL}/tournaments`, `${BASE_URL}/past`, `${BASE_URL}/watch`, `${BASE_URL}/tactics`, `${BASE_URL}/rules`, `${BASE_URL}/shop`, `${BASE_URL}/support`, `${BASE_URL}/about`, ...all.map((t) => `${BASE_URL}/tournaments/${t.slug}`)];
+  const urls = [`${BASE_URL}/`, `${BASE_URL}/tournaments`, `${BASE_URL}/past`, `${BASE_URL}/watch`, `${BASE_URL}/learn`, `${BASE_URL}/referee`, `${BASE_URL}/referee/quiz`, `${BASE_URL}/get-involved`, `${BASE_URL}/tactics`, `${BASE_URL}/rules`, `${BASE_URL}/shop`, `${BASE_URL}/support`, `${BASE_URL}/about`, ...all.map((t) => `${BASE_URL}/tournaments/${t.slug}`)];
   res.type('application/xml').send(
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>${u}</loc></url>`).join('\n')}\n</urlset>\n`,
   );

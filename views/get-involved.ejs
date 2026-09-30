@@ -1,0 +1,54 @@
+<%- include('partials/header', { fullWidth: true, metaDescription: 'Get involved in canoe polo: start playing, coach, referee, volunteer at tournaments, or run a club tournament.' }) %>
+
+<div class="page-banner">
+  <div class="wrap">
+    <p class="crumbs"><a href="/">Home</a> / Get involved</p>
+    <h1>Get involved</h1>
+  </div>
+</div>
+
+<div class="wrap support-grid">
+  <nav class="support-toc" aria-label="On this page">
+    <h2>On this page</h2>
+    <ol>
+      <% INVOLVED.forEach(s => { %><li><a href="#<%= s.id %>"><%= s.title %></a></li><% }) %>
+      <li><a href="#federations">National federations</a></li>
+    </ol>
+  </nav>
+
+  <div class="support-main">
+    <p class="intro-text">Canoe polo is a small sport with a big family. It runs on people giving their time: playing, coaching, refereeing, organising and helping out. There's a place for you whatever your experience.</p>
+
+    <% INVOLVED.forEach(s => { %>
+    <section id="<%= s.id %>" class="support-section involve">
+      <h2 class="sub-head"><%= s.title %></h2>
+      <p><%= s.text %></p>
+      <ul class="involve-points">
+        <% s.points.forEach(p => { %><li><%= p %></li><% }) %>
+      </ul>
+      <p class="lead-actions">
+        <% s.links.forEach(([label, href], n) => { %><a class="btn <%= n === 0 ? 'primary' : '' %>" href="<%= href %>"><%= label %></a><% }) %>
+      </p>
+    </section>
+    <% }) %>
+
+    <section id="federations" class="support-section">
+      <h2 class="sub-head">National federations</h2>
+      <p>Your national federation is the best place to find clubs, courses and competitions.</p>
+      <table class="data-table">
+        <thead><tr><th>Organisation</th><th>Covers</th><th>How they can help</th></tr></thead>
+        <tbody>
+        <% ORGANISATIONS.forEach(o => { %>
+          <tr>
+            <td class="dt-name"><a href="<%= o.url %>" target="_blank" rel="noopener"><%= o.name %></a></td>
+            <td class="dt-area"><%= o.area %></td>
+            <td><%= o.help %></td>
+          </tr>
+        <% }) %>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
