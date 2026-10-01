@@ -91,9 +91,29 @@
   // ---------- Rendering ----------
   let qs = [], i = 0, score = 0, answers = [];
 
+  let player = null, token = '';
+
   function start() {
     qs = newQuiz(); i = 0; score = 0; answers = [];
+    token = '';
+    if (player) fetch('/referee/quiz/token').then((r) => r.json()).then((d) => { token = d.t || ''; }).catch(() => {});
     show();
+  }
+
+  function submitScore(box) {
+    if (!player) return;
+    const note = h('p', 'small-note', 'Saving your score to the leaderboard...');
+    box.appendChild(note);
+    fetch('/referee/quiz/score', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: player.name, club: player.club, country: player.country, consent: true, score, token }),
+    }).then((r) => r.json()).then((d) => {
+      note.textContent = '';
+      if (d.ok) {
+        note.appendChild(document.createTextNode(`You're on the leaderboard (position ${d.rank} for this score). `));
+        const a = h('a', null, 'See the leaderboard'); a.href = '/referee/leaderboard'; note.appendChild(a);
+      } else note.textContent = d.error || 'Your score could not be saved.';
+    }).catch(() => { note.textContent = 'Your score could not be saved. Please check your connection.'; });
   }
 
   function show() {
@@ -180,6 +200,7 @@
     const actions = h('p', 'lead-actions'); actions.appendChild(again);
     const back = h('a', 'btn', 'Study the rules'); back.href = '/referee#rules'; actions.appendChild(back);
     res.appendChild(actions);
+    submitScore(res);
     const missed = answers.filter((x) => !x.right);
     if (missed.length) {
       res.appendChild(h('h3', 'quiz-review-head', 'Questions to review'));
@@ -198,5 +219,23 @@
     root.scrollIntoView({ block: 'nearest' });
   }
 
-  document.getElementById('quiz-start').addEventListener('click', start);
+  const form = document.getElementById('quiz-form');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const err = document.getElementById('qj-error');
+    err.hidden = true;
+    player = null;
+    if (document.getElementById('qj-consent').checked) {
+      const name = document.getElementById('qj-name').value.trim();
+      const club = document.getElementById('qj-club').value.trim();
+      const country = document.getElementById('qj-country').value;
+      if (name.length < 2 || !country) {
+        err.textContent = 'To join the leaderboard, please enter your name and choose your country, or untick the box to play without joining.';
+        err.hidden = false;
+        return;
+      }
+      player = { name, club, country };
+    }
+    start();
+  });
 })();

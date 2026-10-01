@@ -263,6 +263,14 @@ app.get('/tactics', (req, res) => res.render('tactics', { title: 'Tactics board'
 // Learning hub, referee section and quiz, get involved
 app.get('/learn', (req, res) => res.render('learn', { title: 'Learn canoe polo', LEARN: C.LEARN }));
 app.get('/referee', (req, res) => res.render('referee', { title: 'Learn to referee', ...require('./referee'), SIGNALS: require('../public/signals.js').SIGNALS }));
+const LB = require('./leaderboard');
+const scoreLimiter = rateLimit({ windowMs: 10 * 60 * 1000, limit: 8, standardHeaders: false, legacyHeaders: false });
+app.get('/referee/quiz/token', (req, res) => { res.set('Cache-Control', 'no-store'); res.json({ t: LB.newToken() }); });
+app.post('/referee/quiz/score', scoreLimiter, express.json({ limit: '2kb' }), (req, res) => {
+  const r = LB.submit(req.body || {});
+  res.status(r.ok ? 200 : 400).json(r);
+});
+app.get('/referee/leaderboard', (req, res) => res.render('leaderboard', { title: 'Referee quiz leaderboard', rows: LB.top(50) }));
 app.get('/referee/quiz', (req, res) => res.render('referee-quiz', { title: 'Referee quiz' }));
 app.get('/get-involved', (req, res) => res.render('get-involved', { title: 'Get involved', INVOLVED: C.INVOLVED, ORGANISATIONS: require('./support').ORGANISATIONS, NATIONAL: require('./support').NATIONAL }));
 
@@ -297,7 +305,7 @@ app.get('/robots.txt', (req, res) => res.type('text/plain').send(`User-agent: *\
 
 app.get('/sitemap.xml', (req, res) => {
   const all = [...T.listPublic({ when: 'upcoming', limit: 500 }), ...T.listPublic({ when: 'past', limit: 500 })];
-  const urls = [`${BASE_URL}/`, `${BASE_URL}/tournaments`, `${BASE_URL}/tournaments/calendar`, `${BASE_URL}/past`, `${BASE_URL}/watch`, `${BASE_URL}/learn`, `${BASE_URL}/referee`, `${BASE_URL}/referee/quiz`, `${BASE_URL}/get-involved`, `${BASE_URL}/tactics`, `${BASE_URL}/rules`, `${BASE_URL}/shop`, `${BASE_URL}/support`, `${BASE_URL}/about`, `${BASE_URL}/privacy`, `${BASE_URL}/terms`, ...all.map((t) => `${BASE_URL}/tournaments/${t.slug}`)];
+  const urls = [`${BASE_URL}/`, `${BASE_URL}/tournaments`, `${BASE_URL}/tournaments/calendar`, `${BASE_URL}/past`, `${BASE_URL}/watch`, `${BASE_URL}/learn`, `${BASE_URL}/referee`, `${BASE_URL}/referee/quiz`, `${BASE_URL}/referee/leaderboard`, `${BASE_URL}/get-involved`, `${BASE_URL}/tactics`, `${BASE_URL}/rules`, `${BASE_URL}/shop`, `${BASE_URL}/support`, `${BASE_URL}/about`, `${BASE_URL}/privacy`, `${BASE_URL}/terms`, ...all.map((t) => `${BASE_URL}/tournaments/${t.slug}`)];
   res.type('application/xml').send(
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>${u}</loc></url>`).join('\n')}\n</urlset>\n`,
   );
@@ -345,6 +353,14 @@ app.get('/admin/stats', requireAdmin, (req, res) => {
   const days = [7, 30, 90, 365].includes(Number(req.query.days)) ? Number(req.query.days) : 30;
   const r = stats.report(days);
   res.render('admin/stats', { title: 'Statistics', days, r, max: Math.max(1, ...r.series.map((d) => d.views)) });
+});
+
+app.get('/admin/leaderboard', requireAdmin, (req, res) => {
+  res.render('admin/leaderboard', { title: 'Quiz leaderboard', rows: LB.recent(300), msg: req.query.msg || '' });
+});
+app.post('/admin/leaderboard/delete/:id', requireAdmin, checkCsrf, (req, res) => {
+  LB.remove(Number(req.params.id));
+  res.redirect('/admin/leaderboard?msg=Entry+removed');
 });
 
 app.get('/admin/new', requireAdmin, (req, res) => {

@@ -1,0 +1,29 @@
+<%- include('partials/header', { fullWidth: true, metaDescription: 'The canoe polo referee quiz leaderboard: top scores from players, referees and clubs around the world.' }) %>
+
+<div class="page-banner">
+  <div class="wrap">
+    <p class="crumbs"><a href="/">Home</a> / <a href="/learn">Learn</a> / <a href="/referee">Referee</a> / <a href="/referee/quiz">Quiz</a> / Leaderboard</p>
+    <h1>Quiz leaderboard</h1>
+  </div>
+</div>
+
+<div class="wrap quiz-wrap">
+  <p class="intro-text">Best scores in the referee quiz, from people who chose to be listed. Think you can top it?</p>
+  <p><a class="btn primary" href="/referee/quiz">Take the quiz</a></p>
+  <% if (!rows.length) { %>
+    <p class="empty-note">Nobody is on the leaderboard yet. Be the first!</p>
+  <% } else { %>
+  <div class="table-wrap">
+    <table class="lb-table">
+      <thead><tr><th>#</th><th>Name</th><th>Club</th><th>Country</th><th class="num">Score</th></tr></thead>
+      <tbody>
+        <% rows.forEach(function (r, i) { %>
+        <tr><td class="num"><%= i + 1 %></td><td><strong><%= r.name %></strong></td><td><%= r.club || '' %></td><td><%= flag(r.country) %> <%= COUNTRIES[r.country] || r.country %></td><td class="num"><%= r.score %> / 10</td></tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+  <p class="small-note quiz-note">The quiz is unofficial, for fun and practice, and is played on trust. Entries are shown only with the player's permission. To have yours removed, email <a href="mailto:info@canoepolo.eu">info@canoepolo.eu</a>.</p>
+</div>
+<%- include('partials/footer') %>

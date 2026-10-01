@@ -1,0 +1,25 @@
+<%- include('../partials/header') %>
+
+<%- include('tabs', { tab: 'leaderboard' }) %>
+
+<div class="admin-head">
+  <h1>Quiz leaderboard</h1>
+  <div class="actions"><a class="btn" href="/referee/leaderboard">View public page</a></div>
+</div>
+<% if (msg) { %><p class="notice green"><%= msg %></p><% } %>
+<p class="small-note">Every submitted score, newest first. Remove anything inappropriate, or anything a person asks to have deleted.</p>
+<div class="table-wrap">
+  <table class="lb-table">
+    <thead><tr><th>When</th><th>Name</th><th>Club</th><th>Country</th><th class="num">Score</th><th></th></tr></thead>
+    <tbody>
+      <% rows.forEach(function (r) { %>
+      <tr>
+        <td><%= r.created_at %></td><td><%= r.name %></td><td><%= r.club || '' %></td><td><%= r.country %></td><td class="num"><%= r.score %></td>
+        <td><form method="post" action="/admin/leaderboard/delete/<%= r.id %>" data-confirm="Remove this entry?"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn small" type="submit">Remove</button></form></td>
+      </tr>
+      <% }) %>
+      <% if (!rows.length) { %><tr><td colspan="6" class="muted">No entries yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+<%- include('../partials/footer') %>
