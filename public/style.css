@@ -552,7 +552,7 @@ fieldset .full { grid-column: 1 / -1; }
 /* ---------- Phone ---------- */
 @media (max-width: 640px) {
   body { font-size: 16px; }
-  .wrap { padding: 0 18px; }
+  .wrap { padding-left: 18px; padding-right: 18px; }
   .brand-name { font-size: 1.15rem; }
   .hero { padding: 36px 0 44px; }
   .hero-actions .btn { flex: 1 1 100%; }
