@@ -177,7 +177,11 @@ app.get('/', (req, res) => {
   const byCountry = {};
   upcoming.forEach((t) => { byCountry[t.country] = (byCountry[t.country] || 0) + 1; });
   const allVideos = V.all();
+  const today = new Date().toISOString().slice(0, 10);
+  const popupT = T.getBySlug('paddle-europe-canoe-polo-club-championships-2026');
+  const popup = popupT && popupT.end_date >= today ? popupT : null;
   res.render('home', {
+    popup,
     title: 'The home of international canoe polo',
     nextUp: next.slice(0, 6),
     recent: past.slice(0, 4),

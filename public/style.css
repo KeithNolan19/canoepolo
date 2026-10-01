@@ -856,3 +856,13 @@ h1, h2, h3, .event-name, .event-where, .event-extra { overflow-wrap: anywhere; }
 .team-list li { counter-increment: team; display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--line); }
 .team-list li::before { content: counter(team); width: 1.8em; flex: none; font-weight: 600; color: var(--muted); }
 .team-list li.tbc { color: var(--muted); font-style: italic; }
+
+/* Home page promo pop-up */
+.promo { border: 0; border-radius: 16px; padding: 28px 24px 24px; width: min(92vw, 440px); background: var(--card); color: var(--ink); box-shadow: 0 20px 60px rgba(0,0,0,.35); position: fixed; inset: 0; margin: auto; height: fit-content; }
+.promo::backdrop { background: rgba(0,0,0,.55); }
+.promo-x { position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--line); background: var(--card); color: var(--ink); font: inherit; font-size: 1.7rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.promo-x:hover { border-color: var(--ink); }
+.promo-kicker { margin: 0 44px 6px 0; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted, var(--ink)); }
+.promo h2 { margin: 0 44px 6px 0; font-size: 1.5rem; line-height: 1.2; }
+.promo-meta { margin: 0 0 12px; font-weight: 600; }
+.promo .btn { width: 100%; margin-top: 8px; }

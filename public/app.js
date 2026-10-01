@@ -117,3 +117,20 @@ window.cpEvent = function (name) {
   if (!navigator.sendBeacon || navigator.doNotTrack === '1' || location.pathname.startsWith('/admin')) return;
   try { navigator.sendBeacon('/_c', new Blob(['t=' + encodeURIComponent('event:' + name)], { type: 'application/x-www-form-urlencoded' })); } catch (err) { /* ignore */ }
 };
+
+// Home page promo pop-up: shown once per browser session, closed by X, Esc, backdrop or the link.
+(function () {
+  var d = document.getElementById('promo');
+  if (!d || typeof d.showModal !== 'function') return;
+  var key = d.getAttribute('data-key');
+  try { if (sessionStorage.getItem(key)) return; } catch (e) {}
+  function close() {
+    try { sessionStorage.setItem(key, '1'); } catch (e) {}
+    if (d.open) d.close();
+  }
+  d.addEventListener('click', function (e) {
+    if (e.target === d || e.target.closest('[data-promo-close]') || e.target.closest('a')) close();
+  });
+  d.addEventListener('cancel', close);
+  setTimeout(function () { d.showModal(); }, 400);
+})();
