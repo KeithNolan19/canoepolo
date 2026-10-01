@@ -39,6 +39,7 @@
 
     <% if (schedule) { %>
     <h2 class="sub-head" id="schedule">Schedule</h2>
+    <% if (schedule.headline) { %><div class="notice green sched-headline"><strong><%= schedule.headline %></strong></div><% } %>
     <p class="small-note"><%= schedule.note %></p>
     <div data-sched>
       <div class="sched-filters" hidden>
@@ -75,6 +76,12 @@
           </ul>
         </div>
         <% }) %>
+      </section>
+      <% }) %>
+      <% schedule.pending.forEach(label => { %>
+      <section class="sched sched-pending" aria-label="<%= label %>">
+        <div class="sched-head"><h3><%= label %></h3><span class="tag tag-ball">Coming soon</span></div>
+        <p>The <%= label.split(' ')[0] %> timetable will be added here as soon as the organisers release it.</p>
       </section>
       <% }) %>
     </div>
