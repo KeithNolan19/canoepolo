@@ -39,15 +39,20 @@ app.set('views', path.join(__dirname, '..', 'views'));
 app.set('trust proxy', 1); // we sit behind Caddy
 app.disable('x-powered-by');
 
+// Google's translated copy of a page (translate.goog) can load our CSS, images and scripts from this site's own
+// address, so allow our own origin explicitly and let our static files be used cross-origin. They are public files.
+const OWN = (() => { try { const u = new URL(BASE_URL); return u.protocol === 'https:' ? [u.origin] : []; } catch { return []; } })();
+app.use('/fonts', (req, res, next) => { res.set('Access-Control-Allow-Origin', '*'); next(); });
 app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      styleSrc: ["'self'"],
-      fontSrc: ["'self'"],
-      imgSrc: ["'self'", 'data:'],
+      styleSrc: ["'self'", ...OWN],
+      fontSrc: ["'self'", ...OWN],
+      imgSrc: ["'self'", 'data:', ...OWN],
       frameSrc: ['https://www.youtube-nocookie.com'],
-      scriptSrc: ["'self'"],
+      scriptSrc: ["'self'", ...OWN],
       formAction: ["'self'"],
       upgradeInsecureRequests: IS_PROD ? [] : null,
     },
