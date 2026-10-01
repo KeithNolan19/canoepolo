@@ -21,8 +21,8 @@
       <form id="quiz-form" class="quiz-join" autocomplete="off">
         <h2>Join the leaderboard (optional)</h2>
         <p class="small-note">Add your details to get your score on the <a href="/referee/leaderboard">leaderboard</a> when you finish. Or leave the box unticked and just play.</p>
-        <label>Name <input type="text" id="qj-name" maxlength="40" placeholder="First name and surname, or first name and initial"></label>
-        <label>Club <input type="text" id="qj-club" maxlength="50" placeholder="Your club (or leave blank)"></label>
+        <label>Name <input type="text" id="qj-name" maxlength="40" placeholder="First and last name"></label>
+        <label>Club <input type="text" id="qj-club" maxlength="50" placeholder="Club name, if any"></label>
         <label>Country
           <select id="qj-country"><option value="">Choose a country</option>
             <% Object.keys(COUNTRIES).sort(function (a, b) { return COUNTRIES[a].localeCompare(COUNTRIES[b]); }).forEach(function (c) { %><option value="<%= c %>"><%= COUNTRIES[c] %></option><% }) %>
