@@ -2084,6 +2084,19 @@ BATCHES.push({
 ],
 });
 
+BATCHES.push({
+  id: 'setubal-cup-2026-2026-10-01',
+  tournaments: [
+    {
+      name: '2026 Setúbal Cup International Canoe Polo Tournament',
+      start_date: '2026-10-24', end_date: '2026-10-25',
+      city: 'Setúbal', country: 'PT',
+      level: 'International',
+      description: 'International canoe polo tournament in Setúbal, Portugal.',
+    },
+  ],
+});
+
 const PATCHES = [
   {
     id: 'nwc-2026-registration-w1',
