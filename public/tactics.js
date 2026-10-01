@@ -11,7 +11,7 @@
   const COLORS = {
     water: '#2b8f86', waterDeep: '#237a72', line: '#ffffff',
     r: '#e23b32', rText: '#ffffff', w: '#ffffff', wText: '#0a3b36',
-    ball: '#ff6a2b', run: '#ffffff', pass: '#ffc629', shot: '#ff9a5c', sel: '#ff6a2b',
+    ball: '#ffc629', run: '#ffffff', pass: '#ffc629', shot: '#ffe27a', sel: '#5cc8ff',
   };
   const TEAMS = { r: 'Red', w: 'White' };
   const IDS = ['r1', 'r2', 'r3', 'r4', 'r5', 'w1', 'w2', 'w3', 'w4', 'w5'];
