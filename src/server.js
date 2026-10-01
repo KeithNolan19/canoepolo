@@ -271,7 +271,7 @@ app.post('/referee/quiz/score', scoreLimiter, express.json({ limit: '2kb' }), (r
   res.status(r.ok ? 200 : 400).json(r);
 });
 app.get('/referee/leaderboard', (req, res) => res.render('leaderboard', { title: 'Referee quiz leaderboard', rows: LB.top(50) }));
-app.get('/referee/quiz', (req, res) => res.render('referee-quiz', { title: 'Referee quiz' }));
+app.get('/referee/quiz', (req, res) => res.render('referee-quiz', { title: 'Referee quiz', board: LB.top(10) }));
 app.get('/get-involved', (req, res) => res.render('get-involved', { title: 'Get involved', INVOLVED: C.INVOLVED, ORGANISATIONS: require('./support').ORGANISATIONS, NATIONAL: require('./support').NATIONAL }));
 
 app.get('/privacy', (req, res) => res.render('privacy', { title: 'Privacy policy' }));

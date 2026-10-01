@@ -8,6 +8,8 @@
 </div>
 
 <div class="wrap quiz-wrap">
+<div class="quiz-layout">
+  <div class="quiz-main">
   <div id="quiz" class="quiz" aria-live="polite">
     <div class="quiz-intro">
       <p class="intro-text">Ten multiple-choice questions on the rules and the referees' hand signals. You get a fresh random set every time, and your score at the end.</p>
@@ -33,6 +35,22 @@
       <noscript><p class="notice red">The quiz needs JavaScript switched on.</p></noscript>
     </div>
   </div>
+  </div>
+  <aside class="lb-panel" aria-labelledby="lb-title">
+    <h2 id="lb-title">🏆 Leaderboard</h2>
+    <% if (!board.length) { %>
+      <p class="small-note">No scores yet. Join the leaderboard and be the first on the board!</p>
+    <% } else { %>
+      <ol class="lb-list">
+        <% board.forEach(function (r) { %>
+        <li><span class="lb-who"><strong><%= r.name %></strong><small><%= flag(r.country) %> <%= r.club ? r.club + ', ' : '' %><%= COUNTRIES[r.country] || r.country %></small></span><span class="lb-score"><%= r.score %>/10</span></li>
+        <% }) %>
+      </ol>
+    <% } %>
+    <p><a class="btn small" href="/referee/leaderboard">Full leaderboard</a></p>
+    <p class="small-note">Tick the box on the start screen to put your name on it.</p>
+  </aside>
+</div>
   <p class="small-note quiz-note">Questions are based on the ICF Canoe Polo Competition Rules. See the <a href="/referee/leaderboard">leaderboard</a>. Revise with <a href="/referee#rules">all the rules</a> and the <a href="/referee#signals">hand signals</a>.</p>
 </div>
 

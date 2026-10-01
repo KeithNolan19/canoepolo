@@ -334,7 +334,7 @@ kbd { font-family: var(--font); font-size: .85em; font-weight: 600; border: 1px 
 .rule-call::before { content: 'Referee gives: '; color: var(--muted); font-weight: 500; }
 
 /* ---------- Quiz ---------- */
-.quiz-wrap { max-width: 880px; padding-top: 40px; }
+.quiz-wrap { max-width: 1180px; padding-top: 40px; }
 .quiz { --sig-bg: var(--tile); --sig-accent: #0b7bb5; border-radius: var(--r-lg); background: var(--card); border: 1px solid var(--line); padding: clamp(20px, 4vw, 40px); min-height: 420px; }
 .quiz-facts { list-style: none; display: flex; flex-wrap: wrap; gap: 16px 40px; margin: 20px 0 28px; padding: 0; color: var(--muted); }
 .quiz-facts strong { display: block; font-stretch: var(--wide); font-weight: 800; font-size: 2.4rem; line-height: 1; color: var(--ink); }
@@ -758,3 +758,15 @@ fieldset .full { grid-column: 1 / -1; }
 .lb-table { width: 100%; border-collapse: collapse; }
 .lb-table th, .lb-table td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
 .lb-table .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+/* Leaderboard beside the quiz */
+.quiz-layout { display: grid; grid-template-columns: 1fr; gap: 24px; align-items: start; }
+@media (min-width: 960px) { .quiz-layout { grid-template-columns: minmax(0, 1fr) 340px; } .lb-panel { position: sticky; top: 16px; } }
+.lb-panel { background: var(--card); border: 2px solid var(--ball); border-radius: var(--r); padding: 18px 20px; }
+.lb-panel h2 { margin: 0 0 10px; font-size: 1.2rem; }
+.lb-list { list-style: none; counter-reset: lb; margin: 0 0 14px; padding: 0; }
+.lb-list li { counter-increment: lb; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.lb-list li::before { content: counter(lb); font-weight: 800; color: var(--pool); width: 1.6em; flex: none; }
+.lb-who { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.lb-who small { color: var(--muted); }
+.lb-score { font-weight: 800; white-space: nowrap; }
