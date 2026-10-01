@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><%= title %> | canoepolo.eu</title>
   <meta name="description" content="<%= typeof metaDescription !== 'undefined' ? metaDescription : 'The home of international canoe polo (kayak polo): tournaments, videos, rules, refereeing and ways to get involved, for players, coaches, referees, volunteers and clubs.' %>">
+  <link rel="canonical" href="<%= canonical %>">
+  <meta property="og:type" content="<%= typeof ogType !== 'undefined' ? ogType : 'website' %>">
+  <meta property="og:url" content="<%= canonical %>">
+  <meta property="og:description" content="<%= typeof metaDescription !== 'undefined' ? metaDescription : 'The home of international canoe polo (kayak polo).' %>">
   <meta property="og:title" content="<%= title %> | canoepolo.eu">
   <meta property="og:site_name" content="canoepolo.eu">
   <meta name="theme-color" content="#0a3b36">
@@ -12,6 +16,7 @@
   <link rel="preload" href="/fonts/archivo-latin-wdth-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/fonts/fonts.css?v=<%= assetV %>">
   <link rel="stylesheet" href="/style.css?v=<%= assetV %>">
+  <link rel="alternate" type="application/rss+xml" title="canoepolo.eu blog" href="/blog/feed.xml">
   <link rel="alternate" type="text/calendar" title="Canoe polo tournaments" href="/calendar.ics">
 </head>
 <body>
@@ -27,6 +32,7 @@
       <a href="/tournaments" class="<%= path.startsWith('/tournaments') || path === '/past' ? 'on' : '' %>">Tournaments</a>
       <a href="/watch" class="<%= path === '/watch' ? 'on' : '' %>">Watch</a>
       <a href="/learn" class="<%= ['/learn', '/rules', '/tactics'].includes(path) ? 'on' : '' %>">Learn</a>
+      <a href="/blog" class="<%= path.startsWith('/blog') ? 'on' : '' %>">Blog</a>
       <a href="/referee" class="<%= path.startsWith('/referee') ? 'on' : '' %>">Referee</a>
       <a href="/get-involved" class="<%= path === '/get-involved' || path === '/support' ? 'on' : '' %>">Get involved</a>
       <a href="/shop" class="<%= path === '/shop' ? 'on' : '' %>">Shop</a>

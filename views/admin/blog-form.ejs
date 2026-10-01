@@ -1,0 +1,42 @@
+<%- include('../partials/header') %>
+
+<p class="back"><a href="/admin/blog">← Back to blog</a></p>
+
+<form method="post" action="<%= action %>" class="panel">
+  <h1><%= title %></h1>
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+
+  <% if (errors.length) { %>
+    <div class="notice red"><strong>Please fix:</strong><ul><% errors.forEach(e => { %><li><%= e %></li><% }) %></ul></div>
+  <% } %>
+
+  <fieldset>
+    <legend>Post</legend>
+    <label class="full">Title
+      <input name="title" required maxlength="100" value="<%= p.title || '' %>" placeholder="e.g. What is canoe polo? A beginner's guide">
+      <span class="small-note">Keep it under about 60 characters and put the main words (canoe polo, kayak polo) near the start.</span>
+    </label>
+    <label class="full">Web address (slug)
+      <input name="slug" maxlength="80" value="<%= p.slug || '' %>" placeholder="what-is-canoe-polo">
+      <span class="small-note">Leave blank to make it from the title. Do not change it after publishing, or old links break.</span>
+    </label>
+    <label class="full">Summary (shown in Google results)
+      <input name="summary" required maxlength="160" value="<%= p.summary || '' %>" placeholder="One sentence, up to 160 characters.">
+    </label>
+    <label class="full">Post text
+      <textarea name="body" rows="20" required><%= p.body || '' %></textarea>
+      <span class="small-note">Leave a blank line between paragraphs. Start a line with <code>## </code> for a heading. Start lines with <code>- </code> for a bullet list. Nothing else is formatted, and no HTML or links are allowed.</span>
+    </label>
+    <label>Date
+      <input type="date" name="published_at" value="<%= p.published_at || '' %>">
+    </label>
+    <label class="check full"><input type="checkbox" name="published" value="1" <%= p.published ? 'checked' : '' %>> Published (untick to keep as a draft)</label>
+  </fieldset>
+
+  <div class="actions">
+    <button type="submit" class="btn primary">Save post</button>
+    <a class="btn" href="/admin/blog">Cancel</a>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

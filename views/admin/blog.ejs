@@ -1,0 +1,42 @@
+<%- include('../partials/header') %>
+
+<%- include('tabs', { tab: 'blog' }) %>
+
+<div class="admin-head">
+  <h1>Blog</h1>
+  <div class="actions">
+    <a class="btn primary" href="/admin/blog/new">+ New post</a>
+    <a class="btn" href="/blog">View blog</a>
+  </div>
+</div>
+
+<% if (msg) { %><div class="notice green"><%= msg %></div><% } %>
+<p class="small-note">Only posts marked Published, with a date of today or earlier, appear on the <a href="/blog">blog</a>. Drafts stay hidden.</p>
+
+<% if (!posts.length) { %>
+  <div class="empty"><p>No posts yet. Click <strong>+ New post</strong>.</p></div>
+<% } else { %>
+<div class="table-wrap">
+<table class="admin-table">
+  <thead><tr><th>Title</th><th>Status</th><th>Date</th><th></th></tr></thead>
+  <tbody>
+  <% posts.forEach(p => { %>
+    <tr>
+      <td><a href="/admin/blog/edit/<%= p.id %>"><%= p.title %></a><br><span class="small-note">/blog/<%= p.slug %></span></td>
+      <td><%= !p.published ? 'Draft' : (p.published_at > today ? 'Scheduled' : 'Published') %></td>
+      <td class="nowrap"><%= fmtDate(p.published_at) %></td>
+      <td class="nowrap row-actions">
+        <a class="btn small" href="/admin/blog/edit/<%= p.id %>">Edit</a>
+        <form method="post" action="/admin/blog/delete/<%= p.id %>" class="inline" data-confirm="Delete “<%= p.title %>”? This cannot be undone.">
+          <input type="hidden" name="_csrf" value="<%= csrf %>">
+          <button class="btn small danger" type="submit">Delete</button>
+        </form>
+      </td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<% } %>
+
+<%- include('../partials/footer') %>

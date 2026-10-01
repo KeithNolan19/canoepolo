@@ -1,0 +1,35 @@
+<%- include('partials/header', { fullWidth: true }) %>
+<script type="application/ld+json"><%- JSON.stringify({
+  '@context': 'https://schema.org', '@type': 'Article',
+  headline: post.title, description: post.summary,
+  datePublished: post.published_at, dateModified: (post.updated_at || post.published_at).slice(0, 10),
+  mainEntityOfPage: BASE_URL + '/blog/' + post.slug,
+  publisher: { '@type': 'Organization', name: 'canoepolo.eu', url: BASE_URL }
+}).replace(/</g, '\\u003c') %></script>
+
+<div class="page-banner">
+  <div class="wrap">
+    <p class="crumbs"><a href="/">Home</a> / <a href="/blog">Blog</a></p>
+    <h1><%= post.title %></h1>
+    <p class="post-meta"><time datetime="<%= post.published_at %>"><%= fmtDate(post.published_at) %></time> &middot; <%= readMins %> min read</p>
+  </div>
+</div>
+
+<article class="wrap narrow-page prose">
+  <p class="lede"><%= post.summary %></p>
+  <%- html %>
+  <p><a class="btn primary" href="/tournaments">Find a tournament</a> <a class="btn" href="/get-involved">Get involved</a></p>
+</article>
+
+<% if (more.length) { %>
+<div class="wrap narrow-page">
+  <h2>More from the blog</h2>
+  <ul class="post-list">
+  <% more.forEach(p => { %>
+    <li><h3><a href="/blog/<%= p.slug %>"><%= p.title %></a></h3><p><%= p.summary %></p></li>
+  <% }) %>
+  </ul>
+</div>
+<% } %>
+
+<%- include('partials/footer') %>

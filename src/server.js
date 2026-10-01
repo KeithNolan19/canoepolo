@@ -11,6 +11,7 @@ const T = require('./tournaments');
 const { COUNTRIES, LEVELS, DIVISIONS, STATUSES, flag } = require('./constants');
 const { buildCalendar } = require('./ical');
 const V = require('./videos');
+const B = require('./blog');
 require('./imports').run(); // one-time tournament imports (skips anything already listed)
 const C = require('./community');
 
@@ -90,6 +91,7 @@ app.use((req, res, next) => {
     fmtRange,
     fmtDate,
     today: T.today(),
+    canonical: BASE_URL + req.path,
   });
   next();
 });
@@ -310,13 +312,26 @@ app.get('/api/tournaments/:slug', (req, res) => {
   res.json({ ...pub, url: `${BASE_URL}/tournaments/${t.slug}` });
 });
 
+// ---------- Blog ----------
+app.get('/blog', (req, res) => res.render('blog', { title: 'Blog', posts: B.listPublic(), readMins: B.readMins, metaDescription: 'Canoe polo (kayak polo) guides, news and how-tos from canoepolo.eu: how the game works, where to play, and how to get involved.' }));
+app.get('/blog/feed.xml', (req, res) => {
+  const x = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const items = B.listPublic().slice(0, 30).map((p) => `<item><title>${x(p.title)}</title><link>${BASE_URL}/blog/${p.slug}</link><guid>${BASE_URL}/blog/${p.slug}</guid><pubDate>${new Date(p.published_at + 'T09:00:00Z').toUTCString()}</pubDate><description>${x(p.summary)}</description></item>`).join('');
+  res.type('application/rss+xml').send(`<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>canoepolo.eu blog</title><link>${BASE_URL}/blog</link><description>Canoe polo guides and news</description>${items}</channel></rss>`);
+});
+app.get('/blog/:slug', (req, res) => {
+  const post = B.bySlug(req.params.slug);
+  if (!post) return res.status(404).render('404', { title: 'Not found' });
+  res.render('post', { title: post.title, metaDescription: post.summary, ogType: 'article', post, html: B.render(post.body), readMins: B.readMins(post.body), more: B.listPublic().filter((p) => p.id !== post.id).slice(0, 3) });
+});
+
 app.get('/health', (req, res) => res.json({ ok: true }));
 
 app.get('/robots.txt', (req, res) => res.type('text/plain').send(`User-agent: *\nDisallow: /admin\nSitemap: ${BASE_URL}/sitemap.xml\n`));
 
 app.get('/sitemap.xml', (req, res) => {
   const all = [...T.listPublic({ when: 'upcoming', limit: 500 }), ...T.listPublic({ when: 'past', limit: 500 })];
-  const urls = [`${BASE_URL}/`, `${BASE_URL}/tournaments`, `${BASE_URL}/tournaments/calendar`, `${BASE_URL}/past`, `${BASE_URL}/watch`, `${BASE_URL}/learn`, `${BASE_URL}/referee`, `${BASE_URL}/referee/quiz`, `${BASE_URL}/referee/leaderboard`, `${BASE_URL}/get-involved`, `${BASE_URL}/tactics`, `${BASE_URL}/rules`, `${BASE_URL}/shop`, `${BASE_URL}/support`, `${BASE_URL}/about`, `${BASE_URL}/privacy`, `${BASE_URL}/terms`, ...all.map((t) => `${BASE_URL}/tournaments/${t.slug}`)];
+  const urls = [`${BASE_URL}/`, `${BASE_URL}/tournaments`, `${BASE_URL}/tournaments/calendar`, `${BASE_URL}/past`, `${BASE_URL}/blog`, `${BASE_URL}/watch`, `${BASE_URL}/learn`, `${BASE_URL}/referee`, `${BASE_URL}/referee/quiz`, `${BASE_URL}/referee/leaderboard`, `${BASE_URL}/get-involved`, `${BASE_URL}/tactics`, `${BASE_URL}/rules`, `${BASE_URL}/shop`, `${BASE_URL}/support`, `${BASE_URL}/about`, `${BASE_URL}/privacy`, `${BASE_URL}/terms`, ...all.map((t) => `${BASE_URL}/tournaments/${t.slug}`), ...B.listPublic().map((p) => `${BASE_URL}/blog/${p.slug}`)];
   res.type('application/xml').send(
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>${u}</loc></url>`).join('\n')}\n</urlset>\n`,
   );
@@ -442,6 +457,28 @@ app.post('/admin/videos/delete/:id', requireAdmin, checkCsrf, (req, res) => {
   const v = V.getById(Number(req.params.id));
   if (v) V.remove(v.id);
   res.redirect(`/admin/videos?msg=${encodeURIComponent(v ? `Removed “${v.title}”` : 'Nothing to remove')}`);
+});
+
+// ---------- Admin: blog ----------
+app.get('/admin/blog', requireAdmin, (req, res) => res.render('admin/blog', { title: 'Blog', posts: B.all(), today: new Date().toISOString().slice(0, 10), msg: req.query.msg || '' }));
+app.get('/admin/blog/new', requireAdmin, (req, res) => res.render('admin/blog-form', { title: 'New post', p: { published: 0, published_at: new Date().toISOString().slice(0, 10) }, errors: [], action: '/admin/blog/new' }));
+app.get('/admin/blog/edit/:id', requireAdmin, (req, res) => {
+  const p = B.getById(Number(req.params.id));
+  if (!p) return res.status(404).render('404', { title: 'Not found' });
+  res.render('admin/blog-form', { title: `Edit: ${p.title}`, p, errors: [], action: `/admin/blog/edit/${p.id}` });
+});
+app.post(['/admin/blog/new', '/admin/blog/edit/:id'], requireAdmin, checkCsrf, (req, res) => {
+  const id = req.params.id ? Number(req.params.id) : 0;
+  if (id && !B.getById(id)) return res.status(404).render('404', { title: 'Not found' });
+  const { data, errors } = B.validate(req.body, id);
+  if (errors.length) return res.status(400).render('admin/blog-form', { title: id ? 'Edit post' : 'New post', p: data, errors, action: req.originalUrl });
+  const p = B.save(id, data);
+  res.redirect(`/admin/blog?msg=${encodeURIComponent(`Saved “${p.title}”`)}`);
+});
+app.post('/admin/blog/delete/:id', requireAdmin, checkCsrf, (req, res) => {
+  const p = B.getById(Number(req.params.id));
+  if (p) B.remove(p.id);
+  res.redirect(`/admin/blog?msg=${encodeURIComponent(p ? `Deleted “${p.title}”` : 'Nothing to delete')}`);
 });
 
 // ---------- Errors ----------
