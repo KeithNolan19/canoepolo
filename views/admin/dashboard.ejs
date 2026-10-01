@@ -26,7 +26,7 @@
     <tr class="<%= t.end_date < today ? 'past' : '' %>">
       <td class="nowrap"><%= fmtRange(t.start_date, t.end_date) %></td>
       <td><a href="/tournaments/<%= t.slug %>"><%= t.name %></a><% if (t.featured) { %> <span class="badge">Featured</span><% } %></td>
-      <td><%= flag(t.country) %> <%= t.city %></td>
+      <td><%- flagImg(t.country) %> <%= t.city %></td>
       <td><span class="status <%= t.status %>"><%= t.status %></span></td>
       <td class="nowrap row-actions">
         <a class="btn small" href="/admin/edit/<%= t.id %>">Edit</a>

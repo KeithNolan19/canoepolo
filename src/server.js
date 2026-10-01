@@ -52,6 +52,9 @@ app.use(helmet({
     },
   },
 }));
+const FLAGS = new Set(require('fs').readdirSync(path.join(__dirname, '..', 'public', 'flags')).filter((f) => f.endsWith('.svg')).map((f) => f.slice(0, 2)));
+// Flag as a small picture (emoji flags do not show on every computer)
+const flagImg = (c) => { c = String(c || '').toLowerCase(); return FLAGS.has(c) ? `<img class="fl" src="/flags/${c}.svg" alt="" width="20" height="15" loading="lazy">` : ''; };
 app.use(express.urlencoded({ extended: true, limit: '100kb' }));
 app.use(express.static(path.join(__dirname, '..', 'public'), { maxAge: IS_PROD ? '1d' : 0 }));
 const stats = require('./stats');
@@ -71,7 +74,7 @@ app.use((req, res, next) => {
   // Only the admin area uses a cookie. Public visitors get no cookies at all.
   if (req.path.startsWith('/admin') && !req.session.csrf) req.session.csrf = crypto.randomBytes(24).toString('hex');
   Object.assign(res.locals, {
-    COUNTRIES, LEVELS, DIVISIONS, STATUSES, flag, BASE_URL,
+    COUNTRIES, LEVELS, DIVISIONS, STATUSES, flag, flagImg, BASE_URL,
     csrf: req.session.csrf || '',
     assetV: ASSET_V,
     isAdmin: !!req.session.admin,

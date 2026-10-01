@@ -2,7 +2,7 @@
 const COUNTRIES = {
   AR: 'Argentina', AU: 'Australia', AT: 'Austria', BE: 'Belgium', BR: 'Brazil', CA: 'Canada',
   CN: 'China', HR: 'Croatia', CZ: 'Czechia', DK: 'Denmark', EG: 'Egypt', FI: 'Finland',
-  FR: 'France', DE: 'Germany', GB: 'Great Britain', HK: 'Hong Kong', HU: 'Hungary', IN: 'India',
+  FR: 'France', GR: 'Greece', DE: 'Germany', GB: 'Great Britain', HK: 'Hong Kong', HU: 'Hungary', IN: 'India',
   IR: 'Iran', IE: 'Ireland', IT: 'Italy', JP: 'Japan', LU: 'Luxembourg', MY: 'Malaysia',
   NL: 'Netherlands', NZ: 'New Zealand', NO: 'Norway', PL: 'Poland', PT: 'Portugal',
   RU: 'Russia', SG: 'Singapore', SK: 'Slovakia', SI: 'Slovenia', ZA: 'South Africa',

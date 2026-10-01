@@ -22,7 +22,7 @@
       <a class="hero-next" href="/tournaments/<%= n.slug %>">
         <span class="hero-next-label">Next tournament</span>
         <span class="hero-next-name"><%= n.name %></span>
-        <span class="hero-next-meta"><%= fmtRange(n.start_date, n.end_date) %>, <%= flag(n.country) %> <%= n.city %></span>
+        <span class="hero-next-meta"><%= fmtRange(n.start_date, n.end_date) %>, <%- flagImg(n.country) %> <%= n.city %></span>
       </a>
       <% } %>
     </div>
@@ -92,7 +92,7 @@
       <h2>By country</h2>
       <ul class="country-list">
         <% countryCounts.slice(0, 8).forEach(([code, n]) => { %>
-        <li><a href="/tournaments?country=<%= code %>"><span><%= flag(code) %> <%= COUNTRIES[code] || code %></span><span class="num"><%= n %></span></a></li>
+        <li><a href="/tournaments?country=<%= code %>"><span><%- flagImg(code) %> <%= COUNTRIES[code] || code %></span><span class="num"><%= n %></span></a></li>
         <% }) %>
       </ul>
     </div>

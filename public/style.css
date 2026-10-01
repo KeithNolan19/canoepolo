@@ -782,3 +782,10 @@ fieldset .full { grid-column: 1 / -1; }
 .format-ask { margin: 16px 0 0; padding: 12px 14px; background: var(--bg); border-radius: 10px; }
 
 .tflag { font-size: 1.05em; }
+
+img.fl { width: 1.25em; height: auto; vertical-align: -0.12em; border-radius: 2px; box-shadow: 0 0 0 1px rgba(0,0,0,.15); margin-right: .25em; }
+.group-card li a { display: inline-flex; align-items: center; gap: .4em; }
+.group-card li a img.fl { margin-right: 0; flex: none; }
+img.fl { width: 20px; height: 15px; object-fit: contain; box-shadow: none; border-radius: 0; flex: none; }
+img.fl { max-width: none; min-width: 20px; }
+.group-card li a { min-width: 0; overflow-wrap: anywhere; }

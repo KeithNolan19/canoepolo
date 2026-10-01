@@ -18,7 +18,7 @@
       <thead><tr><th>#</th><th>Name</th><th>Club</th><th>Country</th><th class="num">Score</th></tr></thead>
       <tbody>
         <% rows.forEach(function (r, i) { %>
-        <tr><td class="num"><%= i + 1 %></td><td><strong><%= r.name %></strong></td><td><%= r.club || '' %></td><td><%= flag(r.country) %> <%= COUNTRIES[r.country] || r.country %></td><td class="num"><%= r.score %> / 10</td></tr>
+        <tr><td class="num"><%= i + 1 %></td><td><strong><%= r.name %></strong></td><td><%= r.club || '' %></td><td><%- flagImg(r.country) %> <%= COUNTRIES[r.country] || r.country %></td><td class="num"><%= r.score %> / 10</td></tr>
         <% }) %>
       </tbody>
     </table>

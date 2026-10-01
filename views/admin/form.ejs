@@ -38,7 +38,7 @@
       <select name="country" required>
         <option value="">Choose…</option>
         <% Object.entries(COUNTRIES).sort((a,b) => a[1].localeCompare(b[1])).forEach(([code, name]) => { %>
-          <option value="<%= code %>" <%= v('country') === code ? 'selected' : '' %>><%= flag(code) %> <%= name %></option>
+          <option value="<%= code %>" <%= v('country') === code ? 'selected' : '' %>><%= name %></option>
         <% }) %>
       </select>
     </label>

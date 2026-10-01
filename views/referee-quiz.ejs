@@ -43,7 +43,7 @@
     <% } else { %>
       <ol class="lb-list">
         <% board.forEach(function (r) { %>
-        <li><span class="lb-who"><strong><%= r.name %></strong><small><%= flag(r.country) %> <%= r.club ? r.club + ', ' : '' %><%= COUNTRIES[r.country] || r.country %></small></span><span class="lb-score"><%= r.score %>/10</span></li>
+        <li><span class="lb-who"><strong><%= r.name %></strong><small><%- flagImg(r.country) %> <%= r.club ? r.club + ', ' : '' %><%= COUNTRIES[r.country] || r.country %></small></span><span class="lb-score"><%= r.score %>/10</span></li>
         <% }) %>
       </ol>
     <% } %>

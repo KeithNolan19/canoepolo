@@ -8,7 +8,7 @@
     <h1><%= t.name %></h1>
     <p class="event-meta">
       <span><%= fmtRange(t.start_date, t.end_date) %></span>
-      <span><%= flag(t.country) %> <%= [t.venue, t.city, t.country_name].filter(Boolean).join(', ') %></span>
+      <span><%- flagImg(t.country) %> <%= [t.venue, t.city, t.country_name].filter(Boolean).join(', ') %></span>
     </p>
   </div>
 </div>
@@ -22,7 +22,7 @@
     <table class="info-table">
       <tr><th scope="row">Dates</th><td><%= fmtRange(t.start_date, t.end_date) %></td></tr>
       <% if (t.venue) { %><tr><th scope="row">Venue</th><td><%= t.venue %></td></tr><% } %>
-      <tr><th scope="row">Location</th><td><%= flag(t.country) %> <%= t.city %>, <%= t.country_name %></td></tr>
+      <tr><th scope="row">Location</th><td><%- flagImg(t.country) %> <%= t.city %>, <%= t.country_name %></td></tr>
       <tr><th scope="row">Level</th><td><%= t.level %></td></tr>
       <% if (t.divisions.length) { %><tr><th scope="row">Divisions</th><td><%= t.divisions.join(', ') %></td></tr><% } %>
       <% if (t.entry_fee) { %><tr><th scope="row">Entry fee</th><td><%= t.entry_fee %></td></tr><% } %>
@@ -53,7 +53,7 @@
       <div class="group-card <%= dv === 'Women' ? 'is-women' : '' %>">
         <h5>Group <%= g %></h5>
         <ol>
-          <% gt[g].forEach(name => { %><li><a href="#schedule" data-team="<%= name %>|<%= dv %>"><% if (schedule.countries[name]) { %><span class="tflag" aria-hidden="true"><%= flag(schedule.countries[name]) %></span> <% } %><%= name %></a></li><% }) %>
+          <% gt[g].forEach(name => { %><li><a href="#schedule" data-team="<%= name %>|<%= dv %>"><% if (schedule.countries[name]) { %><span class="tflag" aria-hidden="true"><%- flagImg(schedule.countries[name]) %></span> <% } %><%= name %></a></li><% }) %>
         </ol>
       </div>
       <% }) %>
@@ -88,7 +88,7 @@
         <label class="sf-team"><span>Team</span>
           <select data-f="team">
             <option value="">All teams</option>
-            <% ['Men', 'Women'].forEach(dv => { %><optgroup label="<%= dv %>"><% schedule.teams.filter(x => x.division === dv).forEach(x => { %><option value="<%= x.name %>|<%= x.division %>"><%= schedule.countries[x.name] ? flag(schedule.countries[x.name]) + ' ' : '' %><%= x.name %></option><% }) %></optgroup><% }) %>
+            <% ['Men', 'Women'].forEach(dv => { %><optgroup label="<%= dv %>"><% schedule.teams.filter(x => x.division === dv).forEach(x => { %><option value="<%= x.name %>|<%= x.division %>"><%= x.name %></option><% }) %></optgroup><% }) %>
           </select>
         </label>
         <label><span>Search</span><input type="search" data-f="q" placeholder="Type a team name"></label>
@@ -111,7 +111,7 @@
             <% sl.matches.forEach(m => { %>
             <li class="sched-match <%= m.division === 'Women' ? 'is-women' : 'is-men' %>" data-div="<%= m.division %>" data-grp="<%= m.group %>" data-pitch="<%= m.pitch %>" data-teams="<%= (m.home + ' ' + m.away).toLowerCase() %>" data-keys="<%= m.home %>|<%= m.division %>||<%= m.away %>|<%= m.division %>">
               <span class="sm-pitch">Pitch <%= m.pitch %></span>
-              <span class="sm-teams"><strong><% if (schedule.countries[m.home]) { %><span class="tflag" aria-hidden="true"><%= flag(schedule.countries[m.home]) %></span> <% } %><%= m.home %></strong> <em>v</em> <strong><% if (schedule.countries[m.away]) { %><span class="tflag" aria-hidden="true"><%= flag(schedule.countries[m.away]) %></span> <% } %><%= m.away %></strong></span>
+              <span class="sm-teams"><strong><% if (schedule.countries[m.home]) { %><span class="tflag" aria-hidden="true"><%- flagImg(schedule.countries[m.home]) %></span> <% } %><%= m.home %></strong> <em>v</em> <strong><% if (schedule.countries[m.away]) { %><span class="tflag" aria-hidden="true"><%- flagImg(schedule.countries[m.away]) %></span> <% } %><%= m.away %></strong></span>
               <span class="sm-meta"><%= m.division %> &middot; <%= m.group.length === 1 ? 'Group ' + m.group : m.group %> &middot; <%= m.code %></span>
             </li>
             <% }) %>
