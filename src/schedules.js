@@ -21,6 +21,22 @@ const SCHEDULES = {
         C: ["Alaquas", "Kingston", "Rovigo", "Deventer", "Mullinger"],
       },
     },
+    format: {
+      intro: 'Based on the published timetable. This is how the matches line up, not an official description of the format. Nobody is knocked out: every team plays on to Sunday, and the group position decides which bracket you play in.',
+      men: [
+        ['1st in group', 'Straight into the quarter-finals for places 1-8 (Saturday evening), against the winner of a Round of 16 match.'],
+        ['2nd or 3rd', 'Round of 16 for places 1-12 (Saturday): 2A v 3C, 2C v 3A, 2B v 3D, 2D v 3B. Win and you reach the quarter-finals. Lose and you play the semi-finals for places 9-12.'],
+        ['4th or 5th', 'Quarter-finals for places 13-20 (Saturday): 4A v 5C, 4B v 5D, 4C v 5A, 4D v 5B. Winners play the semi-finals for places 13-16, losers the semi-finals for places 17-20.'],
+        ['6th (and 7th in Group D)', 'A five-team round robin for places 21-25, played on Saturday and Sunday.'],
+      ],
+      women: [
+        ['1st or 2nd in group', 'A six-team pool for places 1-6 (called "Group D" on the timetable). Each team plays two matches against teams from the other groups on Saturday. On Sunday: 1st v 4th and 2nd v 3rd in the semi-finals, then the final, the bronze match, and 5th v 6th over two legs.'],
+        ['3rd or 4th in group', 'The same format for places 7-12 (called "Group E" on the timetable).'],
+        ['5th in group', 'The three 5th-placed teams play each other twice for places 13-15 (called "Group F" on the timetable).'],
+      ],
+      womenNote: 'For the women, the letters D, E and F on the timetable are these second-round pools, not the original groups.',
+      ask: 'The timetable does not say how ties in a group are decided (points, goal difference, head-to-head), or whether results between teams from the same group carry over into the women\'s second-round pools. Please ask the organisers about these.',
+    },
     note: 'Timetable from the organisers. Saturday and Sunday include matches that depend on results, shown as "Winner of M69" or "2nd in Group C" until the teams are known. Times and matches can change. For any questions or problems, contact the organisers directly.',
     days: [
       {
@@ -233,6 +249,7 @@ function forSlug(slug) {
     headline: s.headline || '',
     pending: s.pending || [],
     groupsPdf: s.groupsPdf || '',
+    format: s.format || null,
     groupsTable: s.groupsTable || null,
     teams,
     groups: [...new Set(s.days.flatMap((d) => d.matches.map((m) => m[6])))].sort(),

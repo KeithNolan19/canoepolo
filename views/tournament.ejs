@@ -61,6 +61,28 @@
     <% }) %>
     <p class="small-note">Click a team to see their matches.<% if (schedule.groupsPdf) { %> <a href="<%= schedule.groupsPdf %>" target="_blank" rel="noopener">Official groups PDF</a><% } %></p>
     <% } %>
+    <% if (schedule.format) { const f = schedule.format; %>
+    <div class="format-box" id="format">
+      <h3>How the groups work</h3>
+      <p><%= f.intro %></p>
+      <div class="format-cols">
+        <div>
+          <h4>Men (25 teams, Groups A to D)</h4>
+          <dl>
+            <% f.men.forEach(r => { %><dt><%= r[0] %></dt><dd><%= r[1] %></dd><% }) %>
+          </dl>
+        </div>
+        <div>
+          <h4>Women (15 teams, Groups A to C)</h4>
+          <dl>
+            <% f.women.forEach(r => { %><dt><%= r[0] %></dt><dd><%= r[1] %></dd><% }) %>
+          </dl>
+          <p class="small-note"><%= f.womenNote %></p>
+        </div>
+      </div>
+      <p class="format-ask"><strong>Ties and carry-over:</strong> <%= f.ask %></p>
+    </div>
+    <% } %>
     <div data-sched>
       <div class="sched-filters" hidden>
         <label class="sf-team"><span>Team</span>
