@@ -42,7 +42,7 @@ function buildCalendar(tournaments, baseUrl) {
       `DTEND;VALUE=DATE:${nextDay(t.end_date).replace(/-/g, '')}`,
       `SUMMARY:${esc((t.status === 'cancelled' ? 'CANCELLED: ' : '') + t.name)}`,
       `LOCATION:${esc([t.venue, t.city, t.country_name].filter(Boolean).join(', '))}`,
-      `DESCRIPTION:${esc(`${t.level}${t.divisions.length ? ' — ' + t.divisions.join(', ') : ''}\n${url}`)}`,
+      `DESCRIPTION:${esc(`${t.level}${t.divisions.length ? ' - ' + t.divisions.join(', ') : ''}\n${url}`)}`,
       `URL:${url}`,
       `STATUS:${t.status === 'cancelled' ? 'CANCELLED' : 'CONFIRMED'}`,
       'END:VEVENT',

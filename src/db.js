@@ -1,4 +1,4 @@
-// Database setup. Uses SQLite: a single file (data/canoepolo.db) — no separate database server needed.
+// Database setup. Uses SQLite: a single file (data/canoepolo.db) - no separate database server needed.
 const path = require('path');
 const fs = require('fs');
 const Database = require('better-sqlite3');

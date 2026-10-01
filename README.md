@@ -1,4 +1,4 @@
-# canoepolo.eu — The Home of International Canoe Polo
+# canoepolo.eu - The Home of International Canoe Polo
 
 A small, fast website where you (the admin) post canoe polo tournaments, and players around the world can browse, filter and add them to their calendars.
 
@@ -6,14 +6,14 @@ A small, fast website where you (the admin) post canoe polo tournaments, and pla
 
 - Public site: upcoming & past tournaments, filters (country, level, division, month, search), a page per tournament
 - "Add to calendar" per tournament, plus a subscribe-able calendar of everything (`/calendar.ics`)
-- Admin panel at `/admin` — add, edit, cancel, feature or delete tournaments
+- Admin panel at `/admin` - add, edit, cancel, feature or delete tournaments
 - Public JSON API (`/api/tournaments`) so clubs/apps can reuse the data
 - Automatic HTTPS, nightly database backups, sitemap for Google
 - Runs on one **$6/month DigitalOcean Droplet**
 
 ---
 
-## Part 1 — Put the code on GitHub (from your home laptop, ~10 min)
+## Part 1 - Put the code on GitHub (from your home laptop, ~10 min)
 
 GitHub stores your code so your server can download it, and makes future updates a one-line command.
 
@@ -21,13 +21,13 @@ GitHub stores your code so your server can download it, and makes future updates
 2. Create a free account at <https://github.com> if you don't have one.
 3. Click **+ → New repository**. Name it `canoepolo`. Choose **Private**. Click **Create repository**.
 4. On the next page click **"uploading an existing file"**. Drag **everything inside** the unzipped `canoepolo` folder into the browser (the `src`, `views`, `public`, `deploy` folders and all the files). Click **Commit changes**.
-   - Hidden files like `.gitignore` may not show on your laptop — that's fine, the site works without them.
+   - Hidden files like `.gitignore` may not show on your laptop - that's fine, the site works without them.
 
 Because the repository is private, the server needs a key to read it:
 
 5. On GitHub go to **Settings (your profile) → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token**. Give it access to **only the `canoepolo` repository**, permission **Contents: Read-only**. Copy the token (starts with `github_pat_`). You'll paste it in Part 3.
 
-## Part 2 — Create the server on DigitalOcean (~5 min)
+## Part 2 - Create the server on DigitalOcean (~5 min)
 
 1. Sign up at <https://www.digitalocean.com>.
 2. **Create → Droplets**
@@ -38,7 +38,7 @@ Because the repository is private, the server needs a key to read it:
    - Optional but recommended: tick **Backups** (~$1.20/month extra) for full server snapshots.
 3. Click **Create Droplet**. Copy its **IP address** (e.g. `164.90.xxx.xxx`).
 
-## Part 3 — Point your domain at the server
+## Part 3 - Point your domain at the server
 
 When you buy `canoepolo.eu`, go to your registrar's **DNS settings** and add:
 
@@ -49,15 +49,15 @@ When you buy `canoepolo.eu`, go to your registrar's **DNS settings** and add:
 
 Delete any other `A` records for `@` or `www` (registrars often add a "parking" one). DNS can take from a few minutes up to a few hours.
 
-## Part 4 — Install the site on the server (~10 min)
+## Part 4 - Install the site on the server (~10 min)
 
-1. In DigitalOcean, open your Droplet and click **Console** (top right). A black terminal window opens in your browser — no extra software needed.
+1. In DigitalOcean, open your Droplet and click **Console** (top right). A black terminal window opens in your browser - no extra software needed.
 2. Copy and paste these commands one at a time (replace `YOUR-GITHUB-NAME`):
 
    ```bash
    git clone https://YOUR-GITHUB-NAME@github.com/YOUR-GITHUB-NAME/canoepolo.git
    ```
-   When asked for a **password**, paste the **token** from Part 1 step 5 (nothing shows while pasting — that's normal) and press Enter.
+   When asked for a **password**, paste the **token** from Part 1 step 5 (nothing shows while pasting - that's normal) and press Enter.
 
    ```bash
    cd canoepolo
@@ -66,7 +66,7 @@ Delete any other `A` records for `@` or `www` (registrars often add a "parking" 
 3. The script asks for your domain, an admin username and an admin password (12+ characters). Then it installs everything and starts the site. The first build takes about 3–5 minutes.
 4. Visit **https://canoepolo.eu/admin**, log in, and add your first tournament. 🎉
 
-> If the page doesn't load yet, your DNS probably hasn't updated. Wait a bit — the HTTPS certificate is fetched automatically as soon as the domain points to the server.
+> If the page doesn't load yet, your DNS probably hasn't updated. Wait a bit - the HTTPS certificate is fetched automatically as soon as the domain points to the server.
 
 ---
 
@@ -163,6 +163,6 @@ deploy/              server setup & update scripts
 
 **API**
 
-- `GET /api/tournaments` — upcoming tournaments. Query: `country` (e.g. `IE`), `level`, `division`, `month` (`2026-11`), `q`, `when=past`, `limit`
-- `GET /api/tournaments/:slug` — one tournament
-- `GET /calendar.ics` — all upcoming tournaments as a calendar feed
+- `GET /api/tournaments` - upcoming tournaments. Query: `country` (e.g. `IE`), `level`, `division`, `month` (`2026-11`), `q`, `when=past`, `limit`
+- `GET /api/tournaments/:slug` - one tournament
+- `GET /calendar.ics` - all upcoming tournaments as a calendar feed

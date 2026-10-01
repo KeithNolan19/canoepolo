@@ -1,4 +1,4 @@
-// canoepolo.eu — main web server
+// canoepolo.eu - main web server
 const path = require('path');
 const crypto = require('crypto');
 const express = require('express');
@@ -27,7 +27,7 @@ if (IS_PROD && (!ADMIN_PASSWORD || ADMIN_PASSWORD.length < 12 || !SESSION_SECRET
   process.exit(1);
 }
 const adminHash = bcrypt.hashSync(ADMIN_PASSWORD || 'change-me-please', 10);
-if (!ADMIN_PASSWORD) console.warn('WARNING: no ADMIN_PASSWORD set — using "change-me-please" (development only).');
+if (!ADMIN_PASSWORD) console.warn('WARNING: no ADMIN_PASSWORD set - using "change-me-please" (development only).');
 
 // Changes on every deploy, so browsers fetch fresh CSS/JS (they are cached for a day otherwise)
 const ASSET_V = Date.now().toString(36);
@@ -258,7 +258,7 @@ function checkCsrf(req, res, next) {
   const sent = String(req.body._csrf || '');
   const want = String(req.session.csrf || '');
   if (sent.length === want.length && want && crypto.timingSafeEqual(Buffer.from(sent), Buffer.from(want))) return next();
-  res.status(403).send('Form expired — please go back, refresh the page and try again.');
+  res.status(403).send('Form expired - please go back, refresh the page and try again.');
 }
 
 app.get('/admin/login', (req, res) => {
