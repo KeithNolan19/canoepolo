@@ -9,9 +9,9 @@
   const W = 35, H = 23, CY = H / 2;
   const BOAT_L = 3, BOAT_W = 0.62;
   const COLORS = {
-    water: '#2c7fb8', waterDeep: '#236b9c', line: '#ffffff',
-    r: '#e23b32', rText: '#ffffff', w: '#ffffff', wText: '#0b2545',
-    ball: '#f2b61f', run: '#ffffff', pass: '#f2b61f', shot: '#ffd84d', sel: '#f2b61f',
+    water: '#2b8f86', waterDeep: '#237a72', line: '#ffffff',
+    r: '#e23b32', rText: '#ffffff', w: '#ffffff', wText: '#0a3b36',
+    ball: '#ff6a2b', run: '#ffffff', pass: '#ffc629', shot: '#ff9a5c', sel: '#ff6a2b',
   };
   const TEAMS = { r: 'Red', w: 'White' };
   const IDS = ['r1', 'r2', 'r3', 'r4', 'r5', 'w1', 'w2', 'w3', 'w4', 'w5'];
@@ -235,15 +235,15 @@
     }, layer);
     el('rect', { x: -1.8, y: -0.8, width: 3.6, height: 1.6, fill: 'transparent' }, g); // bigger touch target
     if (selected === id) el('path', { d: BOAT, fill: 'none', stroke: COLORS.sel, 'stroke-width': 0.28 }, g);
-    el('path', { d: BOAT, fill: COLORS[team], stroke: team === 'w' ? '#0b2545' : '#7a1510', 'stroke-width': 0.06 }, g);
-    el('circle', { cx: 0, cy: 0, r: 0.42, fill: team === 'w' ? '#0b2545' : '#ffffff', opacity: 0.18 }, g);
+    el('path', { d: BOAT, fill: COLORS[team], stroke: team === 'w' ? '#0a3b36' : '#7a1510', 'stroke-width': 0.06 }, g);
+    el('circle', { cx: 0, cy: 0, r: 0.42, fill: team === 'w' ? '#0a3b36' : '#ffffff', opacity: 0.18 }, g);
     const t = el('text', {
       x: 0, y: 0.02, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': 0.62, 'font-weight': 700,
       'font-family': 'Archivo, sans-serif', fill: COLORS[team + 'Text'], transform: `rotate(${-ang})`,
     }, g);
     t.textContent = n;
     // turning handle at the bow
-    el('circle', { class: 'tb-handle', 'data-rot': id, cx: BOAT_L / 2 + 0.25, cy: 0, r: selected === id ? 0.3 : 0.2, fill: COLORS.sel, stroke: '#0b2545', 'stroke-width': 0.05, opacity: selected === id ? 1 : 0.55 }, g);
+    el('circle', { class: 'tb-handle', 'data-rot': id, cx: BOAT_L / 2 + 0.25, cy: 0, r: selected === id ? 0.3 : 0.2, fill: COLORS.sel, stroke: '#0a3b36', 'stroke-width': 0.05, opacity: selected === id ? 1 : 0.55 }, g);
   }
 
   function drawBall(b) {
