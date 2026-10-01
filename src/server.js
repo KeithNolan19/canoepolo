@@ -352,7 +352,8 @@ app.get('/admin', requireAdmin, (req, res) => {
 app.get('/admin/stats', requireAdmin, (req, res) => {
   const days = [7, 30, 90, 365].includes(Number(req.query.days)) ? Number(req.query.days) : 30;
   const r = stats.report(days);
-  res.render('admin/stats', { title: 'Statistics', days, r, max: Math.max(1, ...r.series.map((d) => d.views)) });
+  const names = new Intl.DisplayNames(['en'], { type: 'region' });
+  res.render('admin/stats', { title: 'Statistics', days, r, regionName: (c) => { try { return names.of(c) || c; } catch (e) { return c; } }, max: Math.max(1, ...r.series.map((d) => d.views)) });
 });
 
 app.get('/admin/leaderboard', requireAdmin, (req, res) => {

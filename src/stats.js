@@ -3,11 +3,13 @@
 // from a hash of IP + browser that is held in memory only, with a salt that changes every day.
 const crypto = require('crypto');
 const db = require('./db');
+const geo = require('./geo');
 
 db.exec(`
 CREATE TABLE IF NOT EXISTS stats_days (day TEXT PRIMARY KEY, views INTEGER NOT NULL DEFAULT 0, visitors INTEGER NOT NULL DEFAULT 0);
 CREATE TABLE IF NOT EXISTS stats_pages (day TEXT NOT NULL, path TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, path));
 CREATE TABLE IF NOT EXISTS stats_refs (day TEXT NOT NULL, ref TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, ref));
+CREATE TABLE IF NOT EXISTS stats_countries (day TEXT NOT NULL, country TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, country));
 CREATE TABLE IF NOT EXISTS stats_clicks (day TEXT NOT NULL, target TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, target));
 `);
 
@@ -28,6 +30,7 @@ const upDay = db.prepare(`INSERT INTO stats_days (day, views, visitors) VALUES (
 const upPage = db.prepare(`INSERT INTO stats_pages (day, path, n) VALUES (?, ?, 1) ON CONFLICT(day, path) DO UPDATE SET n = n + 1`);
 const upRef = db.prepare(`INSERT INTO stats_refs (day, ref, n) VALUES (?, ?, 1) ON CONFLICT(day, ref) DO UPDATE SET n = n + 1`);
 const upClick = db.prepare(`INSERT INTO stats_clicks (day, target, n) VALUES (?, ?, 1) ON CONFLICT(day, target) DO UPDATE SET n = n + 1`);
+const upCountry = db.prepare(`INSERT INTO stats_countries (day, country, n) VALUES (?, ?, 1) ON CONFLICT(day, country) DO UPDATE SET n = n + 1`);
 const cntPages = db.prepare('SELECT COUNT(*) c FROM stats_pages WHERE day = ?');
 const cntClicks = db.prepare('SELECT COUNT(*) c FROM stats_clicks WHERE day = ?');
 
@@ -61,6 +64,7 @@ function middleware(req, res, next) {
       if (fresh) seen.add(id);
       db.transaction(() => {
         upDay.run(day, fresh);
+        if (fresh) upCountry.run(day, geo.country(req.ip) || '??');
         if (cntPages.get(day).c < MAX_PER_DAY) upPage.run(day, p);
         const ref = refHost(req);
         if (ref) upRef.run(day, ref);
@@ -108,13 +112,14 @@ function report(days) {
     visitors: series.reduce((a, d) => a + d.visitors, 0),
     pages: one('SELECT path, SUM(n) n FROM stats_pages WHERE day >= ? GROUP BY path ORDER BY n DESC LIMIT 25'),
     refs: one('SELECT ref, SUM(n) n FROM stats_refs WHERE day >= ? GROUP BY ref ORDER BY n DESC LIMIT 15'),
+    countries: one('SELECT country, SUM(n) n FROM stats_countries WHERE day >= ? GROUP BY country ORDER BY n DESC LIMIT 40'),
     clicks: one('SELECT target, SUM(n) n FROM stats_clicks WHERE day >= ? GROUP BY target ORDER BY n DESC LIMIT 25'),
   };
 }
 
 function purge() {
   const cutoff = new Date(Date.now() - 400 * 86400000).toISOString().slice(0, 10);
-  for (const t of ['stats_days', 'stats_pages', 'stats_refs', 'stats_clicks']) db.prepare(`DELETE FROM ${t} WHERE day < ?`).run(cutoff);
+  for (const t of ['stats_days', 'stats_countries', 'stats_pages', 'stats_refs', 'stats_clicks']) db.prepare(`DELETE FROM ${t} WHERE day < ?`).run(cutoff);
 }
 purge();
 setInterval(purge, 24 * 3600 * 1000).unref();

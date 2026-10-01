@@ -33,6 +33,12 @@
     </table>
   </div>
   <div>
+    <h2>Visitors by country</h2>
+    <table class="stat-table">
+      <% r.countries.forEach(function (p) { %><tr><td><%= p.country === '??' ? 'Unknown' : flag(p.country) + ' ' + (COUNTRIES[p.country] || regionName(p.country)) %></td><td class="num"><%= p.n %></td></tr><% }) %>
+      <% if (!r.countries.length) { %><tr><td class="muted">No data yet.</td></tr><% } %>
+    </table>
+    <p class="small-note">Country is worked out from the visitor's IP address at the moment of the visit; the address itself is not saved. IP location data by <a href="https://db-ip.com" target="_blank" rel="noopener">DB-IP.com</a>. It's approximate, and VPN users show as the VPN's country.</p>
     <h2>Where visitors come from</h2>
     <table class="stat-table">
       <% r.refs.forEach(function (p) { %><tr><td><%= p.ref %></td><td class="num"><%= p.n %></td></tr><% }) %>
