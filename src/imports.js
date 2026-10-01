@@ -2085,6 +2085,24 @@ BATCHES.push({
 });
 
 const PATCHES = [
+  {
+    id: 'nwc-2026-registration-w1',
+    match: { name: 'NorthWest & Central Regional League 2026/2027, weekend 1', start_date: '2026-10-03' },
+    set: {
+      registration_url: 'https://cpt.kayakers.nl/Registration/deb94838-aa30-4c5b-83d4-075571cba873',
+      registration_deadline: '2026-10-02',
+      description: 'Opening weekend of the 2026/27 North West and Central regional league: Divisions 1 to 4 and a women\'s division. The second weekend is on 20-21 March 2027. Organiser: Mike Fletcher.\n\nDivisions (max teams, fee per team): Division 1 (8 teams, GBP 320), Division 2 (8, GBP 320), Division 3 (8, GBP 320), Division 4 (6, GBP 160), women\'s (8, GBP 160). One pitch. Online registration opens 2 June and closes 2 October.',
+    },
+  },
+  {
+    id: 'nwc-2026-registration-w2',
+    match: { name: 'NorthWest & Central Regional League 2026/2027, weekend 2', start_date: '2027-03-20' },
+    set: {
+      registration_url: 'https://cpt.kayakers.nl/Registration/deb94838-aa30-4c5b-83d4-075571cba873',
+      registration_deadline: '2026-10-02',
+      description: 'Final weekend of the 2026/27 North West and Central regional league. The opening weekend is on 3-4 October 2026. Organiser: Mike Fletcher.\n\nDivisions (max teams, fee per team): Division 1 (8 teams, GBP 320), Division 2 (8, GBP 320), Division 3 (8, GBP 320), Division 4 (6, GBP 160), women\'s (8, GBP 160). One pitch. Online registration opens 2 June and closes 2 October.',
+    },
+  },
 
   {
     id: 'milan-ecc-2026-bulletin-1',
