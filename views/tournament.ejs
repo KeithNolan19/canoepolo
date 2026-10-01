@@ -30,6 +30,13 @@
       <% if (t.registration_deadline) { %><tr><th scope="row">Registration closes</th><td><%= fmtDate(t.registration_deadline) %><% if (t.registration_deadline < today) { %> <span class="flag-label cancelled">Closed</span><% } %></td></tr><% } %>
     </table>
 
+    <% if (t.documents.length) { %>
+    <h2 class="sub-head">Documents</h2>
+    <ul class="doc-list">
+      <% t.documents.forEach(d => { %><li><a class="doc-link" href="<%= d.url %>" target="_blank" rel="noopener"><span class="doc-icon" aria-hidden="true">PDF</span><span><%= d.label %></span></a></li><% }) %>
+    </ul>
+    <% } %>
+
     <% if (t.description) { %>
     <h2 class="sub-head">Information</h2>
     <div class="description">

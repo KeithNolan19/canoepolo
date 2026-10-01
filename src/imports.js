@@ -99,6 +99,34 @@ BATCHES.push({
   ],
 });
 
+
+// Updates to tournaments that are already listed. Each runs once and merges its fields into the matching
+// tournament (same name and start date), so later edits in the admin panel are never overwritten again.
+const PATCHES = [
+  {
+    id: 'milan-ecc-2026-bulletin-1',
+    match: { name: 'Paddle Europe Canoe Polo Club Championships 2026', start_date: '2026-10-02' },
+    set: {
+      venue: 'Idroscalo Club, Circonvallazione Idroscalo 29, 20054 Segrate (MI)',
+      entry_fee: 'EUR 300 per team',
+      registration_deadline: '2026-09-21',
+      contact_name: 'Idroscalo Club (organising committee)',
+      contact_email: 'idroscalogare@gmail.com',
+      website_url: 'https://www.idroscaloclubasd.it',
+      documents_text: 'Bulletin 1 | /docs/milan-ecc-2026-bulletin-1.pdf',
+      description: [
+        'The 2026 Paddle Europe Canoe Polo Club Championships are hosted by the Italian Canoe Kayak Federation (FICK), the City of Milan and Idroscalo Club at Idroscalo, the "Sea of Milan", next to Linate Airport. They are played under the Paddle Europe and ICF canoe polo competition rules.',
+        'Programme (provisional)\nThu 1 Oct: accreditation, equipment control, team leaders\' meeting and ITO meeting\nFri 2 Oct: accreditation, equipment control, team meetings and competition day 1\nSat 3 Oct: competition day 2\nSun 4 Oct: competition day 3 and medal ceremony',
+        'Key dates\n21 Sep: final nominal entries (player lists confirmed by National Federations)\n22 Sep: entries confirmed by the Organising Committee\n25 Sep: payment, catering and camping booking deadline\n29 Sep: provisional timetable issued to teams',
+        'Entry fee: EUR 300 per team, non-refundable once paid. Payment details are in Bulletin 1.',
+        'Getting there\nMilan Linate Airport: 3 km, about 10 minutes. Bergamo Orio al Serio: 50 km. Milan Malpensa: 66 km.\nOrganised transfers can be booked by email (space for boats must be requested): Linate EUR 5, Bergamo EUR 20 (minimum 6 people), Malpensa EUR 25 (minimum 6 people), per person one way.',
+        'Staying there\nTeams book their own hotels. Nearby options include Hotel Riviera (1.6 km), Belstay Milano Linate, Moxy Milan Linate, Fasthotel Linate, Best Western Air Hotel Linate and Hotel Montini Linate Airport.\nLunch and dinner can be booked at EUR 15 per meal per person (tell the organisers about allergies when booking). Camping is available at the venue with toilets and showers, EUR 20 per person per day.',
+        'The organisers may update the timetable and arrangements and will tell teams directly. Contact: idroscalogare@gmail.com. Official information: paddle-europe.eu',
+      ].join('\n\n'),
+    },
+  },
+];
+
 function run() {
   const done = new Set(db.prepare('SELECT id FROM imports').all().map((r) => r.id));
   const exists = db.prepare('SELECT id FROM tournaments WHERE lower(name) = lower(?) AND start_date = ?');
@@ -116,6 +144,18 @@ function run() {
       db.prepare('INSERT INTO imports (id) VALUES (?)').run(batch.id);
     })();
     console.log(`Import ${batch.id}: added ${added} tournament(s).`);
+  }
+  const find = db.prepare('SELECT * FROM tournaments WHERE lower(name) = lower(?) AND start_date = ?');
+  for (const patch of PATCHES) {
+    if (done.has(patch.id)) continue;
+    const row = find.get(patch.match.name, patch.match.start_date);
+    if (!row) continue; // not listed (e.g. deleted), nothing to update
+    const cur = T.getById(row.id);
+    const { data, errors } = T.validate({ ...cur, documents_text: (cur.documents || []).map((d) => `${d.label} | ${d.url}`).join('\n'), ...patch.set });
+    if (errors.length) { console.warn(`Patch ${patch.id}: ${errors.join(' ')}`); continue; }
+    T.update(row.id, data);
+    db.prepare('INSERT INTO imports (id) VALUES (?)').run(patch.id);
+    console.log(`Patch ${patch.id}: updated "${cur.name}".`);
   }
 }
 

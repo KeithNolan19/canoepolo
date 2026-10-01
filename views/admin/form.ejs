@@ -1,5 +1,7 @@
 <%- include('../partials/header') %>
-<% const v = (k) => (t[k] == null ? '' : t[k]); %>
+<% const v = (k) => (t[k] == null ? '' : t[k]);
+  let docs = t.documents; if (typeof docs === 'string') { try { docs = JSON.parse(docs); } catch { docs = []; } }
+  const docsText = (docs || []).map((d) => d.label + ' | ' + d.url).join('\n'); %>
 
 <p class="back"><a href="/admin">← Back to admin</a></p>
 <form class="panel" method="post" action="<%= action %>">
@@ -61,6 +63,13 @@
     <label>Entry fee <input name="entry_fee" value="<%= v('entry_fee') %>" placeholder="e.g. €250 per team"></label>
     <label>Contact name <input name="contact_name" value="<%= v('contact_name') %>"></label>
     <label>Contact email <input type="email" name="contact_email" value="<%= v('contact_email') %>"></label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Documents</legend>
+    <label class="full">Bulletins, timetables and other files, one per line as <code>Label | link</code>
+      <textarea name="documents_text" rows="4" placeholder="Bulletin 1 | https://...&#10;Timetable | https://..."><%= docsText %></textarea>
+    </label>
   </fieldset>
 
   <fieldset>

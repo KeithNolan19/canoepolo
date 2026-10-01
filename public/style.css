@@ -380,7 +380,7 @@ kbd { font-family: var(--font); font-size: .85em; font-weight: 600; border: 1px 
 .info-table { width: 100%; border-collapse: collapse; }
 .info-table th, .info-table td { text-align: left; padding: 13px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
 .info-table th { width: 38%; color: var(--muted); font-weight: 550; padding-right: 16px; }
-.description p { max-width: 42em; }
+.description p { max-width: 42em; white-space: pre-line; }
 .event-side .side-block { padding: 22px; border-radius: var(--r-lg); background: var(--tile); margin-bottom: 16px; }
 .event-side .side-block h2 { font-size: 1.2rem; margin-bottom: 14px; }
 .event-side .side-block p { margin: 6px 0; }
@@ -604,3 +604,8 @@ fieldset .full { grid-column: 1 / -1; }
 .footer-legal { display: flex; flex-wrap: wrap; gap: 18px; }
 .legal h3 { font-size: 1.15rem; margin: 26px 0 8px; }
 .legal li { margin-bottom: 8px; }
+
+.doc-list { list-style: none; margin: 0 0 8px; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+.doc-link { display: inline-flex; align-items: center; gap: 12px; padding: 12px 18px 12px 12px; border-radius: var(--r-lg); background: var(--tile); font-weight: 700; text-decoration: none; color: inherit; border: 1px solid transparent; }
+.doc-link:hover { border-color: var(--pool, #0b6bcb); }
+.doc-icon { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; background: #ffc629; color: #0a2540; font-size: .72rem; font-weight: 800; letter-spacing: .04em; }

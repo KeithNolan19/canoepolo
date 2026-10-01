@@ -19,10 +19,15 @@ function uniqueSlug(base, excludeId = 0) {
   return slug;
 }
 
+function parseDocs(json) {
+  try { const a = JSON.parse(json || '[]'); return Array.isArray(a) ? a.filter((d) => d && d.label && d.url) : []; } catch { return []; }
+}
+
 function decorate(t) {
   if (!t) return t;
   return {
     ...t,
+    documents: parseDocs(t.documents),
     featured: !!t.featured,
     divisions: t.divisions ? t.divisions.split(',').filter(Boolean) : [],
     country_name: COUNTRIES[t.country] || t.country,
@@ -76,6 +81,18 @@ function getById(id) {
 
 const isDate = (s) => /^\d{4}-\d{2}-\d{2}$/.test(s) && !isNaN(Date.parse(s));
 const isUrl = (s) => { try { const u = new URL(s); return u.protocol === 'http:' || u.protocol === 'https:'; } catch { return false; } };
+// One document per line: "Label | https://link" (links on this site may start with /)
+function parseDocsText(text) {
+  const docs = []; const errors = [];
+  String(text || '').split(/\r?\n/).map((l) => l.trim()).filter(Boolean).forEach((line) => {
+    const i = line.indexOf('|');
+    const label = i < 0 ? '' : line.slice(0, i).trim();
+    const url = i < 0 ? '' : line.slice(i + 1).trim();
+    if (!label || !(isUrl(url) || /^\/[A-Za-z0-9._\/-]+$/.test(url))) errors.push(`Document line "${line.slice(0, 40)}" should look like: Timetable | https://...`);
+    else docs.push({ label: label.slice(0, 60), url });
+  });
+  return { docs, errors };
+}
 const isEmail = (s) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 
 // Takes raw form input, returns { data, errors }
@@ -107,6 +124,9 @@ function validate(input) {
   };
 
   const errors = [];
+  const dd = parseDocsText(input.documents_text);
+  errors.push(...dd.errors);
+  data.documents = dd.docs.length ? JSON.stringify(dd.docs) : null;
   if (!data.name) errors.push('Name is required.');
   if (data.name.length > 150) errors.push('Name is too long (max 150 characters).');
   if (!isDate(data.start_date)) errors.push('Start date is required (YYYY-MM-DD).');
@@ -130,9 +150,9 @@ function create(data) {
   const slug = uniqueSlug(slugify(data.name.includes(year) ? data.name : `${data.name}-${year}`));
   const info = db.prepare(`
     INSERT INTO tournaments (slug, name, start_date, end_date, city, country, venue, level, divisions, description,
-      website_url, registration_url, source_url, registration_deadline, entry_fee, contact_name, contact_email, status, featured)
+      website_url, registration_url, source_url, documents, registration_deadline, entry_fee, contact_name, contact_email, status, featured)
     VALUES (@slug, @name, @start_date, @end_date, @city, @country, @venue, @level, @divisions, @description,
-      @website_url, @registration_url, @source_url, @registration_deadline, @entry_fee, @contact_name, @contact_email, @status, @featured)
+      @website_url, @registration_url, @source_url, @documents, @registration_deadline, @entry_fee, @contact_name, @contact_email, @status, @featured)
   `).run({ ...data, slug });
   return getById(info.lastInsertRowid);
 }
@@ -141,7 +161,7 @@ function update(id, data) {
   db.prepare(`
     UPDATE tournaments SET name=@name, start_date=@start_date, end_date=@end_date, city=@city, country=@country,
       venue=@venue, level=@level, divisions=@divisions, description=@description, website_url=@website_url,
-      registration_url=@registration_url, source_url=@source_url, registration_deadline=@registration_deadline, entry_fee=@entry_fee,
+      registration_url=@registration_url, source_url=@source_url, documents=@documents, registration_deadline=@registration_deadline, entry_fee=@entry_fee,
       contact_name=@contact_name, contact_email=@contact_email, status=@status, featured=@featured,
       updated_at=datetime('now')
     WHERE id=@id
