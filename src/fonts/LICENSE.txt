@@ -1,0 +1,1 @@
+Poppins (Regular, Medium, Bold) is copyright The Poppins Project Authors and is licensed under the SIL Open Font License, Version 1.1 (https://openfontlicense.org). It is used here only to set text in the downloadable PDF schedules.

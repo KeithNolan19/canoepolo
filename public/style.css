@@ -801,3 +801,8 @@ img.fl { max-width: none; min-width: 20px; }
 .post-list a:hover { text-decoration: underline; }
 .post-meta { color: var(--muted, #5a6b68); font-size: .92rem; margin: 6px 0; }
 .prose .lede { font-size: 1.2rem; font-weight: 550; }
+
+/* Schedule downloads */
+.sched-export { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 0 0 16px; }
+.sched-export[hidden] { display: none; }
+.sched-export > span { font-weight: 650; color: var(--muted); font-size: .92rem; }

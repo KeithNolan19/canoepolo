@@ -232,6 +232,21 @@ app.get('/tournaments/:slug', (req, res) => {
   res.render('tournament', { title: t.name, t, schedule: require('./schedules').forSlug(t.slug) });
 });
 
+const exportLimiter = rateLimit({ windowMs: 60 * 1000, limit: 20, standardHeaders: false, legacyHeaders: false });
+function scheduleExport(kind) {
+  return async (req, res, next) => {
+    try {
+      const t = T.getBySlug(req.params.slug);
+      const schedule = t && require('./schedules').forSlug(t.slug);
+      if (!schedule || schedule.hidden) return res.status(404).render('404', { title: 'Not found' });
+      const X = require('./export');
+      await X[kind](t, schedule, X.readFilters(req.query), res);
+    } catch (e) { next(e); }
+  };
+}
+app.get('/tournaments/:slug/schedule.pdf', exportLimiter, scheduleExport('pdf'));
+app.get('/tournaments/:slug/schedule.xlsx', exportLimiter, scheduleExport('xlsx'));
+
 app.get('/tournaments/:slug/calendar.ics', (req, res) => {
   const t = T.getBySlug(req.params.slug);
   if (!t) return res.status(404).send('Not found');

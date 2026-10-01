@@ -32,6 +32,12 @@
         shown += dayCount;
       });
       empty.hidden = shown !== 0;
+      const exp = box.querySelector('[data-export]');
+      if (exp) {
+        const qs = ['team', 'q', 'div', 'grp', 'pitch'].map((k) => (get(k) ? k + '=' + encodeURIComponent(get(k).trim()) : '')).filter(Boolean).join('&');
+        exp.querySelectorAll('a[data-fmt]').forEach((a) => { a.href = exp.dataset.export + '.' + a.dataset.fmt + (qs ? '?' + qs : ''); });
+        exp.hidden = shown === 0;
+      }
       const filtered = team || q || div || grp || pitch;
       if (filtered && shown) {
         const label = team ? team.split('|')[0] + ' (' + team.split('|')[1] + ')' : 'these filters';
@@ -57,5 +63,6 @@
     });
     bar.addEventListener('input', apply);
     bar.addEventListener('change', apply);
+    apply();
   });
 })();
