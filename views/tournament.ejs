@@ -37,7 +37,10 @@
     </ul>
     <% } %>
 
-    <% if (schedule) { %>
+    <% if (schedule && schedule.hidden) { %>
+    <h2 class="sub-head" id="schedule">Timetable</h2>
+    <div class="notice green sched-headline"><strong>Timetable coming soon.</strong></div>
+    <% } else if (schedule) { %>
     <h2 class="sub-head" id="schedule">Schedule</h2>
     <% if (schedule.headline) { %><div class="notice green sched-headline"><strong><%= schedule.headline %></strong></div><% } %>
     <p class="small-note"><%= schedule.note %></p>
@@ -131,5 +134,5 @@
   </aside>
 </div>
 
-<% if (schedule) { %><script src="/schedule.js?v=<%= assetV %>"></script><% } %>
+<% if (schedule && !schedule.hidden) { %><script src="/schedule.js?v=<%= assetV %>"></script><% } %>
 <%- include('partials/footer') %>

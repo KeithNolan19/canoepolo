@@ -3,6 +3,7 @@
 // To add a day, copy the PDF into public/docs/, add a day below and list the matches.
 const SCHEDULES = {
   'paddle-europe-canoe-polo-club-championships-2026': {
+    hidden: true, // set to false (or delete this line) to publish the timetable
     headline: 'Friday timetable is here. Saturday and Sunday will be released soon.',
     pending: ['Saturday 3 October', 'Sunday 4 October'],
     groupsPdf: '/docs/milan-ecc-2026-groups.pdf',
@@ -88,6 +89,7 @@ const SCHEDULES = {
 function forSlug(slug) {
   const s = SCHEDULES[slug];
   if (!s) return null;
+  if (s.hidden) return { hidden: true };
   const teamSet = new Map();
   s.days.forEach((d) => d.matches.forEach(([, , , code, home, away]) => {
     const division = code[0] === 'F' ? 'Women' : 'Men';
