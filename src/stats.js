@@ -126,8 +126,10 @@ function middleware(req, res, next) {
         if (cntDownloads.get(d0).c < MAX_PER_DAY) upDownload.run(d0, dl.kind, dl.name);
         return;
       }
-      if (res.statusCode !== 200) return;
-      if (!String(res.get('content-type') || '').includes('text/html')) return;
+      // a page the browser already had and re-checked comes back as 304; it is still a page view
+      const again = res.statusCode === 304 && /text\/html/.test(req.get('accept') || '') && req.get('sec-fetch-dest') !== 'iframe';
+      if (res.statusCode !== 200 && !again) return;
+      if (!again && !String(res.get('content-type') || '').includes('text/html')) return;
       if (optedOut(req)) return;
       const ua = req.get('user-agent') || '';
       if (!ua || BOT.test(ua)) return;

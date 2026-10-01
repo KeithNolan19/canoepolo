@@ -64,12 +64,29 @@ const FLAGS = new Set(require('fs').readdirSync(path.join(__dirname, '..', 'publ
 const flagImg = (c) => { c = String(c || '').toLowerCase(); return FLAGS.has(c) ? `<img class="fl" src="/flags/${c}.svg" alt="" width="20" height="15" loading="lazy">` : ''; };
 app.use(express.urlencoded({ extended: true, limit: '100kb' }));
 app.use(stats.middleware); // before the static files so downloads of documents are counted
-app.use(express.static(path.join(__dirname, '..', 'public'), { maxAge: IS_PROD ? '1d' : 0 }));
+// Caching: CSS and JS are linked with ?v=<start time>, so they can be kept for a year (a new deploy changes the link).
+// Fonts never change. Pictures are kept a month. Documents are checked hourly because they can be replaced.
+app.use(express.static(path.join(__dirname, '..', 'public'), {
+  setHeaders(res, file) {
+    if (!IS_PROD) return res.set('Cache-Control', 'no-cache');
+    const year = 'public, max-age=31536000, immutable';
+    if (/[\\/]fonts[\\/]/.test(file) || /\.(css|js)$/.test(file)) res.set('Cache-Control', year);
+    else if (/[\\/]docs[\\/]/.test(file)) res.set('Cache-Control', 'public, max-age=3600');
+    else res.set('Cache-Control', 'public, max-age=2592000');
+  },
+}));
 // Overall brake on abusive traffic (generous for real visitors)
-app.use(rateLimit({ windowMs: 60 * 1000, limit: 300, standardHeaders: false, legacyHeaders: false, skip: (req) => req.path === '/health' }));
+// Every limiter answers 429 with a Retry-After header, so well behaved tools and crawlers slow down by themselves.
+const tooMany = (req, res) => res.status(429).type('text/plain').send('Too many requests. Please slow down and try again in a minute.\n');
+const limiter = (limit, windowMin = 1) => rateLimit({ windowMs: windowMin * 60 * 1000, limit, standardHeaders: 'draft-7', legacyHeaders: false, handler: tooMany });
+app.use(rateLimit({ windowMs: 60 * 1000, limit: 300, standardHeaders: 'draft-7', legacyHeaders: false, handler: tooMany, skip: (req) => req.path === '/health' }));
+// Heavier pages and the open API get a tighter limit of their own (on top of the overall one).
+app.use(['/tournaments/map', '/sitemap.xml', '/blog/feed.xml', '/calendar.ics'], limiter(60));
+app.use('/api', limiter(120));
 app.use((req, res, next) => {
   res.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()');
   if (req.path.startsWith('/admin')) res.set('Cache-Control', 'no-store');
+  else if (req.method === 'GET') res.set('Cache-Control', 'public, max-age=0, must-revalidate'); // always checked, answered with a tiny "not modified" when nothing changed
   next();
 });
 app.get('/.well-known/security.txt', (req, res) => res.type('text/plain').send(`Contact: https://wa.me/353876789927\nPreferred-Languages: en\nCanonical: ${BASE_URL}/.well-known/security.txt\nExpires: 2027-10-01T00:00:00.000Z\n`));
@@ -336,6 +353,7 @@ app.get('/rules', (req, res) => res.render('rules', { title: 'Canoe polo rules',
 
 // ---------- Public JSON API (for apps, club sites, etc.) ----------
 app.get('/api/tournaments', (req, res) => {
+  res.set('Cache-Control', 'public, max-age=300');
   const when = req.query.when === 'past' ? 'past' : 'upcoming';
   const rows = T.listPublic({ ...pickFilters(req.query), when, limit: req.query.limit });
   res.set('Access-Control-Allow-Origin', '*');
@@ -368,7 +386,72 @@ app.get('/blog/:slug', (req, res) => {
 
 app.get('/health', (req, res) => res.json({ ok: true }));
 
-app.get('/robots.txt', (req, res) => res.type('text/plain').send(`User-agent: *\nDisallow: /admin\nSitemap: ${BASE_URL}/sitemap.xml\n`));
+const textFile = (body) => (req, res) => res.type('text/plain').set('Cache-Control', 'public, max-age=3600').send(body);
+// Search engines and AI assistants are welcome to read the public pages. Kept out: the admin area, the quiz leaderboard
+// (people's names), files made on request, internal endpoints and filtered or searched copies of pages.
+app.get('/robots.txt', textFile(`User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /_c
+Disallow: /thumb/
+Disallow: /referee/leaderboard
+Disallow: /referee/quiz/
+Disallow: /tournaments/*/schedule.pdf
+Disallow: /tournaments/*/schedule.xlsx
+Disallow: /*?
+
+Sitemap: ${BASE_URL}/sitemap.xml
+`));
+app.get('/llms.txt', textFile(`# canoepolo.eu
+
+> The home of international canoe polo (kayak polo): tournaments, schedules, rules, referee resources, videos and a tactics board. Run by volunteers (not a legal entity).
+
+## Main pages
+- [Upcoming tournaments](${BASE_URL}/tournaments): calendar of canoe polo tournaments worldwide
+- [Tournament map](${BASE_URL}/tournaments/map): where tournaments are
+- [Past tournaments](${BASE_URL}/past)
+- [Rules in plain English](${BASE_URL}/rules)
+- [Referee guide and quiz](${BASE_URL}/referee)
+- [Blog](${BASE_URL}/blog): guides for clubs, grants, safeguarding and more
+- [Watch](${BASE_URL}/watch): highlights and finals
+- [Get involved](${BASE_URL}/get-involved)
+
+## Data
+- [Tournaments as JSON](${BASE_URL}/api/tournaments): open API, add ?when=past, ?country=XX, ?limit=N
+- [Calendar feed (iCal)](${BASE_URL}/calendar.ics)
+- [Blog RSS](${BASE_URL}/blog/feed.xml)
+- [Sitemap](${BASE_URL}/sitemap.xml)
+
+## Notes
+- Information is gathered from organisers' announcements and from Kayakers.nl (used with permission). Always check the organiser's own page for final details.
+- Please link back to canoepolo.eu when you use this information. See ${BASE_URL}/agents.txt for rules for automated agents.
+`));
+app.get('/agents.txt', textFile(`# agents.txt for canoepolo.eu: how automated agents and AI assistants may use this site
+
+Site: ${BASE_URL}
+Summary: ${BASE_URL}/llms.txt
+
+Allowed
+- Read and summarise public pages, the sitemap, the JSON API (/api/tournaments) and the RSS and iCal feeds.
+- Quote short extracts with a link back to the page.
+
+Not allowed
+- The admin area (/admin), logging in or trying to guess passwords.
+- Submitting forms or the referee quiz, or posting to the leaderboard.
+- Collecting personal data, for example names on the quiz leaderboard.
+- Buying, booking or registering for tournaments on someone's behalf without the person confirming each step with the organiser.
+
+Rate limits
+- Be gentle: no more than about 1 request per second. Over the limit the site answers 429 with a Retry-After header, so back off when you see it.
+- Use the JSON API or the sitemap rather than crawling every page.
+- Cache what you fetch. Pages send ETag headers, so use conditional requests.
+
+Accuracy
+- Tournament details can change. Tell people to confirm dates and entry with the organiser (link on each tournament page).
+
+Contact
+- WhatsApp +353 87 678 9927 (see ${BASE_URL}/about)
+`));
 
 app.get('/sitemap.xml', (req, res) => {
   const all = [...T.listPublic({ when: 'upcoming', limit: 500 }), ...T.listPublic({ when: 'past', limit: 500 })];
