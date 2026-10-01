@@ -89,3 +89,14 @@ document.querySelectorAll('.video-frame[data-video]').forEach((box) => {
   };
   requestAnimationFrame(frame);
 })();
+
+// Anonymous click counts for links that leave the site and for downloads (see /admin/stats). Nothing about the person is sent.
+document.addEventListener('click', (e) => {
+  const a = e.target.closest && e.target.closest('a[href]');
+  if (!a || !navigator.sendBeacon || navigator.doNotTrack === '1' || location.pathname.startsWith('/admin')) return;
+  const href = a.getAttribute('href') || '';
+  const external = /^https?:\/\//i.test(href) && a.host !== location.host;
+  const download = /^\/docs\//.test(href);
+  if (!external && !download) return;
+  try { navigator.sendBeacon('/_c', new Blob(['t=' + encodeURIComponent(href)], { type: 'application/x-www-form-urlencoded' })); } catch (err) { /* ignore */ }
+});

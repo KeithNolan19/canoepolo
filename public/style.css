@@ -731,3 +731,19 @@ fieldset .full { grid-column: 1 / -1; }
 .group-card a { color: var(--ink); text-decoration-color: var(--line); }
 .group-card a:hover { color: var(--link); text-decoration-color: currentColor; }
 @media (max-width: 760px) { .groups-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Admin statistics */
+.stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 18px 0; }
+.stat-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 16px 18px; display: flex; flex-direction: column; gap: 2px; }
+.stat-num { font-size: 2rem; font-weight: 800; color: var(--pool); line-height: 1.1; }
+.stat-table { width: 100%; border-collapse: collapse; margin: 8px 0 24px; font-size: .95rem; }
+.stat-table td { padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.stat-table .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.stat-table .muted, .muted { color: var(--muted, #6b7a78); }
+.stat-day { white-space: nowrap; width: 1%; }
+.stat-bar { width: 55%; }
+.stat-bar progress { width: 100%; height: 12px; accent-color: var(--ball-dark); }
+.wrap-any { word-break: break-all; }
+.stat-cols { display: grid; grid-template-columns: 1fr; gap: 0 32px; }
+@media (min-width: 900px) { .stat-cols { grid-template-columns: 1fr 1fr; } }
+.range-tabs { margin: 0; }

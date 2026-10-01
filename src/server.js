@@ -54,6 +54,9 @@ app.use(helmet({
 }));
 app.use(express.urlencoded({ extended: true, limit: '100kb' }));
 app.use(express.static(path.join(__dirname, '..', 'public'), { maxAge: IS_PROD ? '1d' : 0 }));
+const stats = require('./stats');
+app.use(stats.middleware);
+app.post('/_c', rateLimit({ windowMs: 60 * 1000, limit: 60, standardHeaders: false, legacyHeaders: false }), stats.clickHandler);
 app.use(cookieSession({
   name: 'cp_session',
   secret: SESSION_SECRET || 'dev-only-secret-do-not-use-in-production',
@@ -336,6 +339,12 @@ app.post('/admin/logout', checkCsrf, (req, res) => {
 
 app.get('/admin', requireAdmin, (req, res) => {
   res.render('admin/dashboard', { title: 'Admin', tournaments: T.listAll(), msg: req.query.msg || '' });
+});
+
+app.get('/admin/stats', requireAdmin, (req, res) => {
+  const days = [7, 30, 90, 365].includes(Number(req.query.days)) ? Number(req.query.days) : 30;
+  const r = stats.report(days);
+  res.render('admin/stats', { title: 'Statistics', days, r, max: Math.max(1, ...r.series.map((d) => d.views)) });
 });
 
 app.get('/admin/new', requireAdmin, (req, res) => {

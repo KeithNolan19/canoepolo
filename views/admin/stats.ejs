@@ -1,0 +1,49 @@
+<%- include('../partials/header') %>
+
+<%- include('tabs', { tab: 'stats' }) %>
+
+<div class="admin-head">
+  <h1>Statistics</h1>
+  <nav class="admin-tabs range-tabs" aria-label="Time range">
+    <% [7, 30, 90, 365].forEach(function (d) { %><a href="/admin/stats?days=<%= d %>" class="<%= d === days ? 'on' : '' %>"><%= d === 365 ? '1 year' : 'Last ' + d + ' days' %></a><% }) %>
+  </nav>
+</div>
+
+<p class="small-note">Anonymous counts only: no cookies, no IP addresses saved. People using Do Not Track and known bots are not counted. Visitors are approximate (a person using two devices counts twice, and the count can restart if the server restarts).</p>
+
+<div class="stat-cards">
+  <div class="stat-card"><span class="stat-num"><%= r.views %></span><span>Page views</span></div>
+  <div class="stat-card"><span class="stat-num"><%= r.visitors %></span><span>Visitors (approx.)</span></div>
+  <div class="stat-card"><span class="stat-num"><%= r.series.length ? Math.round(r.views / r.series.length * 10) / 10 : 0 %></span><span>Views per day</span></div>
+</div>
+
+<h2>Views per day</h2>
+<table class="stat-table">
+  <% r.series.slice().reverse().forEach(function (d) { %>
+  <tr><td class="stat-day"><%= d.day %></td><td class="stat-bar"><progress max="<%= max %>" value="<%= d.views %>"></progress></td><td class="num"><%= d.views %></td><td class="num muted"><%= d.visitors %> visitors</td></tr>
+  <% }) %>
+</table>
+
+<div class="stat-cols">
+  <div>
+    <h2>Most viewed pages</h2>
+    <table class="stat-table">
+      <% r.pages.forEach(function (p) { %><tr><td><a href="<%= p.path %>"><%= p.path %></a></td><td class="num"><%= p.n %></td></tr><% }) %>
+      <% if (!r.pages.length) { %><tr><td class="muted">No data yet.</td></tr><% } %>
+    </table>
+  </div>
+  <div>
+    <h2>Where visitors come from</h2>
+    <table class="stat-table">
+      <% r.refs.forEach(function (p) { %><tr><td><%= p.ref %></td><td class="num"><%= p.n %></td></tr><% }) %>
+      <% if (!r.refs.length) { %><tr><td class="muted">No data yet.</td></tr><% } %>
+    </table>
+    <h2>Links clicked (leaving the site, and downloads)</h2>
+    <table class="stat-table">
+      <% r.clicks.forEach(function (p) { %><tr><td class="wrap-any"><%= p.target %></td><td class="num"><%= p.n %></td></tr><% }) %>
+      <% if (!r.clicks.length) { %><tr><td class="muted">No data yet.</td></tr><% } %>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
