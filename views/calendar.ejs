@@ -1,0 +1,84 @@
+<%- include('partials/header', { fullWidth: true, metaDescription: 'Month-by-month calendar of canoe polo tournaments around the world.' }) %>
+<% const qs = (m) => { const p = new URLSearchParams(); p.set('m', m); ['q','country','level','division'].forEach(k => { if (filters[k]) p.set(k, filters[k]); }); return '/tournaments/calendar?' + p.toString(); };
+   const dow = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']; %>
+
+<div class="page-banner">
+  <div class="wrap">
+    <p class="crumbs"><a href="/">Home</a> / <a href="/tournaments">Tournaments</a> / Calendar</p>
+    <h1>Tournament calendar</h1>
+  </div>
+</div>
+
+<div class="wrap">
+  <nav class="admin-tabs page-tabs" aria-label="Tournaments">
+    <a href="/tournaments">Upcoming</a>
+    <a href="/tournaments/calendar" class="on">Calendar</a>
+    <a href="/past">Past</a>
+    <a href="/about#listing">List a tournament</a>
+  </nav>
+
+  <form class="filters cal-filters" method="get" action="/tournaments/calendar" data-autosubmit>
+    <input type="hidden" name="m" value="<%= cal.month %>">
+    <label class="f-search"><span>Search</span><input type="search" name="q" value="<%= filters.q %>" placeholder="Name, city or venue"></label>
+    <label><span>Country</span>
+      <select name="country">
+        <option value="">All countries</option>
+        <% countries.forEach(c => { %><option value="<%= c %>" <%= filters.country === c ? 'selected' : '' %>><%= COUNTRIES[c] || c %></option><% }) %>
+      </select>
+    </label>
+    <label><span>Level</span>
+      <select name="level">
+        <option value="">All levels</option>
+        <% LEVELS.forEach(l => { %><option <%= filters.level === l ? 'selected' : '' %>><%= l %></option><% }) %>
+      </select>
+    </label>
+    <label><span>Division</span>
+      <select name="division">
+        <option value="">All divisions</option>
+        <% DIVISIONS.forEach(d => { %><option <%= filters.division === d ? 'selected' : '' %>><%= d %></option><% }) %>
+      </select>
+    </label>
+    <div class="f-actions">
+      <button type="submit">Apply</button>
+      <% if (filters.q || filters.country || filters.level || filters.division) { %><a href="<%= qs(cal.month).split('&')[0] %>">Reset</a><% } %>
+    </div>
+  </form>
+
+  <div class="cal-head">
+    <a class="btn small" href="<%= qs(cal.prev) %>" aria-label="Previous month">&larr; Previous</a>
+    <h2 class="cal-title"><%= cal.label %></h2>
+    <a class="btn small" href="<%= qs(cal.next) %>" aria-label="Next month">Next &rarr;</a>
+    <% if (cal.month !== nowM) { %><a class="btn small outline" href="<%= qs(nowM) %>">This month</a><% } %>
+  </div>
+
+  <div class="cal" role="group" aria-label="<%= cal.label %> calendar">
+    <div class="cal-dow" aria-hidden="true"><% dow.forEach(d => { %><span><%= d %></span><% }) %></div>
+    <% cal.weeks.forEach(w => { %>
+    <div class="cal-week gl<%= Math.min(Math.max(w.lanes, 2), 12) %>">
+      <% w.days.forEach((d, i) => { %>
+        <div class="cal-day gc<%= i + 1 %> <%= d.inMonth ? '' : 'is-out' %> <%= d.today ? 'is-today' : '' %>"><span><%= d.n %></span></div>
+      <% }) %>
+      <% w.segs.forEach(sg => { const t = sg.t; %>
+        <a class="cal-ev gc<%= sg.col + 1 %> gs<%= sg.span %> gr<%= Math.min(sg.lane + 2, 13) %> k-<%= sg.kind %> <%= sg.cutL ? 'cut-l' : '' %> <%= sg.cutR ? 'cut-r' : '' %> <%= t.status === 'cancelled' ? 'is-cancelled' : '' %>"
+           href="/tournaments/<%= t.slug %>" title="<%= t.name %> - <%= t.city %>, <%= t.country_name %> (<%= fmtRange(t.start_date, t.end_date) %>)"><%= flag(t.country) %> <%= t.name %></a>
+      <% }) %>
+    </div>
+    <% }) %>
+  </div>
+
+  <ul class="cal-key" aria-label="Colour key">
+    <li><i class="k-major"></i> World / continental</li>
+    <li><i class="k-intl"></i> International</li>
+    <li><i class="k-nat"></i> National</li>
+    <li><i class="k-club"></i> Club / friendly</li>
+  </ul>
+
+  <h2 class="sub-head cal-list-head">In <%= cal.label %></h2>
+  <% if (!rows.length) { %>
+    <p class="none">No tournaments listed this month<%= (filters.q || filters.country || filters.level || filters.division) ? ' with these filters' : '' %>. Organising one? <a href="/about#listing">Send us the details</a>.</p>
+  <% } else { %>
+    <%- include('partials/fixtures', { rows, monthHeaders: false }) %>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

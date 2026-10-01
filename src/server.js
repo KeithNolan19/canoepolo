@@ -157,6 +157,59 @@ app.get('/past', (req, res) => {
   res.render('index', { title: 'Past tournaments', tournaments, filters, countries: T.countriesInUse(), when: 'past' });
 });
 
+// Month calendar view
+const MONTHS_BAR = { 'World Championships': 'major', 'Continental Championships': 'major', 'World Games': 'major', 'International': 'intl', 'National Championships': 'nat', 'National League': 'nat', 'Club / Friendly': 'club' };
+function buildMonthGrid(monthStr, rows) {
+  const [y, m] = monthStr.split('-').map(Number);
+  const iso = (d) => d.toISOString().slice(0, 10);
+  const first = new Date(Date.UTC(y, m - 1, 1));
+  const last = new Date(Date.UTC(y, m, 0));
+  const start = new Date(first); start.setUTCDate(start.getUTCDate() - ((first.getUTCDay() + 6) % 7)); // Monday
+  const end = new Date(last); end.setUTCDate(end.getUTCDate() + (7 - ((last.getUTCDay() + 6) % 7 + 1)));
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const weeks = [];
+  for (let ws = new Date(start); ws <= end; ws.setUTCDate(ws.getUTCDate() + 7)) {
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(ws); d.setUTCDate(d.getUTCDate() + i);
+      days.push({ date: iso(d), n: d.getUTCDate(), inMonth: d.getUTCMonth() === m - 1, today: iso(d) === todayStr });
+    }
+    const wStart = days[0].date, wEnd = days[6].date;
+    const segs = rows.filter((t) => t.start_date <= wEnd && t.end_date >= wStart).map((t) => {
+      const c1 = days.findIndex((d) => d.date >= t.start_date);
+      const s0 = t.start_date < wStart ? 0 : days.findIndex((d) => d.date === t.start_date);
+      let e0 = t.end_date > wEnd ? 6 : days.findIndex((d) => d.date === t.end_date);
+      void c1;
+      return { t, col: s0, span: e0 - s0 + 1, cutL: t.start_date < wStart, cutR: t.end_date > wEnd, kind: MONTHS_BAR[t.level] || 'intl' };
+    }).sort((a, b) => a.col - b.col || b.span - a.span);
+    const laneEnds = [];
+    segs.forEach((sg) => {
+      let lane = laneEnds.findIndex((e) => e < sg.col);
+      if (lane < 0) { lane = laneEnds.length; laneEnds.push(0); }
+      laneEnds[lane] = sg.col + sg.span - 1;
+      sg.lane = lane;
+    });
+    weeks.push({ days, segs, lanes: Math.max(laneEnds.length, 1) });
+  }
+  const prev = new Date(Date.UTC(y, m - 2, 1)), next = new Date(Date.UTC(y, m, 1));
+  return { weeks, label: first.toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' }), prev: iso(prev).slice(0, 7), next: iso(next).slice(0, 7), month: monthStr };
+}
+
+app.get('/tournaments/calendar', (req, res) => {
+  const filters = pickFilters(req.query);
+  const nowM = new Date().toISOString().slice(0, 7);
+  const month = /^\d{4}-(0[1-9]|1[0-2])$/.test(String(req.query.m || '')) ? String(req.query.m) : nowM;
+  const [y, m] = month.split('-').map(Number);
+  const from = `${month}-01`;
+  const to = new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
+  const rows = T.listBetween(from, to, filters);
+  // the grid also shows the days of neighbouring months, so fetch the whole visible range
+  const gridFrom = new Date(Date.UTC(y, m - 1, 1 - 6)).toISOString().slice(0, 10);
+  const gridTo = new Date(Date.UTC(y, m, 6)).toISOString().slice(0, 10);
+  const cal = buildMonthGrid(month, T.listBetween(gridFrom, gridTo, filters));
+  res.render('calendar', { title: `Tournament calendar: ${cal.label}`, cal, rows, filters, countries: T.countriesInUse(), nowM });
+});
+
 app.get('/tournaments/:slug', (req, res) => {
   const t = T.getBySlug(req.params.slug, { includeDrafts: !!req.session.admin });
   if (!t) return res.status(404).render('404', { title: 'Not found' });
@@ -241,7 +294,7 @@ app.get('/robots.txt', (req, res) => res.type('text/plain').send(`User-agent: *\
 
 app.get('/sitemap.xml', (req, res) => {
   const all = [...T.listPublic({ when: 'upcoming', limit: 500 }), ...T.listPublic({ when: 'past', limit: 500 })];
-  const urls = [`${BASE_URL}/`, `${BASE_URL}/tournaments`, `${BASE_URL}/past`, `${BASE_URL}/watch`, `${BASE_URL}/learn`, `${BASE_URL}/referee`, `${BASE_URL}/referee/quiz`, `${BASE_URL}/get-involved`, `${BASE_URL}/tactics`, `${BASE_URL}/rules`, `${BASE_URL}/shop`, `${BASE_URL}/support`, `${BASE_URL}/about`, `${BASE_URL}/privacy`, `${BASE_URL}/terms`, ...all.map((t) => `${BASE_URL}/tournaments/${t.slug}`)];
+  const urls = [`${BASE_URL}/`, `${BASE_URL}/tournaments`, `${BASE_URL}/tournaments/calendar`, `${BASE_URL}/past`, `${BASE_URL}/watch`, `${BASE_URL}/learn`, `${BASE_URL}/referee`, `${BASE_URL}/referee/quiz`, `${BASE_URL}/get-involved`, `${BASE_URL}/tactics`, `${BASE_URL}/rules`, `${BASE_URL}/shop`, `${BASE_URL}/support`, `${BASE_URL}/about`, `${BASE_URL}/privacy`, `${BASE_URL}/terms`, ...all.map((t) => `${BASE_URL}/tournaments/${t.slug}`)];
   res.type('application/xml').send(
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>${u}</loc></url>`).join('\n')}\n</urlset>\n`,
   );

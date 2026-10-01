@@ -59,6 +59,17 @@ function listPublic({ country, level, division, q, month, when = 'upcoming', lim
   return rows.map(decorate);
 }
 
+// Everything (past or future) that overlaps a date range, for the calendar view
+function listBetween(from, to, { country, level, division, q } = {}) {
+  const where = ["status IN ('published','cancelled')", 'start_date <= @to', 'end_date >= @from'];
+  const params = { from, to };
+  if (country) { where.push('country = @country'); params.country = country; }
+  if (level) { where.push('level = @level'); params.level = level; }
+  if (division) { where.push("(',' || divisions || ',') LIKE @division"); params.division = `%,${division},%`; }
+  if (q) { where.push('(name LIKE @q OR city LIKE @q OR venue LIKE @q OR description LIKE @q)'); params.q = `%${q}%`; }
+  return db.prepare(`SELECT * FROM tournaments WHERE ${where.join(' AND ')} ORDER BY start_date ASC, end_date DESC`).all(params).map(decorate);
+}
+
 function countriesInUse() {
   return db.prepare(`SELECT DISTINCT country FROM tournaments WHERE status != 'draft' ORDER BY country`).all().map((r) => r.country);
 }
@@ -173,4 +184,4 @@ function remove(id) {
   return db.prepare('DELETE FROM tournaments WHERE id = ?').run(id).changes > 0;
 }
 
-module.exports = { listPublic, countriesInUse, getBySlug, listAll, getById, validate, create, update, remove, today };
+module.exports = { listPublic, listBetween, countriesInUse, getBySlug, listAll, getById, validate, create, update, remove, today };
