@@ -41,6 +41,8 @@ db.exec(`
 // Columns added after launch (safe to run every start)
 const cols = db.prepare('PRAGMA table_info(tournaments)').all().map((c) => c.name);
 if (!cols.includes('source_url')) db.exec('ALTER TABLE tournaments ADD COLUMN source_url TEXT');
+if (!cols.includes('lat')) db.exec('ALTER TABLE tournaments ADD COLUMN lat REAL'); // optional exact map position
+if (!cols.includes('lng')) db.exec('ALTER TABLE tournaments ADD COLUMN lng REAL');
 if (!cols.includes('documents')) db.exec('ALTER TABLE tournaments ADD COLUMN documents TEXT'); // JSON list of {label, url}
 
 // Record of one-time data imports (see src/imports.js)

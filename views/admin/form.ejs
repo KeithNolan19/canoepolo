@@ -43,6 +43,9 @@
       </select>
     </label>
     <label class="full">Venue <input name="venue" value="<%= v('venue') %>" placeholder="e.g. National Watersports Centre"></label>
+    <label>Map latitude (optional) <input name="lat" inputmode="decimal" value="<%= v('lat') %>" placeholder="e.g. 38.52"></label>
+    <label>Map longitude (optional) <input name="lng" inputmode="decimal" value="<%= v('lng') %>" placeholder="e.g. -8.89"></label>
+    <p class="small-note full">Leave both empty and the map pin goes on the town if we know it, otherwise the middle of the country. To place it exactly, right click the venue in an online map and copy the two numbers.</p>
   </fieldset>
 
   <fieldset>

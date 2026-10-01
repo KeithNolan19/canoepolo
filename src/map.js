@@ -42,7 +42,8 @@ const COUNTRIES_LL = {
   TR: [39, 35], UA: [49, 32], US: [39, -98],
 };
 
-function locate(city, country) {
+function locate(city, country, lat, lng) {
+  if (Number.isFinite(lat) && Number.isFinite(lng)) return { ll: [lat, lng], exact: true };
   const c = String(city || '').toLowerCase().trim();
   const keys = [c, c.split(/\s*[\/(]/)[0].trim()];
   for (const k of keys) if (CITIES[k]) return { ll: CITIES[k], exact: true };
@@ -77,7 +78,7 @@ function places(tournaments, view) {
   const b = build()[view];
   const byPlace = new Map();
   tournaments.forEach((t) => {
-    const loc = locate(t.city, t.country);
+    const loc = locate(t.city, t.country, t.lat, t.lng);
     if (!loc) return;
     const key = `${loc.ll[0].toFixed(2)},${loc.ll[1].toFixed(2)}`;
     if (!byPlace.has(key)) byPlace.set(key, { ll: loc.ll, exact: loc.exact, label: loc.exact ? t.city : t.country_name, country: t.country, items: [] });

@@ -132,6 +132,8 @@ function validate(input) {
     contact_email: s('contact_email') || null,
     status: s('status') || 'published',
     featured: input.featured ? 1 : 0,
+    lat: num(input.lat),
+    lng: num(input.lng),
   };
 
   const errors = [];
@@ -147,6 +149,8 @@ function validate(input) {
   if (!COUNTRIES[data.country]) errors.push('Please choose a country.');
   if (!LEVELS.includes(data.level)) errors.push('Please choose a valid level.');
   if (!STATUSES.includes(data.status)) errors.push('Invalid status.');
+  if ((data.lat === null) !== (data.lng === null)) errors.push('Enter both latitude and longitude for the map pin, or leave both empty.');
+  if (data.lat !== null && (data.lat < -90 || data.lat > 90 || data.lng < -180 || data.lng > 180)) errors.push('Map position is out of range (latitude -90 to 90, longitude -180 to 180).');
   if (data.website_url && !isUrl(data.website_url)) errors.push('Website must be a full link starting with https://');
   if (data.registration_url && !isUrl(data.registration_url)) errors.push('Registration link must start with https://');
   if (data.source_url && !isUrl(data.source_url)) errors.push('Source must be a full link starting with https://');
@@ -156,15 +160,21 @@ function validate(input) {
   return { data, errors };
 }
 
+function num(v) {
+  if (v === undefined || v === null || String(v).trim() === '') return null;
+  const n = Number(String(v).trim().replace(',', '.'));
+  return Number.isFinite(n) ? n : null;
+}
+
 function create(data) {
   const year = data.start_date.slice(0, 4);
   const slug = uniqueSlug(slugify(data.name.includes(year) ? data.name : `${data.name}-${year}`));
   const info = db.prepare(`
     INSERT INTO tournaments (slug, name, start_date, end_date, city, country, venue, level, divisions, description,
-      website_url, registration_url, source_url, documents, registration_deadline, entry_fee, contact_name, contact_email, status, featured)
+      website_url, registration_url, source_url, documents, registration_deadline, entry_fee, contact_name, contact_email, status, featured, lat, lng)
     VALUES (@slug, @name, @start_date, @end_date, @city, @country, @venue, @level, @divisions, @description,
-      @website_url, @registration_url, @source_url, @documents, @registration_deadline, @entry_fee, @contact_name, @contact_email, @status, @featured)
-  `).run({ ...data, slug });
+      @website_url, @registration_url, @source_url, @documents, @registration_deadline, @entry_fee, @contact_name, @contact_email, @status, @featured, @lat, @lng)
+  `).run({ lat: null, lng: null, ...data, slug });
   return getById(info.lastInsertRowid);
 }
 
@@ -173,10 +183,10 @@ function update(id, data) {
     UPDATE tournaments SET name=@name, start_date=@start_date, end_date=@end_date, city=@city, country=@country,
       venue=@venue, level=@level, divisions=@divisions, description=@description, website_url=@website_url,
       registration_url=@registration_url, source_url=@source_url, documents=@documents, registration_deadline=@registration_deadline, entry_fee=@entry_fee,
-      contact_name=@contact_name, contact_email=@contact_email, status=@status, featured=@featured,
+      contact_name=@contact_name, contact_email=@contact_email, status=@status, featured=@featured, lat=@lat, lng=@lng,
       updated_at=datetime('now')
     WHERE id=@id
-  `).run({ ...data, id });
+  `).run({ lat: null, lng: null, ...data, id });
   return getById(id);
 }
 
