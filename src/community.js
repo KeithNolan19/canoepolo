@@ -51,7 +51,7 @@ const INVOLVED = [
       'Streaming, commentary, photography and social media.',
       'Registration, catering and looking after visiting teams.',
     ],
-    links: [['Tell us you can help', 'mailto:info@canoepolo.eu?subject=Volunteering']],
+    links: [['Tell us you can help', 'https://wa.me/353876789927?text=Volunteering']],
   },
   {
     id: 'clubs', title: 'Clubs and organisers',
