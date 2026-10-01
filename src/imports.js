@@ -2099,6 +2099,15 @@ BATCHES.push({
 
 const PATCHES = [
   {
+    id: 'setubal-cup-2026-teams',
+    match: { name: '2026 Setúbal Cup International Canoe Polo Tournament', start_date: '2026-10-24' },
+    set: {
+      venue: 'Outdoor swimming pool',
+      description: 'Invite only. The tournament is played in an outdoor swimming pool.\n\nSixteen teams: fourteen have entered so far and two places are still to be confirmed.',
+      teams_text: ['Setúbal | PT', 'Barra | PT', 'Coimbra | PT', 'Deventer | NL', 'Trekvoggles | NL', 'Legends | EU', 'Oxio | ES', 'Piragua Madrid | ES', 'Espanha U21 F | ES', 'Ciências | ES', 'Malaga | ES', 'Kilcok | IE', 'Portugal U21 M | PT', 'Rodeira | ES', 'To be confirmed', 'To be confirmed'].join('\n'),
+    },
+  },
+  {
     id: 'nwc-2026-registration-w1',
     match: { name: 'NorthWest & Central Regional League 2026/2027, weekend 1', start_date: '2026-10-03' },
     set: {
@@ -2217,7 +2226,7 @@ function run() {
     const row = find.get(patch.match.name, patch.match.start_date);
     if (!row) continue; // not listed (e.g. deleted), nothing to update
     const cur = T.getById(row.id);
-    const { data, errors } = T.validate({ ...cur, documents_text: (cur.documents || []).map((d) => `${d.label} | ${d.url}`).join('\n'), ...patch.set });
+    const { data, errors } = T.validate({ ...cur, documents_text: (cur.documents || []).map((d) => `${d.label} | ${d.url}`).join('\n'), teams_text: (cur.teams || []).map((x) => (x.country ? `${x.name} | ${x.country}` : x.name)).join('\n'), ...patch.set });
     if (errors.length) { console.warn(`Patch ${patch.id}: ${errors.join(' ')}`); continue; }
     T.update(row.id, data);
     db.prepare('INSERT INTO imports (id) VALUES (?)').run(patch.id);

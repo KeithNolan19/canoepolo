@@ -23,11 +23,30 @@ function parseDocs(json) {
   try { const a = JSON.parse(json || '[]'); return Array.isArray(a) ? a.filter((d) => d && d.label && d.url) : []; } catch { return []; }
 }
 
+function parseTeams(json) {
+  try { const a = JSON.parse(json || '[]'); return Array.isArray(a) ? a.filter((x) => x && x.name) : []; } catch { return []; }
+}
+// One team per line: "Name | CC" (CC is the two letter country code and is optional). "To be confirmed" marks an open place.
+function parseTeamsText(text) {
+  const teams = []; const errors = [];
+  String(text || '').split(/\r?\n/).map((l) => l.trim()).filter(Boolean).forEach((line) => {
+    const i = line.lastIndexOf('|');
+    const name = (i < 0 ? line : line.slice(0, i)).trim().slice(0, 60);
+    const cc = i < 0 ? '' : line.slice(i + 1).trim().toUpperCase();
+    if (!name) return;
+    if (cc && !/^[A-Z]{2}$/.test(cc)) errors.push(`Team line "${line.slice(0, 40)}": use a two letter country code after the | (for example PT).`);
+    else teams.push(cc ? { name, country: cc } : { name });
+  });
+  if (teams.length > 80) errors.push('Too many teams (max 80).');
+  return { teams, errors };
+}
+
 function decorate(t) {
   if (!t) return t;
   return {
     ...t,
     documents: parseDocs(t.documents),
+    teams: parseTeams(t.teams),
     featured: !!t.featured,
     divisions: t.divisions ? t.divisions.split(',').filter(Boolean) : [],
     country_name: COUNTRIES[t.country] || t.country,
@@ -140,6 +159,9 @@ function validate(input) {
   const dd = parseDocsText(input.documents_text);
   errors.push(...dd.errors);
   data.documents = dd.docs.length ? JSON.stringify(dd.docs) : null;
+  const tt = parseTeamsText(input.teams_text);
+  errors.push(...tt.errors);
+  data.teams = tt.teams.length ? JSON.stringify(tt.teams) : null;
   if (!data.name) errors.push('Name is required.');
   if (data.name.length > 150) errors.push('Name is too long (max 150 characters).');
   if (!isDate(data.start_date)) errors.push('Start date is required (YYYY-MM-DD).');
@@ -171,10 +193,10 @@ function create(data) {
   const slug = uniqueSlug(slugify(data.name.includes(year) ? data.name : `${data.name}-${year}`));
   const info = db.prepare(`
     INSERT INTO tournaments (slug, name, start_date, end_date, city, country, venue, level, divisions, description,
-      website_url, registration_url, source_url, documents, registration_deadline, entry_fee, contact_name, contact_email, status, featured, lat, lng)
+      website_url, registration_url, source_url, documents, teams, registration_deadline, entry_fee, contact_name, contact_email, status, featured, lat, lng)
     VALUES (@slug, @name, @start_date, @end_date, @city, @country, @venue, @level, @divisions, @description,
-      @website_url, @registration_url, @source_url, @documents, @registration_deadline, @entry_fee, @contact_name, @contact_email, @status, @featured, @lat, @lng)
-  `).run({ lat: null, lng: null, ...data, slug });
+      @website_url, @registration_url, @source_url, @documents, @teams, @registration_deadline, @entry_fee, @contact_name, @contact_email, @status, @featured, @lat, @lng)
+  `).run({ lat: null, lng: null, teams: null, ...data, slug });
   return getById(info.lastInsertRowid);
 }
 
@@ -182,11 +204,11 @@ function update(id, data) {
   db.prepare(`
     UPDATE tournaments SET name=@name, start_date=@start_date, end_date=@end_date, city=@city, country=@country,
       venue=@venue, level=@level, divisions=@divisions, description=@description, website_url=@website_url,
-      registration_url=@registration_url, source_url=@source_url, documents=@documents, registration_deadline=@registration_deadline, entry_fee=@entry_fee,
+      registration_url=@registration_url, source_url=@source_url, documents=@documents, teams=@teams, registration_deadline=@registration_deadline, entry_fee=@entry_fee,
       contact_name=@contact_name, contact_email=@contact_email, status=@status, featured=@featured, lat=@lat, lng=@lng,
       updated_at=datetime('now')
     WHERE id=@id
-  `).run({ lat: null, lng: null, ...data, id });
+  `).run({ lat: null, lng: null, teams: null, ...data, id });
   return getById(id);
 }
 

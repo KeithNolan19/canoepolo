@@ -1,7 +1,9 @@
 <%- include('../partials/header') %>
 <% const v = (k) => (t[k] == null ? '' : t[k]);
   let docs = t.documents; if (typeof docs === 'string') { try { docs = JSON.parse(docs); } catch { docs = []; } }
-  const docsText = (docs || []).map((d) => d.label + ' | ' + d.url).join('\n'); %>
+  const docsText = (docs || []).map((d) => d.label + ' | ' + d.url).join('\n');
+  let tms = t.teams; if (typeof tms === 'string') { try { tms = JSON.parse(tms); } catch { tms = []; } }
+  const teamsText = (tms || []).map((x) => x.country ? x.name + ' | ' + x.country : x.name).join('\n'); %>
 
 <p class="back"><a href="/admin">← Back to admin</a></p>
 <form class="panel" method="post" action="<%= action %>">
@@ -72,6 +74,13 @@
     <legend>Documents</legend>
     <label class="full">Bulletins, timetables and other files, one per line as <code>Label | link</code>
       <textarea name="documents_text" rows="4" placeholder="Bulletin 1 | https://...&#10;Timetable | https://..."><%= docsText %></textarea>
+    </label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Teams entered</legend>
+    <label class="full">One team per line as <code>Team name | PT</code> (two letter country code). Use <code>To be confirmed</code> for an open place.
+      <textarea name="teams_text" rows="6" placeholder="Setúbal | PT&#10;Deventer | NL&#10;To be confirmed"><%= teamsText %></textarea>
     </label>
   </fieldset>
 

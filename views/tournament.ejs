@@ -130,6 +130,14 @@
     </div>
     <% } %>
 
+    <% if (t.teams.length) { const entered = t.teams.filter(x => x.country); const open = t.teams.length - entered.length; %>
+    <h2 class="sub-head">Teams entered</h2>
+    <p class="small-note"><%= entered.length %> team<%= entered.length === 1 ? '' : 's' %> entered so far<% if (open) { %>, <%= open %> place<%= open === 1 ? '' : 's' %> to be confirmed<% } %>.</p>
+    <ol class="team-list">
+      <% t.teams.forEach(x => { %><li class="<%= x.country ? '' : 'tbc' %>"><% if (x.country) { %><%- flagImg(x.country) %> <%= x.name %><% } else { %><%= x.name %><% } %></li><% }) %>
+    </ol>
+    <% } %>
+
     <% if (t.description) { %>
     <h2 class="sub-head">Information</h2>
     <div class="description">

@@ -850,3 +850,9 @@ h1, h2, h3, .event-name, .event-where, .event-extra { overflow-wrap: anywhere; }
 
 /* buttons inside running text should not push the lines apart */
 .prose p .btn, .prose li .btn { margin: 4px 2px; vertical-align: middle; }
+
+/* Teams entered */
+.team-list { list-style: none; counter-reset: team; margin: 0 0 8px; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px 20px; }
+.team-list li { counter-increment: team; display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.team-list li::before { content: counter(team); width: 1.8em; flex: none; font-weight: 600; color: var(--muted); }
+.team-list li.tbc { color: var(--muted); font-style: italic; }
