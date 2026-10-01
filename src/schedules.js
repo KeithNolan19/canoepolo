@@ -21,6 +21,17 @@ const SCHEDULES = {
         C: ["Alaquas", "Kingston", "Rovigo", "Deventer", "Mullinger"],
       },
     },
+    // Country (ISO code) of each club, for the flag shown beside the name. Clubs left out show no flag.
+    countries: {
+      'KSVH Berlin': 'DE', 'KGV Essen': 'DE', 'KRM Essen': 'DE', 'Duisburg': 'DE',
+      'Corbeil-Essenos': 'FR', 'Avranches': 'FR', "Pont D'ouilly": 'FR',
+      'Deventer': 'NL', 'Coimbra': 'PT', 'Setubal': 'PT',
+      'Kilkenny': 'IE', 'Mullinger': 'IE', 'Kingston': 'GB',
+      'Thurgauer': 'CH', 'Zurich': 'CH', 'Odysseus': 'GR', 'Skovshoveld': 'DK',
+      'Malaga': 'ES', 'Castellón': 'ES', 'Burriana': 'ES', 'Alaquas': 'ES',
+      'Chiavari': 'IT', 'Napoli': 'IT', 'Ichnusa': 'IT', 'Rovigo': 'IT',
+      'Poznan': 'PL', 'Warszawa': 'PL', 'Praha': 'CZ', 'Gent': 'BE', 'Linkopig': 'SE',
+    },
     format: {
       intro: 'Based on the published timetable. This is how the matches line up, not an official description of the format. Nobody is knocked out: every team plays on to Sunday, and the group position decides which bracket you play in.',
       men: [
@@ -250,6 +261,7 @@ function forSlug(slug) {
     pending: s.pending || [],
     groupsPdf: s.groupsPdf || '',
     format: s.format || null,
+    countries: s.countries || {},
     groupsTable: s.groupsTable || null,
     teams,
     groups: [...new Set(s.days.flatMap((d) => d.matches.map((m) => m[6])))].sort(),

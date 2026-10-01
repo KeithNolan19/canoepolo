@@ -780,3 +780,5 @@ fieldset .full { grid-column: 1 / -1; }
 .format-box dt { font-weight: 800; margin-top: 10px; color: var(--pool); }
 .format-box dd { margin: 2px 0 0; }
 .format-ask { margin: 16px 0 0; padding: 12px 14px; background: var(--bg); border-radius: 10px; }
+
+.tflag { font-size: 1.05em; }

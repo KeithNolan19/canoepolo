@@ -53,7 +53,7 @@
       <div class="group-card <%= dv === 'Women' ? 'is-women' : '' %>">
         <h5>Group <%= g %></h5>
         <ol>
-          <% gt[g].forEach(name => { %><li><a href="#schedule" data-team="<%= name %>|<%= dv %>"><%= name %></a></li><% }) %>
+          <% gt[g].forEach(name => { %><li><a href="#schedule" data-team="<%= name %>|<%= dv %>"><% if (schedule.countries[name]) { %><span class="tflag" aria-hidden="true"><%= flag(schedule.countries[name]) %></span> <% } %><%= name %></a></li><% }) %>
         </ol>
       </div>
       <% }) %>
@@ -88,7 +88,7 @@
         <label class="sf-team"><span>Team</span>
           <select data-f="team">
             <option value="">All teams</option>
-            <% ['Men', 'Women'].forEach(dv => { %><optgroup label="<%= dv %>"><% schedule.teams.filter(x => x.division === dv).forEach(x => { %><option value="<%= x.name %>|<%= x.division %>"><%= x.name %></option><% }) %></optgroup><% }) %>
+            <% ['Men', 'Women'].forEach(dv => { %><optgroup label="<%= dv %>"><% schedule.teams.filter(x => x.division === dv).forEach(x => { %><option value="<%= x.name %>|<%= x.division %>"><%= schedule.countries[x.name] ? flag(schedule.countries[x.name]) + ' ' : '' %><%= x.name %></option><% }) %></optgroup><% }) %>
           </select>
         </label>
         <label><span>Search</span><input type="search" data-f="q" placeholder="Type a team name"></label>
@@ -111,7 +111,7 @@
             <% sl.matches.forEach(m => { %>
             <li class="sched-match <%= m.division === 'Women' ? 'is-women' : 'is-men' %>" data-div="<%= m.division %>" data-grp="<%= m.group %>" data-pitch="<%= m.pitch %>" data-teams="<%= (m.home + ' ' + m.away).toLowerCase() %>" data-keys="<%= m.home %>|<%= m.division %>||<%= m.away %>|<%= m.division %>">
               <span class="sm-pitch">Pitch <%= m.pitch %></span>
-              <span class="sm-teams"><strong><%= m.home %></strong> <em>v</em> <strong><%= m.away %></strong></span>
+              <span class="sm-teams"><strong><% if (schedule.countries[m.home]) { %><span class="tflag" aria-hidden="true"><%= flag(schedule.countries[m.home]) %></span> <% } %><%= m.home %></strong> <em>v</em> <strong><% if (schedule.countries[m.away]) { %><span class="tflag" aria-hidden="true"><%= flag(schedule.countries[m.away]) %></span> <% } %><%= m.away %></strong></span>
               <span class="sm-meta"><%= m.division %> &middot; <%= m.group.length === 1 ? 'Group ' + m.group : m.group %> &middot; <%= m.code %></span>
             </li>
             <% }) %>
