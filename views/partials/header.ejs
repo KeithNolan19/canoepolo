@@ -21,6 +21,15 @@
 </head>
 <body>
 <a class="skip" href="#content">Skip to content</a>
+<% if (langs.length) { %>
+<div class="langbar" data-base="<%= BASE_URL %>">
+  <div class="wrap">
+    <span class="lg-label">Translate with Google:</span>
+    <ul class="lg-list"><% langs.forEach(l => { %><li><a href="<%= l.url %>" lang="<%= l.code %>" hreflang="<%= l.code %>" rel="nofollow noopener" target="_blank"><%= l.name %></a></li><% }) %></ul>
+    <a class="lg-back" href="<%= BASE_URL %>" hidden>Back to English</a>
+  </div>
+</div>
+<% } %>
 <header class="site-header">
   <div class="wrap bar">
     <a class="brand" href="/" aria-label="canoepolo.eu home">

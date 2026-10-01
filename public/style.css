@@ -806,3 +806,13 @@ img.fl { max-width: none; min-width: 20px; }
 .sched-export { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 0 0 16px; }
 .sched-export[hidden] { display: none; }
 .sched-export > span { font-weight: 650; color: var(--muted); font-size: .92rem; }
+
+/* Language links */
+.langbar { background: var(--deep); color: #d7e9e5; font-size: .84rem; }
+.langbar .wrap { display: flex; align-items: center; gap: 12px; min-height: 36px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+.langbar .wrap::-webkit-scrollbar { display: none; }
+.lg-label { color: #9cc7bf; flex: none; }
+.lg-list { list-style: none; display: flex; gap: 4px 14px; margin: 0; padding: 0; }
+.lg-list[hidden], .lg-label[hidden], .lg-back[hidden] { display: none; }
+.langbar a { color: #fff; text-decoration: none; font-weight: 600; padding: 8px 0; display: inline-block; }
+.langbar a:hover { text-decoration: underline; }

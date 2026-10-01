@@ -78,6 +78,17 @@ app.use(cookieSession({
   maxAge: 12 * 60 * 60 * 1000, // 12 hours
 }));
 
+// "Read this site in" links. Each one is a plain link to Google's translated copy of the page, so nothing is sent
+// to Google unless a visitor clicks. Only shown on the real https site, not on the admin pages.
+const LANGS = [['de', 'Deutsch'], ['fr', 'Français'], ['es', 'Español'], ['it', 'Italiano'], ['nl', 'Nederlands'], ['da', 'Dansk'], ['cs', 'Čeština'], ['pl', 'Polski']];
+function translateLinks(req) {
+  let u;
+  try { u = new URL(BASE_URL); } catch { return []; }
+  if (u.protocol !== 'https:' || /^(localhost|127\.|\[)/.test(u.hostname) || req.path.startsWith('/admin')) return [];
+  const host = u.hostname.replace(/-/g, '--').replace(/\./g, '-') + '.translate.goog';
+  return LANGS.map(([code, name]) => ({ code, name, url: `https://${host}${req.originalUrl.split('?')[0]}?_x_tr_sl=en&_x_tr_tl=${code}&_x_tr_hl=${code}&_x_tr_pto=wapp` }));
+}
+
 // Helpers available in every page template
 app.use((req, res, next) => {
   // Only the admin area uses a cookie. Public visitors get no cookies at all.
@@ -92,6 +103,7 @@ app.use((req, res, next) => {
     fmtDate,
     today: T.today(),
     canonical: BASE_URL + req.path,
+    langs: translateLinks(req),
   });
   next();
 });

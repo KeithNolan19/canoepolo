@@ -100,3 +100,14 @@ document.addEventListener('click', (e) => {
   if (!external && !download) return;
   try { navigator.sendBeacon('/_c', new Blob(['t=' + encodeURIComponent(href)], { type: 'application/x-www-form-urlencoded' })); } catch (err) { /* ignore */ }
 });
+
+// On Google's translated copy of the site, swap the language links for a way back to the English original.
+(function () {
+  const bar = document.querySelector('.langbar');
+  if (!bar || !/\.translate\.goog$/.test(location.hostname)) return;
+  const back = bar.querySelector('.lg-back');
+  bar.querySelector('.lg-list').hidden = true;
+  bar.querySelector('.lg-label').hidden = true;
+  back.href = bar.dataset.base + location.pathname;
+  back.hidden = false;
+})();
