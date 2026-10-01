@@ -118,6 +118,7 @@ BATCHES.push({
 // Updates to tournaments that are already listed. Each runs once and merges its fields into the matching
 // tournament (same name and start date), so later edits in the admin panel are never overwritten again.
 const PATCHES = [
+
   {
     id: 'milan-ecc-2026-bulletin-1',
     match: { name: 'Paddle Europe Canoe Polo Club Championships 2026', start_date: '2026-10-02' },
@@ -140,7 +141,11 @@ const PATCHES = [
       ].join('\n\n'),
     },
   },
-];
+  {
+    id: 'milan-ecc-2026-friday-timetable',
+    match: { name: 'Paddle Europe Canoe Polo Club Championships 2026', start_date: '2026-10-02' },
+    set: { documents_text: 'Bulletin 1 | /docs/milan-ecc-2026-bulletin-1.pdf\nFriday timetable | /docs/milan-ecc-2026-friday-timetable.pdf' },
+  },];
 
 function run() {
   const done = new Set(db.prepare('SELECT id FROM imports').all().map((r) => r.id));
