@@ -100,6 +100,21 @@ BATCHES.push({
 });
 
 
+BATCHES.push({
+  id: 'germany-autumn-2026-10-01',
+  tournaments: [
+    {
+      name: 'Bundesländervergleichskampf 2026',
+      start_date: '2026-10-03', end_date: '2026-10-04',
+      city: 'Ennepetal', country: 'DE',
+      venue: 'Wupper, Ackersiepen 98B',
+      level: 'National Championships',
+      description: 'Annual German inter-state canoe polo competition, where teams from the German regional canoe associations play each other.',
+      source_url: 'https://vkb-ev.de/calendar/kanupolo/',
+    },
+  ],
+});
+
 // Updates to tournaments that are already listed. Each runs once and merges its fields into the matching
 // tournament (same name and start date), so later edits in the admin panel are never overwritten again.
 const PATCHES = [
