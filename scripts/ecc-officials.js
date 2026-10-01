@@ -65,7 +65,7 @@ function head(first) {
     doc.font('B').fontSize(17).fillColor(INK).text('ECC 2026, Friday 2 October', X, 36);
     doc.font('M').fontSize(11).fillColor(MUTED).text('Referees and table officials', X, doc.y);
     doc.moveDown(0.4);
-    doc.font('R').fontSize(8.5).fillColor(INK).text('Provisional list from the organisers. An updated list will follow, so check canoepolo.eu for the latest. A team name means that team supplies the official. Where the same team is shown twice, that team supplies both referees, because there are not enough ICF referees.', X, doc.y, { width: W });
+    doc.font('R').fontSize(8.5).fillColor(INK).text('Provisional list, directly from the organiser. There may be a discrepancy, which the organiser will check and clear up soon. An updated list will follow, so check canoepolo.eu for the latest. A team name means that team supplies the official. Where the same team is shown twice, that team supplies both referees, because there are not enough ICF referees.', X, doc.y, { width: W });
     doc.moveDown(0.6);
   }
   const y = doc.y;

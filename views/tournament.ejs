@@ -30,6 +30,8 @@
       <% if (t.registration_deadline) { %><tr><th scope="row">Registration closes</th><td><%= fmtDate(t.registration_deadline) %><% if (t.registration_deadline < today) { %> <span class="flag-label cancelled">Closed</span><% } %></td></tr><% } %>
     </table>
 
+    <% if (schedule && schedule.notice) { %><div class="notice" role="note"><strong>Note:</strong> <%= schedule.notice %></div><% } %>
+
     <% if (t.documents.length) { %>
     <h2 class="sub-head">Documents</h2>
     <ul class="doc-list">

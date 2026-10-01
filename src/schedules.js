@@ -5,6 +5,7 @@
 const SCHEDULES = {
   'paddle-europe-canoe-polo-club-championships-2026': {
     hidden: false,
+    notice: 'All files and schedules on this page come directly from the organiser. There may be a discrepancy between them (for example, some Friday match slots and the referee list do not fully agree). The organiser will check this and clear it up soon. Please check back for updates.',
     headline: 'The full timetable is here: Friday, Saturday and Sunday.',
     pending: [],
     groupsPdf: '/docs/milan-ecc-2026-groups.pdf',
@@ -257,6 +258,7 @@ function forSlug(slug) {
   const teams = [...teamSet.values()].sort((a, b) => a.name.localeCompare(b.name) || a.division.localeCompare(b.division));
   return {
     note: s.note,
+    notice: s.notice || '',
     headline: s.headline || '',
     pending: s.pending || [],
     groupsPdf: s.groupsPdf || '',
