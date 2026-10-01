@@ -376,6 +376,8 @@ app.get('/api/tournaments/:slug', (req, res) => {
 });
 
 // ---------- Blog ----------
+const GAZEBOS = require('./gazebos');
+app.get(`/tournaments/${GAZEBOS.slug}/gazebos`, (req, res) => res.render('gazebos', { g: GAZEBOS, title: 'ECC 2026 competition area and gazebo placement', metaDescription: 'Gazebo and boat storage placement and site map for the 2026 European Club Championships in Milan.' }));
 app.get('/blog', (req, res) => res.render('blog', { title: 'Blog', posts: B.listPublic(), readMins: B.readMins, metaDescription: 'Canoe polo (kayak polo) guides, news and how-tos from canoepolo.eu: how the game works, where to play, and how to get involved.' }));
 app.get('/blog/feed.xml', (req, res) => {
   const x = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

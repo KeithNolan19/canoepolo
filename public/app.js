@@ -134,3 +134,20 @@ window.cpEvent = function (name) {
   d.addEventListener('cancel', close);
   setTimeout(function () { d.showModal(); }, 400);
 })();
+
+// Live filter for lists: <input data-filter-list="id"> hides <li data-text> items that do not match.
+(function () {
+  document.querySelectorAll('input[data-filter-list]').forEach(function (inp) {
+    var list = document.getElementById(inp.getAttribute('data-filter-list'));
+    if (!list) return;
+    var none = list.parentNode.querySelector('.gz-none');
+    inp.addEventListener('input', function () {
+      var q = inp.value.trim().toLowerCase(), n = 0;
+      list.querySelectorAll('li').forEach(function (li) {
+        var ok = !q || (li.getAttribute('data-text') || '').indexOf(q) !== -1;
+        li.hidden = !ok; if (ok) n++;
+      });
+      if (none) none.hidden = n > 0;
+    });
+  });
+})();

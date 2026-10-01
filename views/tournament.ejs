@@ -33,7 +33,7 @@
     <% if (t.documents.length) { %>
     <h2 class="sub-head">Documents</h2>
     <ul class="doc-list">
-      <% t.documents.forEach(d => { %><li><a class="doc-link" href="<%= d.url %>" target="_blank" rel="noopener"><span class="doc-icon" aria-hidden="true">PDF</span><span><%= d.label %></span></a></li><% }) %>
+      <% t.documents.forEach(d => { %><li><% const pdf = /\.pdf$/i.test(d.url); %><a class="doc-link" href="<%= d.url %>"<%- pdf ? ' target="_blank" rel="noopener"' : '' %>><span class="doc-icon" aria-hidden="true"><%= pdf ? 'PDF' : 'MAP' %></span><span><%= d.label %></span></a></li><% }) %>
     </ul>
     <% } %>
 

@@ -1,0 +1,29 @@
+<%- include('partials/header', { fullWidth: true }) %>
+
+<div class="page-banner">
+  <div class="wrap">
+    <p class="crumbs"><a href="/">Home</a> / <a href="/tournaments">Tournaments</a> / <a href="/tournaments/<%= g.slug %>">ECC 2026</a> / Gazebos</p>
+    <h1>ECC 2026 competition area</h1>
+  </div>
+</div>
+
+<div class="wrap narrow-page">
+  <p class="lead">Every team has a boat storage space and a gazebo or tent. Find your team below, then look for the same number on the map.</p>
+
+  <label class="f-search gz-search"><span>Find your team</span><input type="search" data-filter-list="gz-list" placeholder="Type a team name" autocomplete="off"></label>
+
+  <ol class="gz-list" id="gz-list">
+    <% g.teams.forEach((name, i) => { %>
+    <li data-text="<%= name.toLowerCase() %>"><span class="gz-n"><%= i + 1 %></span><span class="gz-name"><%= name || 'Not assigned' %></span></li>
+    <% }) %>
+  </ol>
+  <p class="gz-none" hidden>No team matches. Check the spelling or look at the full list.</p>
+
+  <h2 class="sub-head">Site map</h2>
+  <p>Tap the map to open it full size and zoom in. The numbers in the green areas match the list above. Red areas are the numbered buildings, HQ is the competition headquarters, and the four pitches are along the water.</p>
+  <a href="<%= g.image %>" target="_blank" rel="noopener"><img class="gz-map" src="<%= g.image %>" alt="Site map of the ECC 2026 competition area showing gazebo and boat storage numbers 1 to 30, the HQ building and pitches 1 to 4" width="1800" height="1000"></a>
+  <p class="muted">Placement list and map from the organisers. Check the official bulletin for updates.</p>
+  <p><a class="btn" href="/tournaments/<%= g.slug %>">Back to information and schedule</a></p>
+</div>
+
+<%- include('partials/footer') %>
