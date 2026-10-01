@@ -186,7 +186,7 @@
     el('line', { x1: W / 2, y1: 0, x2: W / 2, y2: H }, lines);
     [6, W - 6].forEach((x) => el('line', { x1: x, y1: 0, x2: x, y2: H, 'stroke-dasharray': '0.5 0.35' }, lines));
     el('circle', { cx: W / 2, cy: CY, r: 0.25, fill: COLORS.line, stroke: 'none' }, lines);
-    const labels = el('g', { fill: COLORS.line, 'font-size': 0.7, 'font-family': 'Archivo, sans-serif', opacity: 0.8 }, svg);
+    const labels = el('g', { fill: COLORS.line, 'font-size': 0.7, 'font-family': 'Poppins, sans-serif', opacity: 0.8 }, svg);
     el('text', { x: 6, y: H + 1.1, 'text-anchor': 'middle' }, labels).textContent = '6 m';
     el('text', { x: W - 6, y: H + 1.1, 'text-anchor': 'middle' }, labels).textContent = '6 m';
     el('text', { x: W / 2, y: H + 1.1, 'text-anchor': 'middle' }, labels).textContent = '35 × 23 m';
@@ -239,7 +239,7 @@
     el('circle', { cx: 0, cy: 0, r: 0.42, fill: team === 'w' ? '#0a3b36' : '#ffffff', opacity: 0.18 }, g);
     const t = el('text', {
       x: 0, y: 0.02, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': 0.62, 'font-weight': 700,
-      'font-family': 'Archivo, sans-serif', fill: COLORS[team + 'Text'], transform: `rotate(${-ang})`,
+      'font-family': 'Poppins, sans-serif', fill: COLORS[team + 'Text'], transform: `rotate(${-ang})`,
     }, g);
     t.textContent = n;
     // turning handle at the bow
