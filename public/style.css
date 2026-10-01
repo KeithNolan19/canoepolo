@@ -719,3 +719,15 @@ fieldset .full { grid-column: 1 / -1; }
 .sched-pending { padding: 18px 20px; border: 2px dashed var(--line); border-radius: var(--r-lg); margin: 0 0 18px; }
 .sched-pending .sched-head { margin-bottom: 6px; }
 .sched-pending p { margin: 0; color: var(--muted); }
+
+/* ---------- Groups ---------- */
+.groups-title { font-size: 1.35rem; margin: 18px 0 6px; }
+.groups-div { font-size: 1rem; font-stretch: 100%; color: var(--muted); margin: 14px 0 8px; text-transform: uppercase; letter-spacing: .05em; }
+.groups-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.group-card { background: var(--card); border: 1px solid var(--line); border-top: 5px solid var(--pool); border-radius: var(--r); padding: 12px 14px 10px; }
+.group-card.is-women { border-top-color: var(--ball); }
+.group-card h5 { font-size: .95rem; margin: 0 0 8px; }
+.group-card ol { margin: 0; padding-left: 20px; font-size: .95rem; line-height: 1.7; }
+.group-card a { color: var(--ink); text-decoration-color: var(--line); }
+.group-card a:hover { color: var(--link); text-decoration-color: currentColor; }
+@media (max-width: 760px) { .groups-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

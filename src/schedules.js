@@ -5,6 +5,20 @@ const SCHEDULES = {
   'paddle-europe-canoe-polo-club-championships-2026': {
     headline: 'Friday timetable is here. Saturday and Sunday will be released soon.',
     pending: ['Saturday 3 October', 'Sunday 4 October'],
+    groupsPdf: '/docs/milan-ecc-2026-groups.pdf',
+    groupsTable: {
+      Men: {
+        A: ["KSVH Berlin", "Branik", "Deventer", "Corbeil-Essenos", "Coimbra", "Kilkenny"],
+        B: ["Thurgauer", "Odysseus", "Avranches", "Dispersus", "Iper", "Setubal"],
+        C: ["Praha", "Skovshoveld", "KGV Essen", "Malaga", "Chiavari", "Poznan"],
+        D: ["Ulster", "Gent", "Warszawa", "Zurich", "Castellón", "Napoli", "Linkopig"],
+      },
+      Women: {
+        A: ["Duisburg", "Pont D'ouilly", "Neptun", "Ichnusa", "Zurich"],
+        B: ["Avranches", "KRM Essen", "Thurgauer", "Burriana", "Praha"],
+        C: ["Alaquas", "Kingston", "Rovigo", "Deventer", "Mullinger"],
+      },
+    },
     note: 'Provisional timetable from the organisers. Times and matches can change. For any questions or problems, contact the organisers directly.',
     days: [
       {
@@ -84,6 +98,8 @@ function forSlug(slug) {
     note: s.note,
     headline: s.headline || '',
     pending: s.pending || [],
+    groupsPdf: s.groupsPdf || '',
+    groupsTable: s.groupsTable || null,
     teams,
     groups: [...new Set(s.days.flatMap((d) => d.matches.map((m) => m[6])))].sort(),
     pitches: [...new Set(s.days.flatMap((d) => d.matches.map((m) => m[2])))].sort((a, b) => a - b),

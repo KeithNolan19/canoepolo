@@ -45,6 +45,16 @@
     // choosing a team clears the free-text search, and the other way round
     field('team').addEventListener('change', () => { if (get('team')) field('q').value = ''; });
     field('q').addEventListener('input', () => { if (get('q')) field('team').value = ''; });
+    // team names in the groups list jump to that team's matches
+    document.querySelectorAll('a[data-team]').forEach((a) => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        field('team').value = a.dataset.team;
+        field('q').value = '';
+        apply();
+        bar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
     bar.addEventListener('input', apply);
     bar.addEventListener('change', apply);
   });

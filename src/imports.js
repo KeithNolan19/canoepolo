@@ -145,7 +145,12 @@ const PATCHES = [
     id: 'milan-ecc-2026-friday-timetable',
     match: { name: 'Paddle Europe Canoe Polo Club Championships 2026', start_date: '2026-10-02' },
     set: { documents_text: 'Bulletin 1 | /docs/milan-ecc-2026-bulletin-1.pdf\nFriday timetable | /docs/milan-ecc-2026-friday-timetable.pdf' },
-  },];
+  },  {
+    id: 'milan-ecc-2026-groups',
+    match: { name: 'Paddle Europe Canoe Polo Club Championships 2026', start_date: '2026-10-02' },
+    set: { documents_text: 'Bulletin 1 | /docs/milan-ecc-2026-bulletin-1.pdf\nGroups | /docs/milan-ecc-2026-groups.pdf\nFriday timetable | /docs/milan-ecc-2026-friday-timetable.pdf' },
+  },
+];
 
 function run() {
   const done = new Set(db.prepare('SELECT id FROM imports').all().map((r) => r.id));
