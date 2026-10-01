@@ -2141,6 +2141,11 @@ const PATCHES = [
     set: { documents_text: 'Bulletin 1 | /docs/milan-ecc-2026-bulletin-1.pdf\nGroups | /docs/milan-ecc-2026-groups.pdf' },
   },
   {
+    id: 'milan-ecc-2026-full-timetable',
+    match: { name: 'Paddle Europe Canoe Polo Club Championships 2026', start_date: '2026-10-02' },
+    set: { documents_text: 'Bulletin 1 | /docs/milan-ecc-2026-bulletin-1.pdf\nGroups | /docs/milan-ecc-2026-groups.pdf\nTimetable (Friday, Saturday, Sunday) | /docs/milan-ecc-2026-schedule.pdf' },
+  },
+  {
     id: 'pylkwier-2026-details',
     match: { name: 'Pylkwier 2026', start_date: '2026-10-03' },
     set: {

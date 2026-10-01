@@ -4,7 +4,7 @@
 // To add a day, copy the PDF into public/docs/, add a day below and list the matches.
 const SCHEDULES = {
   'paddle-europe-canoe-polo-club-championships-2026': {
-    hidden: true, // set to false (or delete this line) to publish the timetable
+    hidden: false,
     headline: 'The full timetable is here: Friday, Saturday and Sunday.',
     pending: [],
     groupsPdf: '/docs/milan-ecc-2026-groups.pdf',
