@@ -154,7 +154,7 @@ BATCHES.push({
       divisions: ['Open', 'Women'],
       entry_fee: 'GBP 160 to 320 per team, depending on division',
       registration_deadline: '2026-10-02',
-      description: 'Opening weekend of the 2026/27 North West and Central regional league: Divisions 1 to 4 and a women\'s division. The second weekend is on 20-21 March 2027. Organiser: Mike Fletcher. Registration and contact details are on the source page.',
+      description: 'Opening weekend of the 2026/27 North West and Central regional league: Divisions 1 to 4 and a women\'s division. The second weekend is on 20-21 March 2027. Registration and contact details are on the source page.',
       source_url: 'https://cpt.kayakers.nl/View/deb94838-aa30-4c5b-83d4-075571cba873',
     },
     {
@@ -164,7 +164,7 @@ BATCHES.push({
       venue: 'Shiers Drive',
       level: 'National League',
       divisions: ['Open', 'Women'],
-      description: 'Final weekend of the 2026/27 North West and Central regional league. The opening weekend is on 3-4 October 2026. Organiser: Mike Fletcher. Registration and contact details are on the source page.',
+      description: 'Final weekend of the 2026/27 North West and Central regional league. The opening weekend is on 3-4 October 2026. Registration and contact details are on the source page.',
       source_url: 'https://cpt.kayakers.nl/View/deb94838-aa30-4c5b-83d4-075571cba873',
     },
     {
@@ -174,7 +174,7 @@ BATCHES.push({
       venue: 'Haley\'s Terrace',
       level: 'National League',
       divisions: ['Open'],
-      description: 'Round 1 of 6 in the Yorkshire Division 2 regional league (Yorkshire and Humber). Organiser: Paul Elliott. Registration and contact details are on the source page.',
+      description: 'Round 1 of 6 in the Yorkshire Division 2 regional league (Yorkshire and Humber). Registration and contact details are on the source page.',
       source_url: 'https://cpt.kayakers.nl/View/2026yorkshire2',
     },
     {
@@ -184,7 +184,7 @@ BATCHES.push({
       venue: 'Haley\'s Terrace',
       level: 'National League',
       divisions: ['Open'],
-      description: 'Round 2 of 6 in the Yorkshire Division 2 regional league (Yorkshire and Humber). Organiser: Paul Elliott. Registration and contact details are on the source page.',
+      description: 'Round 2 of 6 in the Yorkshire Division 2 regional league (Yorkshire and Humber). Registration and contact details are on the source page.',
       source_url: 'https://cpt.kayakers.nl/View/2026yorkshire2',
     },
     {
@@ -194,7 +194,7 @@ BATCHES.push({
       venue: 'Haley\'s Terrace',
       level: 'National League',
       divisions: ['Open'],
-      description: 'Round 3 of 6 in the Yorkshire Division 2 regional league (Yorkshire and Humber). Organiser: Paul Elliott. Registration and contact details are on the source page.',
+      description: 'Round 3 of 6 in the Yorkshire Division 2 regional league (Yorkshire and Humber). Registration and contact details are on the source page.',
       source_url: 'https://cpt.kayakers.nl/View/2026yorkshire2',
     },
     {
@@ -204,7 +204,7 @@ BATCHES.push({
       venue: 'Haley\'s Terrace',
       level: 'National League',
       divisions: ['Open'],
-      description: 'Round 4 of 6 in the Yorkshire Division 2 regional league (Yorkshire and Humber). Organiser: Paul Elliott. Registration and contact details are on the source page.',
+      description: 'Round 4 of 6 in the Yorkshire Division 2 regional league (Yorkshire and Humber). Registration and contact details are on the source page.',
       source_url: 'https://cpt.kayakers.nl/View/2026yorkshire2',
     },
     {
@@ -214,7 +214,7 @@ BATCHES.push({
       venue: 'Haley\'s Terrace',
       level: 'National League',
       divisions: ['Open'],
-      description: 'Round 5 of 6 in the Yorkshire Division 2 regional league (Yorkshire and Humber). Organiser: Paul Elliott. Registration and contact details are on the source page.',
+      description: 'Round 5 of 6 in the Yorkshire Division 2 regional league (Yorkshire and Humber). Registration and contact details are on the source page.',
       source_url: 'https://cpt.kayakers.nl/View/2026yorkshire2',
     },
     {
@@ -224,7 +224,7 @@ BATCHES.push({
       venue: 'Haley\'s Terrace',
       level: 'National League',
       divisions: ['Open'],
-      description: 'Round 6 of 6 in the Yorkshire Division 2 regional league (Yorkshire and Humber). Organiser: Paul Elliott. Registration and contact details are on the source page.',
+      description: 'Round 6 of 6 in the Yorkshire Division 2 regional league (Yorkshire and Humber). Registration and contact details are on the source page.',
       source_url: 'https://cpt.kayakers.nl/View/2026yorkshire2',
     },
     {
@@ -234,7 +234,7 @@ BATCHES.push({
       venue: 'Haley\'s Terrace',
       level: 'National League',
       divisions: ['Open'],
-      description: 'Round 1 of 4 in the Yorkshire Division 3 regional league (Yorkshire and Humber). Organiser: Paul Elliott. Registration and contact details are on the source page.',
+      description: 'Round 1 of 4 in the Yorkshire Division 3 regional league (Yorkshire and Humber). Registration and contact details are on the source page.',
       source_url: 'https://cpt.kayakers.nl/View/2026yorkshire3',
     },
     {
@@ -244,7 +244,7 @@ BATCHES.push({
       venue: 'Haley\'s Terrace',
       level: 'National League',
       divisions: ['Open'],
-      description: 'Round 2 of 4 in the Yorkshire Division 3 regional league (Yorkshire and Humber). Organiser: Paul Elliott. Registration and contact details are on the source page.',
+      description: 'Round 2 of 4 in the Yorkshire Division 3 regional league (Yorkshire and Humber). Registration and contact details are on the source page.',
       source_url: 'https://cpt.kayakers.nl/View/2026yorkshire3',
     },
     {
@@ -254,7 +254,7 @@ BATCHES.push({
       venue: 'Haley\'s Terrace',
       level: 'National League',
       divisions: ['Open'],
-      description: 'Round 3 of 4 in the Yorkshire Division 3 regional league (Yorkshire and Humber). Organiser: Paul Elliott. Registration and contact details are on the source page.',
+      description: 'Round 3 of 4 in the Yorkshire Division 3 regional league (Yorkshire and Humber). Registration and contact details are on the source page.',
       source_url: 'https://cpt.kayakers.nl/View/2026yorkshire3',
     },
     {
@@ -264,7 +264,7 @@ BATCHES.push({
       venue: 'Haley\'s Terrace',
       level: 'National League',
       divisions: ['Open'],
-      description: 'Round 4 of 4 in the Yorkshire Division 3 regional league (Yorkshire and Humber). Organiser: Paul Elliott. Registration and contact details are on the source page.',
+      description: 'Round 4 of 4 in the Yorkshire Division 3 regional league (Yorkshire and Humber). Registration and contact details are on the source page.',
       source_url: 'https://cpt.kayakers.nl/View/2026yorkshire3',
     },
     {
@@ -274,7 +274,7 @@ BATCHES.push({
       venue: 'Haley\'s Terrace',
       level: 'National League',
       divisions: ['Women'],
-      description: 'Round 1 of 2 in the Yorkshire Women regional league (Yorkshire and Humber). Organiser: Paul Elliott. Registration and contact details are on the source page.',
+      description: 'Round 1 of 2 in the Yorkshire Women regional league (Yorkshire and Humber). Registration and contact details are on the source page.',
       source_url: 'https://cpt.kayakers.nl/View/2026yorkshirew',
     },
     {
@@ -284,7 +284,7 @@ BATCHES.push({
       venue: 'Haley\'s Terrace',
       level: 'National League',
       divisions: ['Women'],
-      description: 'Round 2 of 2 in the Yorkshire Women regional league (Yorkshire and Humber). Organiser: Paul Elliott. Registration and contact details are on the source page.',
+      description: 'Round 2 of 2 in the Yorkshire Women regional league (Yorkshire and Humber). Registration and contact details are on the source page.',
       source_url: 'https://cpt.kayakers.nl/View/2026yorkshirew',
     },
   ],
@@ -2091,7 +2091,7 @@ const PATCHES = [
     set: {
       registration_url: 'https://cpt.kayakers.nl/Registration/deb94838-aa30-4c5b-83d4-075571cba873',
       registration_deadline: '2026-10-02',
-      description: 'Opening weekend of the 2026/27 North West and Central regional league: Divisions 1 to 4 and a women\'s division. The second weekend is on 20-21 March 2027. Organiser: Mike Fletcher.\n\nDivisions (max teams, fee per team): Division 1 (8 teams, GBP 320), Division 2 (8, GBP 320), Division 3 (8, GBP 320), Division 4 (6, GBP 160), women\'s (8, GBP 160). One pitch. Online registration opens 2 June and closes 2 October.',
+      description: 'Opening weekend of the 2026/27 North West and Central regional league: Divisions 1 to 4 and a women\'s division. The second weekend is on 20-21 March 2027.\n\nDivisions (max teams, fee per team): Division 1 (8 teams, GBP 320), Division 2 (8, GBP 320), Division 3 (8, GBP 320), Division 4 (6, GBP 160), women\'s (8, GBP 160). One pitch. Online registration opens 2 June and closes 2 October.',
     },
   },
   {
@@ -2100,7 +2100,7 @@ const PATCHES = [
     set: {
       registration_url: 'https://cpt.kayakers.nl/Registration/deb94838-aa30-4c5b-83d4-075571cba873',
       registration_deadline: '2026-10-02',
-      description: 'Final weekend of the 2026/27 North West and Central regional league. The opening weekend is on 3-4 October 2026. Organiser: Mike Fletcher.\n\nDivisions (max teams, fee per team): Division 1 (8 teams, GBP 320), Division 2 (8, GBP 320), Division 3 (8, GBP 320), Division 4 (6, GBP 160), women\'s (8, GBP 160). One pitch. Online registration opens 2 June and closes 2 October.',
+      description: 'Final weekend of the 2026/27 North West and Central regional league. The opening weekend is on 3-4 October 2026.\n\nDivisions (max teams, fee per team): Division 1 (8 teams, GBP 320), Division 2 (8, GBP 320), Division 3 (8, GBP 320), Division 4 (6, GBP 160), women\'s (8, GBP 160). One pitch. Online registration opens 2 June and closes 2 October.',
     },
   },
 
@@ -2161,6 +2161,17 @@ const PATCHES = [
   },
 ];
 
+// One-time clean-ups of data that was imported earlier (each runs once, recorded in the imports table)
+const SCRUBS = [
+  {
+    id: 'remove-organiser-names-2026-10-01',
+    sql: [
+      ["UPDATE tournaments SET description = replace(description, ' Organiser: Paul Elliott.', '') WHERE description LIKE '%Organiser: Paul Elliott.%'"],
+      ["UPDATE tournaments SET description = replace(description, ' Organiser: Mike Fletcher.', '') WHERE description LIKE '%Organiser: Mike Fletcher.%'"],
+    ],
+  },
+];
+
 function run() {
   const done = new Set(db.prepare('SELECT id FROM imports').all().map((r) => r.id));
   const exists = db.prepare('SELECT id FROM tournaments WHERE lower(name) = lower(?) AND start_date = ?');
@@ -2178,6 +2189,14 @@ function run() {
       db.prepare('INSERT INTO imports (id) VALUES (?)').run(batch.id);
     })();
     console.log(`Import ${batch.id}: added ${added} tournament(s).`);
+  }
+  for (const sc of SCRUBS) {
+    if (done.has(sc.id)) continue;
+    db.transaction(() => {
+      sc.sql.forEach(([q]) => db.prepare(q).run());
+      db.prepare('INSERT INTO imports (id) VALUES (?)').run(sc.id);
+    })();
+    console.log(`Clean-up ${sc.id} done.`);
   }
   const find = db.prepare('SELECT * FROM tournaments WHERE lower(name) = lower(?) AND start_date = ?');
   for (const patch of PATCHES) {

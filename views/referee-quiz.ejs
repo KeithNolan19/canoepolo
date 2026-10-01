@@ -28,7 +28,7 @@
             <% Object.keys(COUNTRIES).sort(function (a, b) { return COUNTRIES[a].localeCompare(COUNTRIES[b]); }).forEach(function (c) { %><option value="<%= c %>"><%= COUNTRIES[c] %></option><% }) %>
           </select>
         </label>
-        <label class="check"><input type="checkbox" id="qj-consent"> I'm happy for my name, club, country and score to be shown publicly on the leaderboard. I can ask to have it removed at any time.</label>
+        <label class="check"><input type="checkbox" id="qj-consent"> I am 16 or over, and I'm happy for my name, club, country and score to be shown publicly on the leaderboard. I can ask to have it removed at any time.</label>
         <p id="qj-error" class="notice red" role="alert" hidden></p>
         <p><button type="submit" class="btn primary" id="quiz-start">Start the quiz</button></p>
       </form>

@@ -57,6 +57,14 @@ const FLAGS = new Set(require('fs').readdirSync(path.join(__dirname, '..', 'publ
 const flagImg = (c) => { c = String(c || '').toLowerCase(); return FLAGS.has(c) ? `<img class="fl" src="/flags/${c}.svg" alt="" width="20" height="15" loading="lazy">` : ''; };
 app.use(express.urlencoded({ extended: true, limit: '100kb' }));
 app.use(express.static(path.join(__dirname, '..', 'public'), { maxAge: IS_PROD ? '1d' : 0 }));
+// Overall brake on abusive traffic (generous for real visitors)
+app.use(rateLimit({ windowMs: 60 * 1000, limit: 300, standardHeaders: false, legacyHeaders: false, skip: (req) => req.path === '/health' }));
+app.use((req, res, next) => {
+  res.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()');
+  if (req.path.startsWith('/admin')) res.set('Cache-Control', 'no-store');
+  next();
+});
+app.get('/.well-known/security.txt', (req, res) => res.type('text/plain').send(`Contact: https://wa.me/353876789927\nPreferred-Languages: en\nCanonical: ${BASE_URL}/.well-known/security.txt\nExpires: 2027-10-01T00:00:00.000Z\n`));
 const stats = require('./stats');
 app.use(stats.middleware);
 app.post('/_c', rateLimit({ windowMs: 60 * 1000, limit: 60, standardHeaders: false, legacyHeaders: false }), stats.clickHandler);
