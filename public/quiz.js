@@ -93,10 +93,32 @@
 
   let player = null, token = '';
 
+  // Keep the quiz in this browser tab so a refresh carries on where you left off.
+  const KEY = 'cp-quiz-state';
+  const ser = (it) => ({ ...it, sig: it.sig ? it.sig.id : undefined, options: it.kind === 'sig-which' ? it.options.map((o) => o.id) : it.options });
+  const de = (it) => ({ ...it, sig: it.sig ? SIG.byId[it.sig] : undefined, options: it.kind === 'sig-which' ? it.options.map((id) => SIG.byId[id]) : it.options });
+  function save() {
+    try { sessionStorage.setItem(KEY, JSON.stringify({ qs: qs.map(ser), score, answers: answers.map((a) => ({ chosen: a.chosen, right: a.right })), player, token })); } catch (e) { /* ignore */ }
+  }
+  function clearSaved() { try { sessionStorage.removeItem(KEY); } catch (e) { /* ignore */ } }
+  function restore() {
+    try {
+      const d = JSON.parse(sessionStorage.getItem(KEY) || 'null');
+      if (!d || !Array.isArray(d.qs) || !d.qs.length || !Array.isArray(d.answers)) return false;
+      qs = d.qs.map(de);
+      if (qs.some((x) => (x.sig === undefined && x.kind === 'sig-what') || (x.kind === 'sig-which' && x.options.some((o) => !o)))) return false;
+      answers = d.answers.map((a, n) => ({ item: qs[n], chosen: a.chosen, right: a.right }));
+      score = Number(d.score) || 0; player = d.player || null; token = d.token || '';
+      i = answers.length;
+      return true;
+    } catch (e) { return false; }
+  }
+
   function start() {
     qs = newQuiz(); i = 0; score = 0; answers = [];
     token = '';
-    if (player) fetch('/referee/quiz/token').then((r) => r.json()).then((d) => { token = d.t || ''; }).catch(() => {});
+    if (player) fetch('/referee/quiz/token').then((r) => r.json()).then((d) => { token = d.t || ''; save(); }).catch(() => {});
+    save();
     show();
   }
 
@@ -166,6 +188,7 @@
       if (b.dataset.value === item.a) b.classList.add('is-right');
       else if (b === btn) b.classList.add('is-wrong');
     });
+    save();
     root.querySelector('.quiz-score').textContent = `Score: ${score}`;
     const fb = h('div', 'quiz-feedback ' + (right ? 'ok' : 'no'));
     fb.setAttribute('role', 'status');
@@ -201,6 +224,7 @@
     const back = h('a', 'btn', 'Study the rules'); back.href = '/referee#rules'; actions.appendChild(back);
     res.appendChild(actions);
     submitScore(res);
+    clearSaved();
     const missed = answers.filter((x) => !x.right);
     if (missed.length) {
       res.appendChild(h('h3', 'quiz-review-head', 'Questions to review'));
@@ -219,6 +243,7 @@
     root.scrollIntoView({ block: 'nearest' });
   }
 
+  if (restore()) { if (i >= qs.length) finish(); else show(); return; }
   const form = document.getElementById('quiz-form');
   form.addEventListener('submit', (e) => {
     e.preventDefault();
