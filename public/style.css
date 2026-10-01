@@ -816,3 +816,28 @@ img.fl { max-width: none; min-width: 20px; }
 .lg-list[hidden], .lg-label[hidden], .lg-back[hidden] { display: none; }
 .langbar a { color: #fff; text-decoration: none; font-weight: 600; padding: 8px 0; display: inline-block; }
 .langbar a:hover { text-decoration: underline; }
+
+/* Tournament map */
+.map-controls { display: flex; flex-wrap: wrap; gap: 10px 16px; margin: 4px 0 14px; }
+.seg { display: inline-flex; border: 1.5px solid var(--line); border-radius: 999px; overflow: hidden; background: var(--card); }
+.seg a { padding: 8px 16px; text-decoration: none; font-weight: 650; font-size: .94rem; color: var(--ink); }
+.seg a.on { background: var(--deep); color: #fff; }
+.tmap { display: block; width: 100%; height: auto; border-radius: var(--r-lg); border: 1px solid var(--line); background: var(--tile); }
+.tmap-sea { fill: color-mix(in srgb, var(--pool) 16%, var(--tile)); }
+.tmap-land { fill: var(--card); stroke: var(--line); stroke-width: .6; stroke-linejoin: round; }
+.tmap-pin { fill: var(--deep); stroke: #fff; stroke-width: 2; cursor: pointer; }
+.tmap-pin.approx { fill: var(--card); stroke: var(--deep); stroke-width: 2.5; }
+.tmap.past .tmap-pin { fill: var(--muted); }
+.tmap a:hover .tmap-pin, .tmap a:focus .tmap-pin, .tmap a.sel .tmap-pin { stroke: var(--ball); stroke-width: 3.5; }
+.tmap-n { fill: #fff; font-size: 14px; font-weight: 800; pointer-events: none; }
+.map-note { margin: 10px 0 18px; }
+.map-panel { border: 2px solid var(--deep); border-radius: var(--r-lg); padding: 16px 20px; background: var(--card); margin-bottom: 24px; }
+.map-panel[hidden] { display: none; }
+.map-places { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-bottom: 40px; }
+.map-place h3 { margin: 0 0 6px; font-size: 1.1rem; }
+.map-place { border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; background: var(--card); }
+.map-panel .map-place, .map-panel h3 { border: 0; padding: 0; }
+.map-items { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.map-items li { display: flex; flex-direction: column; }
+.map-items span { color: var(--muted); font-size: .9rem; }
+.tmap-n.sm { font-size: 8px; }

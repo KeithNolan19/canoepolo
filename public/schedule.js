@@ -66,3 +66,22 @@
     apply();
   });
 })();
+
+// Map page: clicking a pin shows that place's tournaments above the list.
+(function () {
+  'use strict';
+  const box = document.querySelector('[data-map]');
+  if (!box) return;
+  const panel = box.querySelector('[data-panel]');
+  box.querySelectorAll('[data-pin]').forEach((pin) => {
+    pin.addEventListener('click', (e) => {
+      const place = box.querySelector('[data-place="' + pin.dataset.pin + '"]');
+      if (!place) return;
+      e.preventDefault();
+      box.querySelectorAll('[data-pin]').forEach((p) => p.classList.toggle('sel', p === pin));
+      panel.innerHTML = place.innerHTML;
+      panel.hidden = false;
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  });
+})();

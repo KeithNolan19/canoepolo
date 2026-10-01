@@ -1,0 +1,63 @@
+<%- include('partials/header', { fullWidth: true }) %>
+
+<div class="page-banner">
+  <div class="wrap">
+    <p class="crumbs"><a href="/">Home</a> / <a href="/tournaments">Tournaments</a> / Map</p>
+    <h1>Tournament map</h1>
+  </div>
+</div>
+
+<div class="wrap">
+  <nav class="admin-tabs page-tabs" aria-label="Tournaments">
+    <a href="/tournaments">Upcoming</a>
+    <a href="/tournaments/calendar">Calendar</a>
+    <a href="/tournaments/map" class="on">Map</a>
+    <a href="/past">Past</a>
+    <a href="https://www.kayakers.nl/Account/Register" target="_blank" rel="noopener">Create a tournament</a>
+  </nav>
+
+  <div class="map-controls">
+    <div class="seg" role="group" aria-label="Show">
+      <a href="/tournaments/map?region=<%= view %>" class="<%= when === 'upcoming' ? 'on' : '' %>">Upcoming</a>
+      <a href="/tournaments/map?region=<%= view %>&when=past" class="<%= when === 'past' ? 'on' : '' %>">Past</a>
+    </div>
+    <div class="seg" role="group" aria-label="Region">
+      <% Object.entries(VIEWS).forEach(([k, v]) => { %><a href="/tournaments/map?region=<%= k %><%= when === 'past' ? '&when=past' : '' %>" class="<%= view === k ? 'on' : '' %>"><%= v.label %></a><% }) %>
+    </div>
+  </div>
+
+  <div data-map>
+    <svg class="tmap <%= when %>" viewBox="0 0 <%= m.w %> <%= m.h %>" role="img" aria-label="Map of <%= shown %> canoe polo tournaments">
+      <rect class="tmap-sea" width="<%= m.w %>" height="<%= m.h %>"/>
+      <path class="tmap-land" d="<%= m.land %>"/>
+      <% m.pins.forEach((p, i) => { %>
+      <a href="#place-<%= i %>" data-pin="<%= i %>" aria-label="<%= p.label %>: <%= p.items.length %> tournament<%= p.items.length === 1 ? '' : 's' %>">
+        <circle class="tmap-pin <%= p.exact ? '' : 'approx' %>" cx="<%= p.x %>" cy="<%= p.y %>" r="<%= p.r %>"><title><%= p.label %> (<%= p.items.length %>)</title></circle>
+        <% if (p.items.length > 1) { %><text class="tmap-n <%= view === 'world' ? 'sm' : '' %>" x="<%= p.x %>" y="<%= p.y + 5 %>" text-anchor="middle"><%= p.items.length %></text><% } %>
+      </a>
+      <% }) %>
+    </svg>
+    <p class="small-note map-note">Pins mark the town. Where only a country or region is known, the pin shows the middle of it (hollow pin). <%= shown %> of <%= total %> <%= when === 'past' ? 'past' : 'upcoming' %> tournaments are on this map<% if (shown < total) { %>; switch region to see the rest<% } %>.</p>
+
+    <div class="map-panel" data-panel hidden aria-live="polite"></div>
+
+    <% if (!m.pins.length) { %>
+      <div class="empty"><p>No tournaments to show on this map.</p></div>
+    <% } %>
+    <h2 class="sub-head">Tournaments on the map</h2>
+    <div class="map-places">
+      <% m.pins.slice().sort((a, b) => a.label.localeCompare(b.label)).forEach((p) => { const i = m.pins.indexOf(p); %>
+      <section id="place-<%= i %>" class="map-place" data-place="<%= i %>">
+        <h3><%- flagImg(p.country) %> <%= p.label %></h3>
+        <ul class="map-items">
+          <% p.items.forEach(t => { %>
+          <li><a href="/tournaments/<%= t.slug %>"><%= t.name %></a><span><%= fmtRange(t.start_date, t.end_date) %></span></li>
+          <% }) %>
+        </ul>
+      </section>
+      <% }) %>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

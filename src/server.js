@@ -243,6 +243,15 @@ app.get('/tournaments/calendar', (req, res) => {
   res.render('calendar', { title: `Tournament calendar: ${cal.label}`, cal, rows, filters, countries: T.countriesInUse(), nowM });
 });
 
+app.get('/tournaments/map', (req, res) => {
+  const MAP = require('./map');
+  const when = req.query.when === 'past' ? 'past' : 'upcoming';
+  const view = MAP.VIEWS[req.query.region] ? req.query.region : 'europe';
+  const rows = T.listPublic({ when, limit: 500 });
+  const m = MAP.places(rows, view);
+  res.render('map', { title: `Tournament map: ${MAP.VIEWS[view].label}`, metaDescription: 'Map of canoe polo tournaments around the world: see where the next events are.', when, view, VIEWS: MAP.VIEWS, m, total: rows.length, shown: m.pins.reduce((n, p) => n + p.items.length, 0) });
+});
+
 app.get('/tournaments/:slug', (req, res) => {
   const t = T.getBySlug(req.params.slug, { includeDrafts: !!req.session.admin });
   if (!t) return res.status(404).render('404', { title: 'Not found' });
@@ -363,7 +372,7 @@ app.get('/robots.txt', (req, res) => res.type('text/plain').send(`User-agent: *\
 
 app.get('/sitemap.xml', (req, res) => {
   const all = [...T.listPublic({ when: 'upcoming', limit: 500 }), ...T.listPublic({ when: 'past', limit: 500 })];
-  const urls = [`${BASE_URL}/`, `${BASE_URL}/tournaments`, `${BASE_URL}/tournaments/calendar`, `${BASE_URL}/past`, `${BASE_URL}/blog`, `${BASE_URL}/watch`, `${BASE_URL}/learn`, `${BASE_URL}/referee`, `${BASE_URL}/referee/quiz`, `${BASE_URL}/referee/leaderboard`, `${BASE_URL}/get-involved`, `${BASE_URL}/tactics`, `${BASE_URL}/rules`, `${BASE_URL}/shop`, `${BASE_URL}/support`, `${BASE_URL}/about`, `${BASE_URL}/privacy`, `${BASE_URL}/terms`, ...all.map((t) => `${BASE_URL}/tournaments/${t.slug}`), ...B.listPublic().map((p) => `${BASE_URL}/blog/${p.slug}`)];
+  const urls = [`${BASE_URL}/`, `${BASE_URL}/tournaments`, `${BASE_URL}/tournaments/calendar`, `${BASE_URL}/tournaments/map`, `${BASE_URL}/past`, `${BASE_URL}/blog`, `${BASE_URL}/watch`, `${BASE_URL}/learn`, `${BASE_URL}/referee`, `${BASE_URL}/referee/quiz`, `${BASE_URL}/referee/leaderboard`, `${BASE_URL}/get-involved`, `${BASE_URL}/tactics`, `${BASE_URL}/rules`, `${BASE_URL}/shop`, `${BASE_URL}/support`, `${BASE_URL}/about`, `${BASE_URL}/privacy`, `${BASE_URL}/terms`, ...all.map((t) => `${BASE_URL}/tournaments/${t.slug}`), ...B.listPublic().map((p) => `${BASE_URL}/blog/${p.slug}`)];
   res.type('application/xml').send(
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>${u}</loc></url>`).join('\n')}\n</urlset>\n`,
   );
