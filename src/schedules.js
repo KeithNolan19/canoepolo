@@ -53,11 +53,10 @@ const SCHEDULES = {
       {
         date: '2026-10-02',
         label: 'Friday 2 October',
-        pdf: '/docs/milan-ecc-2026-schedule.pdf',
+        pdf: '/docs/milan-ecc-2026-schedule-update-1-oct.pdf',
         matches: [
           ["12:00", "12:30", 1, "M1", "Branik", "Corbeil-Essenos", "A"],
           ["12:00", "12:30", 2, "M2", "KGV Essen", "Poznan", "C"],
-          ["12:00", "12:30", 3, "F1", "Zurich", "Duisburg", "A"],
           ["12:00", "12:30", 4, "F2", "Burriana", "Praha", "B"],
           ["12:30", "13:00", 1, "M3", "Praha", "Malaga", "C"],
           ["12:30", "13:00", 2, "M4", "Iper", "Dispersus", "B"],
@@ -79,6 +78,7 @@ const SCHEDULES = {
           ["14:30", "15:00", 3, "M63", "Warszawa", "Gent", "D"],
           ["14:30", "15:00", 4, "M16", "Zurich", "Linkopig", "D"],
           ["15:00", "15:30", 1, "F9", "Rovigo", "Deventer", "C"],
+          ["15:00", "15:30", 2, "F10", "Duisburg", "Pont D'ouilly", "A"],
           ["15:00", "15:30", 3, "M17", "Avranches", "Iper", "B"],
           ["15:00", "15:30", 4, "M18", "Thurgauer", "Setubal", "B"],
           ["15:30", "16:00", 1, "M36", "Castellón", "Napoli", "D"],
@@ -86,7 +86,6 @@ const SCHEDULES = {
           ["15:30", "16:00", 3, "M21", "Deventer", "Coimbra", "A"],
           ["15:30", "16:00", 4, "M22", "Corbeil-Essenos", "Kilkenny", "A"],
           ["16:00", "16:30", 1, "M31", "Praha", "KGV Essen", "C"],
-          ["16:00", "16:30", 2, "F10", "Duisburg", "Pont D'ouilly", "A"],
           ["16:00", "16:30", 3, "F11", "Avranches", "KRM Essen", "B"],
           ["16:00", "16:30", 4, "F12", "Thurgauer", "Burriana", "B"],
           ["16:30", "17:00", 1, "F13", "Neptun", "Ichnusa", "A"],
@@ -95,10 +94,11 @@ const SCHEDULES = {
           ["16:30", "17:00", 4, "M64", "Chiavari", "Skovshoveld", "C"],
           ["17:00", "17:30", 1, "M25", "Castellón", "Linkopig", "D"],
           ["17:00", "17:30", 3, "M27", "Warszawa", "Zurich", "D"],
+          ["17:00", "17:30", 4, "M30", "Dispersus", "Thurgauer", "B"],
           ["17:30", "18:00", 1, "F8", "Alaquas", "Kingston", "C"],
           ["17:30", "18:00", 2, "M48", "Malaga", "KGV Essen", "C"],
           ["17:30", "18:00", 3, "M29", "Avranches", "Setubal", "B"],
-          ["17:30", "18:00", 4, "M30", "Dispersus", "Thurgauer", "B"],
+          ["17:30", "18:00", 4, "F1", "Zurich", "Duisburg", "A"],
           ["18:00", "18:30", 1, "M32", "Odysseus", "Iper", "B"],
           ["18:00", "18:30", 2, "M28", "Skovshoveld", "Poznan", "C"],
           ["18:00", "18:30", 3, "M33", "Branik", "Coimbra", "A"],
@@ -112,7 +112,7 @@ const SCHEDULES = {
       {
         date: '2026-10-03',
         label: 'Saturday 3 October',
-        pdf: '/docs/milan-ecc-2026-schedule.pdf',
+        pdf: '/docs/milan-ecc-2026-schedule-update-1-oct.pdf',
         matches: [
           ["07:30", "08:00", 1, "F16", "Pont D'ouilly", "Ichnusa", "A"],
           ["07:30", "08:00", 2, "F17", "KRM Essen", "Burriana", "B"],
@@ -195,7 +195,7 @@ const SCHEDULES = {
       {
         date: '2026-10-04',
         label: 'Sunday 4 October',
-        pdf: '/docs/milan-ecc-2026-schedule.pdf',
+        pdf: '/docs/milan-ecc-2026-schedule-update-1-oct.pdf',
         matches: [
           ["07:30", "08:05", 1, "F46", "5th in Group D", "6th in Group D", "Places 5-6, 1st leg"],
           ["07:30", "08:05", 2, "F47", "1st in Group E", "4th in Group E", "Semi-final, places 7-10"],
