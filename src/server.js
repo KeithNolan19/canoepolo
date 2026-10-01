@@ -402,7 +402,7 @@ Disallow: /*?
 
 Sitemap: ${BASE_URL}/sitemap.xml
 `));
-app.get('/llms.txt', textFile(`# canoepolo.eu
+app.get(['/llms.txt', '/llm.txt'], textFile(`# canoepolo.eu
 
 > The home of international canoe polo (kayak polo): tournaments, schedules, rules, referee resources, videos and a tactics board. Run by volunteers (not a legal entity).
 
