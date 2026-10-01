@@ -71,7 +71,7 @@
         </label>
         <label><span>Search</span><input type="search" data-f="q" placeholder="Type a team name"></label>
         <label><span>Division</span><select data-f="div"><option value="">Men and women</option><option>Men</option><option>Women</option></select></label>
-        <label><span>Group</span><select data-f="grp"><option value="">All groups</option><% schedule.groups.forEach(g => { %><option value="<%= g %>">Group <%= g %></option><% }) %></select></label>
+        <label><span>Group or stage</span><select data-f="grp"><option value="">All groups and stages</option><% schedule.groups.forEach(g => { %><option value="<%= g %>"><%= g.length === 1 ? 'Group ' + g : g %></option><% }) %></select></label>
         <label><span>Pitch</span><select data-f="pitch"><option value="">All pitches</option><% schedule.pitches.forEach(p => { %><option value="<%= p %>">Pitch <%= p %></option><% }) %></select></label>
       </div>
       <p class="sched-summary" data-summary aria-live="polite" hidden></p>
@@ -90,7 +90,7 @@
             <li class="sched-match <%= m.division === 'Women' ? 'is-women' : 'is-men' %>" data-div="<%= m.division %>" data-grp="<%= m.group %>" data-pitch="<%= m.pitch %>" data-teams="<%= (m.home + ' ' + m.away).toLowerCase() %>" data-keys="<%= m.home %>|<%= m.division %>||<%= m.away %>|<%= m.division %>">
               <span class="sm-pitch">Pitch <%= m.pitch %></span>
               <span class="sm-teams"><strong><%= m.home %></strong> <em>v</em> <strong><%= m.away %></strong></span>
-              <span class="sm-meta"><%= m.division %> &middot; Group <%= m.group %> &middot; <%= m.code %></span>
+              <span class="sm-meta"><%= m.division %> &middot; <%= m.group.length === 1 ? 'Group ' + m.group : m.group %> &middot; <%= m.code %></span>
             </li>
             <% }) %>
           </ul>
