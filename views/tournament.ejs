@@ -97,7 +97,7 @@
         <label><span>Pitch</span><select data-f="pitch"><option value="">All pitches</option><% schedule.pitches.forEach(p => { %><option value="<%= p %>">Pitch <%= p %></option><% }) %></select></label>
       </div>
       <p class="sched-summary" data-summary aria-live="polite" hidden></p>
-      <p class="sched-export" data-export="/tournaments/<%= t.slug %>/schedule" hidden><span>Save this list:</span> <a class="btn small primary" data-fmt="pdf" target="_blank" rel="noopener" href="#">PDF for your phone</a> <a class="btn small outline" data-fmt="xlsx" href="#">Excel</a></p>
+      <p class="sched-export" data-export="/tournaments/<%= t.slug %>/schedule" hidden><span>Save this list:</span> <a class="btn small primary" data-fmt="pdf" target="_blank" rel="noopener" href="#">PDF</a> <a class="btn small outline" data-fmt="xlsx" href="#">Excel</a></p>
       <p class="sched-empty" hidden>No matches fit these filters.</p>
       <% schedule.days.forEach(d => { %>
       <section class="sched" data-day aria-label="<%= d.label %>">
