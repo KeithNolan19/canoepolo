@@ -27,7 +27,7 @@ const SCHEDULES = {
       'Corbeil-Essenos': 'FR', 'Avranches': 'FR', "Pont D'ouilly": 'FR',
       'Deventer': 'NL', 'Coimbra': 'PT', 'Setubal': 'PT',
       'Kilkenny': 'IE', 'Mullinger': 'IE', 'Ulster': 'IE', 'Branik': 'CZ', 'Neptun': 'DK', 'Iper': 'BE', 'Dispersus': 'GB', 'Kingston': 'GB',
-      'Thurgauer': 'CH', 'Zurich': 'CH', 'Odysseus': 'GR', 'Skovshoveld': 'DK',
+      'Thurgauer': 'CH', 'Zurich': 'CH', 'Odysseus': 'NL', 'Skovshoveld': 'DK',
       'Malaga': 'ES', 'Castellón': 'ES', 'Burriana': 'ES', 'Alaquas': 'ES',
       'Chiavari': 'IT', 'Napoli': 'IT', 'Ichnusa': 'IT', 'Rovigo': 'IT',
       'Poznan': 'PL', 'Warszawa': 'PL', 'Praha': 'CZ', 'Gent': 'BE', 'Linkopig': 'SE',
