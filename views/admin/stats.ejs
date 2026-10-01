@@ -14,8 +14,13 @@
 <div class="stat-cards">
   <div class="stat-card"><span class="stat-num"><%= r.views %></span><span>Page views</span></div>
   <div class="stat-card"><span class="stat-num"><%= r.visitors %></span><span>Visitors (approx.)</span></div>
-  <div class="stat-card"><span class="stat-num"><%= r.series.length ? Math.round(r.views / r.series.length * 10) / 10 : 0 %></span><span>Views per day</span></div>
+  <div class="stat-card"><span class="stat-num"><%= r.visitStats.total %></span><span>Visits</span></div>
+  <div class="stat-card"><span class="stat-num"><%= r.visitStats.bounceRate %>%</span><span>Left after one page</span></div>
+  <div class="stat-card"><span class="stat-num"><%= r.visitStats.avgPages %></span><span>Pages per visit</span></div>
+  <div class="stat-card"><span class="stat-num"><%= Math.floor(r.visitStats.avgSecs / 60) %>m <%= r.visitStats.avgSecs % 60 %>s</span><span>Visit length (2+ pages)</span></div>
+  <div class="stat-card"><span class="stat-num"><%= r.downloadTotal %></span><span>Downloads</span></div>
 </div>
+<p class="small-note">A visit is one person browsing with no break longer than 30 minutes. Visits are counted when they end, so the last half hour can be missing. A visit that leaves after one page is a "bounce". Visit length only counts visits with 2 or more pages, because time on a single page can't be measured.</p>
 
 <h2>Views per day</h2>
 <table class="stat-table">
@@ -24,13 +29,38 @@
   <% }) %>
 </table>
 
+<h2>Pages: views and drop-off</h2>
+<p class="small-note">"Entered" is how many visits started on that page. "Left" is how many visits ended on it. "Drop-off" is left divided by views: the higher it is, the more often people stop there.</p>
+<div class="table-wrap">
+<table class="admin-table stat-flow">
+  <thead><tr><th>Page</th><th class="num">Views</th><th class="num">Entered</th><th class="num">Left</th><th class="num">Drop-off</th></tr></thead>
+  <tbody>
+  <% r.pageFlow.forEach(function (p) { %><tr><td class="wrap-any"><a href="<%= p.path %>"><%= p.path %></a></td><td class="num"><%= p.views %></td><td class="num"><%= p.entries %></td><td class="num"><%= p.exits %></td><td class="num"><progress max="100" value="<%= p.exitRate %>"></progress> <%= p.exitRate %>%</td></tr><% }) %>
+  <% if (!r.pageFlow.length) { %><tr><td class="muted" colspan="5">No data yet.</td></tr><% } %>
+  </tbody>
+</table>
+</div>
+
 <div class="stat-cols">
   <div>
-    <h2>Most viewed pages</h2>
+    <h2>Pages per visit</h2>
     <table class="stat-table">
-      <% r.pages.forEach(function (p) { %><tr><td><a href="<%= p.path %>"><%= p.path %></a></td><td class="num"><%= p.n %></td></tr><% }) %>
-      <% if (!r.pages.length) { %><tr><td class="muted">No data yet.</td></tr><% } %>
+      <% r.visitStats.buckets.forEach(function (b) { %><tr><td><%= b.bucket === '1' ? '1 page (left straight away)' : b.bucket + ' pages' %></td><td class="stat-bar"><progress max="<%= Math.max(1, r.visitStats.total) %>" value="<%= b.n %>"></progress></td><td class="num"><%= b.n %></td></tr><% }) %>
     </table>
+
+    <h2>Downloads</h2>
+    <table class="stat-table">
+      <% r.downloadKinds.forEach(function (k) { %><tr><td><strong><%= k.kind %></strong></td><td class="num"><strong><%= k.n %></strong></td></tr><% }) %>
+      <% r.downloads.forEach(function (d) { %><tr><td class="wrap-any muted"><%= d.kind %>: <%= d.name %></td><td class="num"><%= d.n %></td></tr><% }) %>
+      <% if (!r.downloads.length) { %><tr><td class="muted">No downloads yet.</td></tr><% } %>
+    </table>
+    <p class="small-note">Counted when the file is sent: PDFs in the documents, team schedule PDFs and Excel files, and calendar files. People who have Do Not Track switched on are not counted.</p>
+
+    <h2>Referee quiz: where people stop</h2>
+    <table class="stat-table">
+      <% r.funnel.forEach(function (f) { %><tr><td><%= f.label %></td><td class="stat-bar"><progress max="<%= Math.max(1, r.funnel[0].n) %>" value="<%= f.n %>"></progress></td><td class="num"><%= f.n %></td><td class="num muted"><%= r.funnel[0].n ? Math.round(f.n / r.funnel[0].n * 100) : 0 %>%</td></tr><% }) %>
+    </table>
+    <p class="small-note">How many times each question was shown, and how many quizzes were finished. Team schedules viewed: <%= r.schedTeam %>.</p>
   </div>
   <div>
     <h2>Visitors by country</h2>

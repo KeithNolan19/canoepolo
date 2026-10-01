@@ -138,7 +138,9 @@
     }).catch(() => { note.textContent = 'Your score could not be saved. Please check your connection.'; });
   }
 
+  const ev = (n) => { if (window.cpEvent) window.cpEvent(n); }; // anonymous progress counters
   function show() {
+    ev('quiz-q' + (i + 1));
     const item = qs[i];
     root.textContent = '';
     const head = h('div', 'quiz-head');
@@ -204,6 +206,7 @@
   }
 
   function finish() {
+    ev('quiz-done');
     root.textContent = '';
     let best = 0;
     try { best = Number(localStorage.getItem('cp-ref-best') || 0); if (score > best) localStorage.setItem('cp-ref-best', String(score)); } catch (e) { /* ignore */ }

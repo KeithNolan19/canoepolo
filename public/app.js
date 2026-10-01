@@ -111,3 +111,9 @@ document.addEventListener('click', (e) => {
   back.href = bar.dataset.base + location.pathname;
   back.hidden = false;
 })();
+
+// Anonymous counters for a few actions (quiz progress, team schedule views). Nothing about the person is sent.
+window.cpEvent = function (name) {
+  if (!navigator.sendBeacon || navigator.doNotTrack === '1' || location.pathname.startsWith('/admin')) return;
+  try { navigator.sendBeacon('/_c', new Blob(['t=' + encodeURIComponent('event:' + name)], { type: 'application/x-www-form-urlencoded' })); } catch (err) { /* ignore */ }
+};

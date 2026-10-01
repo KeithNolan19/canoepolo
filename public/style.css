@@ -844,3 +844,5 @@ img.fl { max-width: none; min-width: 20px; }
 
 /* Poppins is wider than the old font: let very long words (e.g. German event names) wrap instead of overflowing */
 h1, h2, h3, .event-name, .event-where, .event-extra { overflow-wrap: anywhere; }
+.stat-flow progress { width: 64px; height: 8px; vertical-align: middle; }
+.stat-cards { flex-wrap: wrap; }

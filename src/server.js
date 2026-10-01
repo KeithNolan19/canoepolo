@@ -12,6 +12,7 @@ const { COUNTRIES, LEVELS, DIVISIONS, STATUSES, flag } = require('./constants');
 const { buildCalendar } = require('./ical');
 const V = require('./videos');
 const B = require('./blog');
+const stats = require('./stats');
 require('./imports').run(); // one-time tournament imports (skips anything already listed)
 const C = require('./community');
 
@@ -62,6 +63,7 @@ const FLAGS = new Set(require('fs').readdirSync(path.join(__dirname, '..', 'publ
 // Flag as a small picture (emoji flags do not show on every computer)
 const flagImg = (c) => { c = String(c || '').toLowerCase(); return FLAGS.has(c) ? `<img class="fl" src="/flags/${c}.svg" alt="" width="20" height="15" loading="lazy">` : ''; };
 app.use(express.urlencoded({ extended: true, limit: '100kb' }));
+app.use(stats.middleware); // before the static files so downloads of documents are counted
 app.use(express.static(path.join(__dirname, '..', 'public'), { maxAge: IS_PROD ? '1d' : 0 }));
 // Overall brake on abusive traffic (generous for real visitors)
 app.use(rateLimit({ windowMs: 60 * 1000, limit: 300, standardHeaders: false, legacyHeaders: false, skip: (req) => req.path === '/health' }));
@@ -71,8 +73,6 @@ app.use((req, res, next) => {
   next();
 });
 app.get('/.well-known/security.txt', (req, res) => res.type('text/plain').send(`Contact: https://wa.me/353876789927\nPreferred-Languages: en\nCanonical: ${BASE_URL}/.well-known/security.txt\nExpires: 2027-10-01T00:00:00.000Z\n`));
-const stats = require('./stats');
-app.use(stats.middleware);
 app.post('/_c', rateLimit({ windowMs: 60 * 1000, limit: 60, standardHeaders: false, legacyHeaders: false }), stats.clickHandler);
 app.use(cookieSession({
   name: 'cp_session',
