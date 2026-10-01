@@ -63,7 +63,7 @@ Delete any other `A` records for `@` or `www` (registrars often add a "parking" 
    cd canoepolo
    sudo bash deploy/setup-server.sh
    ```
-3. The script asks for your domain, an admin username and an admin password (12+ characters). Then it installs everything and starts the site. The first build takes about 3–5 minutes.
+3. The script asks for your domain, an admin username and an admin password (12+ characters). Then it installs everything and starts the site. The first build takes about 3-5 minutes.
 4. Visit **https://canoepolo.eu/admin**, log in, and add your first tournament. 🎉
 
 > If the page doesn't load yet, your DNS probably hasn't updated. Wait a bit - the HTTPS certificate is fetched automatically as soon as the domain points to the server.

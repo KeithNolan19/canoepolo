@@ -88,9 +88,9 @@ function fmtRange(a, b) {
   if (!b || a === b) return fmtDate(a);
   const [ya, ma] = a.split('-');
   const [yb, mb] = b.split('-');
-  if (ya === yb && ma === mb) return `${Number(a.slice(8))}–${fmtDate(b)}`;
-  if (ya === yb) return `${fmtDate(a, { day: 'numeric', month: 'short' })} – ${fmtDate(b)}`;
-  return `${fmtDate(a)} – ${fmtDate(b)}`;
+  if (ya === yb && ma === mb) return `${Number(a.slice(8))}-${fmtDate(b)}`;
+  if (ya === yb) return `${fmtDate(a, { day: 'numeric', month: 'short' })} - ${fmtDate(b)}`;
+  return `${fmtDate(a)} - ${fmtDate(b)}`;
 }
 
 // Photos: put files in public/images/ (e.g. hero.jpg). Returns the web path if the file exists.

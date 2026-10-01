@@ -72,8 +72,8 @@
           <tr>
             <td class="dt-name"><% if (i.url) { %><a <%- ext(i.url) %>><%= i.name %></a><% } else { %><%= i.name %><% } %></td>
             <td><%= i.who %></td>
-            <td class="dt-amount"><%= i.amount || '–' %></td>
-            <td class="dt-when"><%= i.when || '–' %></td>
+            <td class="dt-amount"><%= i.amount || '-' %></td>
+            <td class="dt-when"><%= i.when || '-' %></td>
           </tr>
         <% }) %>
         </tbody>

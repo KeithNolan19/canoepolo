@@ -8,12 +8,12 @@
 <% }
      const d1 = Number(t.start_date.slice(8)), d2 = Number(t.end_date.slice(8));
      const sameMonth = t.start_date.slice(0, 7) === t.end_date.slice(0, 7);
-     const days = t.start_date === t.end_date ? String(d1) : `${d1}–${d2}`; %>
+     const days = t.start_date === t.end_date ? String(d1) : `${d1}-${d2}`; %>
   <li class="event <%= t.status === 'cancelled' ? 'is-cancelled' : '' %> <%= t.featured ? 'is-featured' : '' %>">
     <a href="/tournaments/<%= t.slug %>">
       <span class="event-date" aria-hidden="true">
         <span class="event-days"><%= days %></span>
-        <span class="event-mon"><%= mon(t.start_date) %><%= sameMonth ? '' : '–' + mon(t.end_date) %></span>
+        <span class="event-mon"><%= mon(t.start_date) %><%= sameMonth ? '' : '-' + mon(t.end_date) %></span>
       </span>
       <span class="event-body">
         <span class="event-name"><%= t.name %><% if (t.status === 'cancelled') { %> <span class="tag tag-red">Cancelled</span><% } %><% if (t.featured) { %> <span class="tag tag-ball">Featured</span><% } %></span>
