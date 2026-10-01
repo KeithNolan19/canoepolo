@@ -689,7 +689,7 @@ fieldset .full { grid-column: 1 / -1; }
 .sched { margin: 18px 0 36px; }
 .sched-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
 .sched-head h3 { font-size: 1.35rem; }
-.sched-filters { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 10px; background: var(--tile); padding: 14px; border-radius: var(--r-lg); margin-bottom: 18px; }
+.sched-filters { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; background: var(--tile); padding: 14px; border-radius: var(--r-lg); margin-bottom: 18px; }
 .sched-filters[hidden] { display: none; }
 .sched-filters label { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .sched-filters label > span { font-size: .8rem; font-weight: 650; color: var(--muted); }
@@ -705,6 +705,12 @@ fieldset .full { grid-column: 1 / -1; }
 .sm-meta { grid-area: meta; font-size: .8rem; color: var(--muted); }
 @media (max-width: 760px) {
   .sched-filters { grid-template-columns: 1fr 1fr; }
-  .sched-filters label:first-child { grid-column: 1 / -1; }
+  .sched-filters label:nth-child(-n+2) { grid-column: 1 / -1; }
   .sched-matches { grid-template-columns: 1fr; }
+}
+.sched-summary { font-weight: 700; margin: 0 0 14px; }
+.sched-summary[hidden] { display: none; }
+@media (min-width: 761px) {
+  .sched-filters label { grid-column: span 2; }
+  .sched-filters label:nth-child(-n+2) { grid-column: span 3; }
 }

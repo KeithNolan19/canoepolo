@@ -72,8 +72,17 @@ const SCHEDULES = {
 function forSlug(slug) {
   const s = SCHEDULES[slug];
   if (!s) return null;
+  const teamSet = new Map();
+  s.days.forEach((d) => d.matches.forEach(([, , , code, home, away]) => {
+    const division = code[0] === 'F' ? 'Women' : 'Men';
+    [home, away].forEach((name) => teamSet.set(`${name}|${division}`, { name, division }));
+  }));
+  const teams = [...teamSet.values()].sort((a, b) => a.name.localeCompare(b.name) || a.division.localeCompare(b.division));
   return {
     note: s.note,
+    teams,
+    groups: [...new Set(s.days.flatMap((d) => d.matches.map((m) => m[6])))].sort(),
+    pitches: [...new Set(s.days.flatMap((d) => d.matches.map((m) => m[2])))].sort((a, b) => a - b),
     days: s.days.map((d) => {
       const slots = [];
       d.matches.forEach(([start, end, pitch, code, home, away, group]) => {

@@ -40,35 +40,44 @@
     <% if (schedule) { %>
     <h2 class="sub-head" id="schedule">Schedule</h2>
     <p class="small-note"><%= schedule.note %></p>
-    <% schedule.days.forEach((d, di) => { %>
-    <section class="sched" data-sched aria-label="<%= d.label %>">
-      <div class="sched-head">
-        <h3><%= d.label %></h3>
-        <% if (d.pdf) { %><a class="btn small outline" href="<%= d.pdf %>" target="_blank" rel="noopener">Official PDF</a><% } %>
-      </div>
+    <div data-sched>
       <div class="sched-filters" hidden>
-        <label><span>Find a team</span><input type="search" data-f="q" placeholder="e.g. Zurich"></label>
+        <label class="sf-team"><span>Team</span>
+          <select data-f="team">
+            <option value="">All teams</option>
+            <% ['Men', 'Women'].forEach(dv => { %><optgroup label="<%= dv %>"><% schedule.teams.filter(x => x.division === dv).forEach(x => { %><option value="<%= x.name %>|<%= x.division %>"><%= x.name %></option><% }) %></optgroup><% }) %>
+          </select>
+        </label>
+        <label><span>Search</span><input type="search" data-f="q" placeholder="Type a team name"></label>
         <label><span>Division</span><select data-f="div"><option value="">Men and women</option><option>Men</option><option>Women</option></select></label>
-        <label><span>Group</span><select data-f="grp"><option value="">All groups</option><% d.groups.forEach(g => { %><option value="<%= g %>">Group <%= g %></option><% }) %></select></label>
-        <label><span>Pitch</span><select data-f="pitch"><option value="">All pitches</option><% d.pitches.forEach(p => { %><option value="<%= p %>">Pitch <%= p %></option><% }) %></select></label>
+        <label><span>Group</span><select data-f="grp"><option value="">All groups</option><% schedule.groups.forEach(g => { %><option value="<%= g %>">Group <%= g %></option><% }) %></select></label>
+        <label><span>Pitch</span><select data-f="pitch"><option value="">All pitches</option><% schedule.pitches.forEach(p => { %><option value="<%= p %>">Pitch <%= p %></option><% }) %></select></label>
       </div>
+      <p class="sched-summary" data-summary aria-live="polite" hidden></p>
       <p class="sched-empty" hidden>No matches fit these filters.</p>
-      <% d.slots.forEach(sl => { %>
-      <div class="sched-slot" data-slot>
-        <h4><%= sl.start %> - <%= sl.end %></h4>
-        <ul class="sched-matches">
-          <% sl.matches.forEach(m => { %>
-          <li class="sched-match <%= m.division === 'Women' ? 'is-women' : 'is-men' %>" data-div="<%= m.division %>" data-grp="<%= m.group %>" data-pitch="<%= m.pitch %>" data-teams="<%= (m.home + ' ' + m.away).toLowerCase() %>">
-            <span class="sm-pitch">Pitch <%= m.pitch %></span>
-            <span class="sm-teams"><strong><%= m.home %></strong> <em>v</em> <strong><%= m.away %></strong></span>
-            <span class="sm-meta"><%= m.division %> &middot; Group <%= m.group %> &middot; <%= m.code %></span>
-          </li>
-          <% }) %>
-        </ul>
-      </div>
+      <% schedule.days.forEach(d => { %>
+      <section class="sched" data-day aria-label="<%= d.label %>">
+        <div class="sched-head">
+          <h3><%= d.label %></h3>
+          <% if (d.pdf) { %><a class="btn small outline" href="<%= d.pdf %>" target="_blank" rel="noopener">Official PDF</a><% } %>
+        </div>
+        <% d.slots.forEach(sl => { %>
+        <div class="sched-slot" data-slot>
+          <h4><%= sl.start %> - <%= sl.end %></h4>
+          <ul class="sched-matches">
+            <% sl.matches.forEach(m => { %>
+            <li class="sched-match <%= m.division === 'Women' ? 'is-women' : 'is-men' %>" data-div="<%= m.division %>" data-grp="<%= m.group %>" data-pitch="<%= m.pitch %>" data-teams="<%= (m.home + ' ' + m.away).toLowerCase() %>" data-keys="<%= m.home %>|<%= m.division %>||<%= m.away %>|<%= m.division %>">
+              <span class="sm-pitch">Pitch <%= m.pitch %></span>
+              <span class="sm-teams"><strong><%= m.home %></strong> <em>v</em> <strong><%= m.away %></strong></span>
+              <span class="sm-meta"><%= m.division %> &middot; Group <%= m.group %> &middot; <%= m.code %></span>
+            </li>
+            <% }) %>
+          </ul>
+        </div>
+        <% }) %>
+      </section>
       <% }) %>
-    </section>
-    <% }) %>
+    </div>
     <% } %>
 
     <% if (t.description) { %>
