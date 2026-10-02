@@ -923,3 +923,16 @@ h1, h2, h3, .event-name, .event-where, .event-extra { overflow-wrap: anywhere; }
 .gm-lineups ul { list-style: none; margin: 4px 0 0; padding: 0; }
 .gm .btn { margin-top: 14px; }
 .sm-changed { color: var(--red); font-weight: 700; }
+
+/* Group tables */
+.gt { margin: 0 0 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--card); }
+.gt summary { cursor: pointer; padding: 10px 14px; font-weight: 700; }
+.gt > div { padding: 0 10px 10px; overflow-x: auto; }
+.st-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.st-table th, .st-table td { padding: 6px 6px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.st-table .num { text-align: right; }
+.st-table .pos { width: 1.6em; color: var(--muted); font-weight: 700; }
+.st-table .pts { font-weight: 700; }
+.st-table tr.me td { background: var(--tile); font-weight: 700; }
+.st-table img { vertical-align: -1px; }
+@media (max-width: 460px) { .st-table .hide-s { display: none; } }

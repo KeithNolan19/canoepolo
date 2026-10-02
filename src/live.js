@@ -140,6 +140,34 @@ async function sweep() {
   } finally { sweeping = false; }
 }
 
+// Group tables from finished games: 3 points for a win, 1 for a draw. Order: points, goal difference, goals scored (provisional: the organiser's ranking is the official one).
+function standings() {
+  const sch = schedules.forSlug(SLUG, { raw: true });
+  if (!sch || sch.hidden || !sch.groupsTable) return {};
+  const out = {};
+  Object.entries(sch.groupsTable).forEach(([division, groups]) => {
+    out[division] = {};
+    Object.entries(groups).forEach(([g, names]) => {
+      const rows = new Map(names.map((n) => [n, { name: n, cc: (sch.countries || {})[n] || '', p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0 }]));
+      sch.days.forEach((d) => d.slots.forEach((sl) => sl.matches.forEach((m) => {
+        if (m.group !== g || m.division !== division) return;
+        const v = state.get(m.code);
+        if (!v || v.status !== 'FT') return;
+        const h = rows.get(m.home), a = rows.get(m.away);
+        if (!h || !a) return;
+        const [x, y] = v.score;
+        h.p++; a.p++; h.gf += x; h.ga += y; a.gf += y; a.ga += x;
+        if (x > y) { h.w++; a.l++; } else if (x < y) { a.w++; h.l++; } else { h.d++; a.d++; }
+      })));
+      const list = [...rows.values()].map((r) => ({ ...r, gd: r.gf - r.ga, pts: r.w * 3 + r.d }));
+      list.sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf || a.name.localeCompare(b.name));
+      list.forEach((r, i) => { r.pos = i + 1; });
+      out[division][g] = list;
+    });
+  });
+  return out;
+}
+
 // Games where the official page disagrees with our timetable
 function changes() {
   const out = {};
@@ -176,4 +204,4 @@ function detail(code) {
   return m ? { ...m.detail, time: m.time, field: m.field } : null;
 }
 
-module.exports = { start, snapshot, detail, changes, meta, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };
+module.exports = { start, snapshot, detail, changes, standings, meta, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };

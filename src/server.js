@@ -418,6 +418,7 @@ app.get(`/tournaments/${ECC_SLUG}/support/:cc`, (req, res, next) => {
 });
 app.get('/api/live-game/:code', (req, res) => { res.set('Cache-Control', 'public, max-age=15'); res.json(live.detail(String(req.params.code).toUpperCase().slice(0, 6)) || {}); });
 app.get('/api/live-changes', (req, res) => { res.set('Cache-Control', 'public, max-age=30'); res.json(live.changes()); });
+app.get('/api/standings', (req, res) => { res.set('Cache-Control', 'public, max-age=20'); res.json(live.standings()); });
 app.get('/api/live-scores', (req, res) => { res.set('Cache-Control', 'public, max-age=20'); res.json(live.snapshot()); });
 app.get('/api/tournaments', (req, res) => {
   res.set('Cache-Control', 'public, max-age=300');

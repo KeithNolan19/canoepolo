@@ -63,6 +63,11 @@
     </div>
     <% }) %>
     <p class="small-note">Click a team to see their matches.<% if (schedule.groupsPdf) { %> <a href="<%= schedule.groupsPdf %>" target="_blank" rel="noopener">Official groups PDF</a><% } %></p>
+    <h3 class="groups-title" id="tables">Group tables</h3>
+    <p class="small-note">Worked out from finished games: 3 points for a win, 1 for a draw, then goal difference, then goals scored. This is a guide only. The organiser's own ranking is the official one.</p>
+    <% ['Men', 'Women'].forEach(dv => { const gt = schedule.groupsTable[dv]; if (!gt) return; Object.keys(gt).forEach(g => { %>
+    <details class="gt"><summary><%= dv %>, Group <%= g %></summary><div data-standings="<%= dv %>|<%= g %>"></div></details>
+    <% }) }) %>
     <% } %>
     <% if (schedule.format) { const f = schedule.format; %>
     <div class="format-box" id="format">

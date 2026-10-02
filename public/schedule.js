@@ -236,3 +236,42 @@
     li.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('a')) { e.preventDefault(); open(li); } });
   });
 })();
+
+// Group tables (from finished games), refreshed with the scores
+(function () {
+  const boxes = document.querySelectorAll('[data-standings]');
+  if (!boxes.length || !window.fetch) return;
+  const th = (t, c) => { const n = document.createElement('th'); n.textContent = t; if (c) n.className = c; return n; };
+  const td = (t, c) => { const n = document.createElement('td'); n.textContent = t; if (c) n.className = c; return n; };
+  function load() {
+    if (document.hidden) return;
+    fetch('/api/standings').then((r) => r.json()).then((d) => {
+      boxes.forEach((box) => {
+        const [div, g] = box.dataset.standings.split('|');
+        const rows = d[div] && d[div][g];
+        if (!rows) return;
+        const any = rows.some((r) => r.p > 0);
+        const tbl = document.createElement('table');
+        tbl.className = 'st-table';
+        const head = document.createElement('tr');
+        [['#'], ['Team'], ['P', 'num'], ['W', 'num hide-s'], ['D', 'num hide-s'], ['L', 'num hide-s'], ['GF', 'num hide-s'], ['GA', 'num hide-s'], ['GD', 'num'], ['Pts', 'num']].forEach((x) => head.append(th(x[0], x[1])));
+        tbl.append(head);
+        rows.forEach((r) => {
+          const tr = document.createElement('tr');
+          if (box.dataset.team && box.dataset.team === r.name) tr.className = 'me';
+          tr.append(td(any && r.p ? String(r.pos) : '-', 'pos'));
+          const name = td('');
+          if (r.cc) { const img = document.createElement('img'); img.src = '/flags/' + r.cc.toLowerCase() + '.svg'; img.alt = ''; img.width = 18; img.height = 12; name.append(img, ' '); }
+          name.append(document.createTextNode(r.name));
+          tr.append(name, td(r.p, 'num'), td(r.w, 'num hide-s'), td(r.d, 'num hide-s'), td(r.l, 'num hide-s'), td(r.gf, 'num hide-s'), td(r.ga, 'num hide-s'), td((r.gd > 0 ? '+' : '') + r.gd, 'num'), td(r.pts, 'num pts'));
+          tbl.append(tr);
+        });
+        box.textContent = '';
+        box.append(tbl);
+      });
+    }).catch(() => {});
+  }
+  load();
+  setInterval(load, 30000);
+  document.addEventListener('visibilitychange', load);
+})();
