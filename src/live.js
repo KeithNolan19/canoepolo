@@ -135,7 +135,7 @@ async function sweep() {
   sweeping = true;
   try {
     for (const m of matchList()) {
-      if (finished.has(m.code)) continue;
+      if (finished.has(m.code) || m.start > now + 3 * 60 * 60 * 1000) continue; // only games that are due within 3 hours or already past: kind to the organiser's site
       try { ingest(m, await fetchPage(m.url)); } catch (e) { /* try again next time */ }
       await new Promise((r) => setTimeout(r, 700));
     }

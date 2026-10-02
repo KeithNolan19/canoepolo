@@ -118,6 +118,7 @@ const SCHEDULES = {
       {
         date: '2026-10-03',
         label: 'Saturday 3 October',
+        liveFirstId: 53, // checked against the organiser's Saturday list: N° 53 is the first game (07:30 pitch 1) and 109 is 15:45 pitch 4, in timetable order
         pdf: '/docs/milan-ecc-2026-schedule-update-1-oct.pdf',
         matches: [
           ["07:30", "08:00", 1, "F16", "Pont D'ouilly", "Ichnusa", "A"],
