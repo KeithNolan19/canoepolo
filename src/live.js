@@ -88,7 +88,7 @@ async function fetchPage(url) {
 }
 
 function matchList() {
-  const s = schedules.forSlug(SLUG);
+  const s = schedules.forSlug(SLUG, { raw: true });
   if (!s || s.hidden) return [];
   const out = [];
   s.days.forEach((d) => d.slots.forEach((sl) => sl.matches.forEach((m) => {
@@ -109,6 +109,7 @@ function ingest(m, html) {
   const t = textOf(html);
   const tm = /TIME\s+(\d{1,2}:\d{2})/i.exec(t), fm = /FIELD\s+(\S+)/i.exec(t);
   meta.set(m.code, { time: tm ? tm[1].padStart(5, '0') : '', field: fm ? fm[1] : '', detail: parseDetail(html), at: Date.now() });
+  schedules.setOverrides(changes());
   if (p.result) {
     state.set(m.code, { ...p.result, at: Date.now() });
     if (p.result.status === 'FT') finished.add(m.code);
@@ -148,7 +149,7 @@ function changes() {
     const c = {};
     if (v.time && v.time !== m.time.padStart(5, '0')) c.time = v.time;
     if (v.field && Number(v.field) && Number(v.field) !== m.pitch) c.pitch = Number(v.field);
-    if (Object.keys(c).length) out[m.code] = c;
+    if (Object.keys(c).length) out[m.code] = { ...c, was: { time: m.time, pitch: m.pitch } };
   });
   return out;
 }

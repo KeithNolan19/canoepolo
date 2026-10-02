@@ -156,7 +156,7 @@
         if (!v) return;
         const n = document.createElement('span');
         n.className = 'sm-changed';
-        n.textContent = 'Changed on the official site: ' + [v.time ? 'now ' + v.time : '', v.pitch ? 'pitch ' + v.pitch : ''].filter(Boolean).join(', ');
+        n.textContent = 'Updated by the organisers (was ' + [v.was.time, 'pitch ' + v.was.pitch].join(', ') + ')';
         const meta = li.querySelector('.sm-meta');
         (meta || li).appendChild(document.createElement('br'));
         (meta || li).appendChild(n);

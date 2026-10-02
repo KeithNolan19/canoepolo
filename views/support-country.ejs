@@ -42,7 +42,7 @@
 
   <% const dn = Object.keys(duties).sort(); if (dn.length) { %>
   <section class="ie-team">
-    <h2>Referee and table duties on Friday</h2>
+    <h2>Referee and table duties</h2>
     <% dn.forEach(n => { %>
     <h3 class="ie-duty-h"><%= n %></h3>
     <ul class="ie-duties"><% duties[n].forEach(d => { %><li><strong><%= d.start %></strong> &middot; <%= d.role %> &middot; <%= d.match %> (pitch <%= d.pitch %>, <%= d.code %>)</li><% }) %></ul>

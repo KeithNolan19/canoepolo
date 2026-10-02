@@ -401,10 +401,16 @@ app.get(`/tournaments/${ECC_SLUG}/support/:cc`, (req, res, next) => {
       }
       t.games.push({ day: d.label, start: sl.start, pitch: m.pitch, code: m.code, opp: home ? m.away : m.home, oppFlag: sch.countries[home ? m.away : m.home] || '', group: m.group, live: m.live || '', away: !home });
     });
-    const off = d.date === '2026-10-02' && OFFICIALS[m.code];
-    if (off) off.forEach((o, i) => {
-      if (!o || !names.has(o)) return;
-      (duties[o] = duties[o] || []).push({ start: sl.start, pitch: m.pitch, code: m.code, match: `${m.home} v ${m.away}`, role: i === 0 ? 'Referee 1' : 'Referee 2 / table' });
+    // Duties follow the organisers' own match page; the Friday sheet is only the fallback before a page has been read
+    const pg = live.meta.get(m.code);
+    const po = pg && pg.detail && pg.detail.officials;
+    let off = null;
+    if (po && (po.referee1 || po.referee2)) off = [[po.referee1, 'Referee 1'], [po.referee2, 'Referee 2'], [po.scorer, 'Scorer'], [po.timekeeper, 'Timekeeper']];
+    else if (d.date === '2026-10-02' && OFFICIALS[m.code]) off = [[OFFICIALS[m.code][0], 'Referee 1'], [OFFICIALS[m.code][1], 'Referee 2 / table']];
+    if (off) off.forEach(([o, role]) => {
+      const club = o && [...names].find((n) => n.toLowerCase() === o.trim().toLowerCase());
+      if (!club) return;
+      (duties[club] = duties[club] || []).push({ start: sl.start, pitch: m.pitch, code: m.code, match: `${m.home} v ${m.away}`, role });
     });
   })));
   const rows = Object.values(teams).sort((a, b) => a.name.localeCompare(b.name) || a.division.localeCompare(b.division));

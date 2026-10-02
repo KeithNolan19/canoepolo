@@ -9,7 +9,7 @@ const SCHEDULES = {
     liveUrl: 'https://ecc2026milano.it/en/campionati/view?id=1',
     // Official match pages are liveMatchBase + id. Ids run in timetable order (time, then pitch); a day sets liveFirstId once its ids are confirmed.
     liveMatchBase: 'https://ecc2026milano.it/en/partite/view?id=',
-    notice: 'All files and schedules on this page come directly from the organiser. There may be a discrepancy between them (for example, some Friday match slots and the referee list do not fully agree). The organiser will check this and clear it up soon. Please check back for updates.',
+    notice: 'Match times, pitches, scores and officials on this page are read from the organiser\'s own system every few minutes, so they follow any change the organiser makes. The PDF files are as issued by the organiser and may be out of date.',
     headline: 'The full timetable is here: Friday, Saturday and Sunday.',
     pending: [],
     groupsPdf: '/docs/milan-ecc-2026-groups.pdf',
@@ -250,7 +250,13 @@ const SCHEDULES = {
 };
 
 // Turn the compact lists into objects, grouped by time slot
-function forSlug(slug) {
+// The organisers' own system is always right: live.js reports games whose time or pitch differs from this timetable and they are moved here
+let overrides = {};
+function setOverrides(o) { overrides = o || {}; }
+const addMinutes = (hhmm, min) => { const [h, m] = hhmm.split(':').map(Number); const t = h * 60 + m + min; return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`; };
+const toMin = (hhmm) => { const [h, m] = hhmm.split(':').map(Number); return h * 60 + m; };
+
+function forSlug(slug, opts = {}) {
   const s = SCHEDULES[slug];
   if (!s) return null;
   if (s.hidden) return { hidden: true };
@@ -286,13 +292,29 @@ function forSlug(slug) {
       slots.forEach((x) => x.matches.sort((a, b) => a.pitch - b.pitch));
       const all = slots.flatMap((x) => x.matches);
       if (d.liveFirstId && s.liveMatchBase) all.forEach((m, i) => { m.liveId = d.liveFirstId + i; m.live = s.liveMatchBase + m.liveId; });
+      let outSlots = slots, outAll = all;
+      if (!opts.raw && all.some((m) => overrides[m.code])) {
+        // move games to where the organisers' system says they are (ids stay as they were)
+        const rebuilt = [];
+        slots.forEach((sl) => sl.matches.forEach((m) => {
+          const o = overrides[m.code] || {};
+          const start = o.time || sl.start;
+          const end = o.time ? addMinutes(start, toMin(sl.end) - toMin(sl.start)) : sl.end;
+          let slot = rebuilt.find((x) => x.start === start);
+          if (!slot) { slot = { start, end, matches: [] }; rebuilt.push(slot); }
+          slot.matches.push({ ...m, pitch: o.pitch || m.pitch, moved: o.time || o.pitch ? { time: sl.start, pitch: m.pitch } : undefined });
+        }));
+        rebuilt.sort((a, b) => a.start.localeCompare(b.start));
+        rebuilt.forEach((x) => x.matches.sort((a, b) => a.pitch - b.pitch));
+        outSlots = rebuilt; outAll = rebuilt.flatMap((x) => x.matches);
+      }
       return {
-        date: d.date, label: d.label, pdf: d.pdf, slots,
-        groups: [...new Set(all.map((m) => m.group))].sort(),
-        pitches: [...new Set(all.map((m) => m.pitch))].sort((a, b) => a - b),
+        date: d.date, label: d.label, pdf: d.pdf, slots: outSlots,
+        groups: [...new Set(outAll.map((m) => m.group))].sort(),
+        pitches: [...new Set(outAll.map((m) => m.pitch))].sort((a, b) => a - b),
       };
     }),
   };
 }
 
-module.exports = { forSlug };
+module.exports = { forSlug, setOverrides };
