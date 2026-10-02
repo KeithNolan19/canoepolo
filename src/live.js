@@ -51,7 +51,8 @@ function parse(html) {
   const evs = parseEvents(html);
   // Only trust the scorers when they add up to the score on the page
   const ok = evs.goals.filter((g) => g.team === 1).length === score[0] && evs.goals.filter((g) => g.team === 2).length === score[1];
-  return { debug: t.slice(0, 400), events: evs, result: { score, status: done ? 'FT' : 'LIVE', goals: ok ? evs.goals : null, cards: ok ? evs.cards : null } };
+  const ts = /TIME\s+(\d{1,2}:\d{2})\s+\((\d{1,2}:\d{2})\)/i.exec(t); // scheduled time and the time the game really started
+  return { debug: t.slice(0, 400), events: evs, result: { ks: ts ? ts[2].padStart(5, '0') : undefined, score, status: done ? 'FT' : 'LIVE', goals: ok ? evs.goals : null, cards: ok ? evs.cards : null } };
 }
 
 async function fetchPage(url) {
@@ -71,9 +72,9 @@ function matchList() {
   return out;
 }
 
-// A match is worth asking about from 5 minutes before the start until it has finished (or 2.5 hours after the start)
+// A match is worth asking about from 10 minutes before the scheduled start until it has finished (or 4 hours after it, because games run late)
 function due(m, now) {
-  return !finished.has(m.code) && now >= m.start - 5 * 60 * 1000 && now <= m.start + 150 * 60 * 1000;
+  return !finished.has(m.code) && now >= m.start - 10 * 60 * 1000 && now <= m.start + 4 * 60 * 60 * 1000;
 }
 
 async function tick() {
@@ -100,7 +101,7 @@ function start() {
 
 function snapshot() {
   const o = {};
-  state.forEach((v, k) => { o[k] = { s: `${v.score[0]} - ${v.score[1]}`, st: v.status, g: v.goals || undefined, c: v.cards || undefined }; });
+  state.forEach((v, k) => { o[k] = { s: `${v.score[0]} - ${v.score[1]}`, st: v.status, ks: v.ks, g: v.goals || undefined, c: v.cards || undefined }; });
   return o;
 }
 

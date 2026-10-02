@@ -102,6 +102,12 @@
         st.className = 'st' + (v.st === 'LIVE' ? ' live' : '');
         st.textContent = v.st === 'LIVE' ? 'LIVE' : 'FINAL';
         el.appendChild(st);
+        if (v.ks && el.dataset.start && v.ks !== el.dataset.start) {
+          const late = document.createElement('span');
+          late.className = 'st';
+          late.textContent = 'Started ' + v.ks;
+          el.appendChild(late);
+        }
       });
       renderGoals(d);
     }).catch(() => {});

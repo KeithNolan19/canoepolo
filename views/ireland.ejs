@@ -29,7 +29,7 @@
       <li class="sched-match <%= t.division === 'Women' ? 'is-women' : 'is-men' %>">
         <span class="sm-pitch"><%= g.day.split(' ')[0].slice(0, 3) %><br><%= g.start %></span>
         <span class="sm-teams">v <strong><% if (g.oppFlag) { %><span class="tflag" aria-hidden="true"><%- flagImg(g.oppFlag) %></span> <% } %><%= g.opp %></strong></span>
-        <% if (g.live) { %><span class="sm-score" data-score="<%= g.code %>" data-flip="<%= g.away ? 1 : 0 %>" aria-live="polite"></span><% } %>
+        <% if (g.live) { %><span class="sm-score" data-score="<%= g.code %>" data-start="<%= g.start %>" data-flip="<%= g.away ? 1 : 0 %>" aria-live="polite"></span><% } %>
         <% if (g.live) { %><span class="sm-goals" data-goals="<%= g.code %>" data-side="<%= g.away ? 2 : 1 %>" data-team="<%= t.name %>" data-opp="<%= g.opp %>"></span><% } %>
         <span class="sm-meta">Pitch <%= g.pitch %> &middot; Group <%= g.group %> &middot; <%= g.code %><% if (g.live) { %> &middot; <a class="sm-live" href="<%= g.live %>" target="_blank" rel="noopener">Live score</a><% } %></span>
       </li>
