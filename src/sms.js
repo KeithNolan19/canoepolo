@@ -27,7 +27,12 @@ const configured = () => !!(env('TWILIO_ACCOUNT_SID') && env('TWILIO_AUTH_TOKEN'
 const dryRun = () => env('SMS_DRY_RUN') === '1';
 const available = () => (configured() || dryRun()) && Date.now() < END;
 const today = () => new Date().toISOString().slice(0, 10);
-const cap = () => Math.max(1, Number(env('SMS_DAILY_CAP')) || 400);
+const cap = () => Math.max(1, Number(env('SMS_DAILY_CAP')) || 150);
+// At most this many confirmed numbers (default 10), so the bill stays small. Raise it with SMS_MAX_SIGNUPS in .env.
+const maxSignups = () => Math.max(1, Number(env('SMS_MAX_SIGNUPS')) || 10);
+const confirmed = () => db.prepare('SELECT COUNT(*) AS n FROM sms_phones WHERE verified = 1 AND stopped = 0').get().n;
+const full = () => confirmed() >= maxSignups();
+const FULL_MSG = 'Text updates are full. We limit the number of sign-ups to keep this free for everyone. Scores and times are always on the ECC page.';
 
 // Numbers must be international (+353 ...) and from Europe. Keeps bots from running up the bill with far-away premium numbers.
 function normalisePhone(raw) {
@@ -86,6 +91,8 @@ async function start(rawPhone, teams) {
   if (!valid.length) return { error: 'Please pick at least one team.' };
   const now = Date.now();
   let row = db.prepare('SELECT * FROM sms_phones WHERE phone = ?').get(phone);
+  if ((!row || !row.verified) && full()) return { error: FULL_MSG };
+  if (!row && db.prepare('SELECT COUNT(*) AS n FROM sms_phones').get().n >= maxSignups() * 4) return { error: FULL_MSG };
   if (!row) { db.prepare('INSERT INTO sms_phones (phone, token, created) VALUES (?, ?, ?)').run(phone, newToken(), now); row = db.prepare('SELECT * FROM sms_phones WHERE phone = ?').get(phone); }
   if (row.stopped) return { error: 'This number has asked us to stop texting it. Please contact us if that was a mistake.' };
   const stash = JSON.stringify(valid);
@@ -117,6 +124,7 @@ async function verify(rawPhone, code) {
   db.prepare('UPDATE sms_phones SET attempts = attempts + 1 WHERE phone = ?').run(phone);
   const ok = hash(String(code || '').trim()) === row.code_hash;
   if (!ok) return { error: 'That code is not right.', phone, step: 'code' };
+  if (!row.verified && full()) return { error: FULL_MSG };
   db.prepare('UPDATE sms_phones SET verified = 1, code_hash = NULL WHERE phone = ?').run(phone);
   const p = db.prepare('SELECT teams FROM sms_pending WHERE phone = ?').get(phone);
   if (p) { try { addFollows(phone, JSON.parse(p.teams)); } catch (e) { /* ignore */ } db.prepare('DELETE FROM sms_pending WHERE phone = ?').run(phone); }
@@ -206,7 +214,7 @@ function cleanup() {
 function summary() {
   const n = (q) => db.prepare(q).get().n;
   return {
-    configured: configured(), dryRun: dryRun(), open: available(), cap: cap(), sentToday: spent(),
+    maxSignups: maxSignups(), full: full(), configured: configured(), dryRun: dryRun(), open: available(), cap: cap(), sentToday: spent(),
     numbers: n('SELECT COUNT(*) AS n FROM sms_phones WHERE verified = 1 AND stopped = 0'),
     stopped: n('SELECT COUNT(*) AS n FROM sms_phones WHERE stopped = 1'),
     follows: n('SELECT COUNT(*) AS n FROM sms_follows'),
@@ -233,4 +241,4 @@ async function broadcast(team, text) {
   return { ok, failed, total: list.length };
 }
 
-module.exports = { audience, broadcast, available, start, verify, stopByToken, byToken, startTimer, cleanup, summary, send, normalisePhone, run };
+module.exports = { full, audience, broadcast, available, start, verify, stopByToken, byToken, startTimer, cleanup, summary, send, normalisePhone, run };

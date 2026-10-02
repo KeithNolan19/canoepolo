@@ -4,7 +4,7 @@
 
 <div class="admin-head"><h1>Text updates</h1></div>
 <% if (msg) { %><p class="notice green"><%= msg %></p><% } %>
-<p>Status: <strong><%= s.open ? (s.dryRun ? 'Test mode (nothing is sent)' : 'Live') : 'Off' %></strong> &middot; confirmed numbers <strong><%= s.numbers %></strong> &middot; follows <strong><%= s.follows %></strong> &middot; stopped <strong><%= s.stopped %></strong> &middot; texts today <strong><%= s.sentToday %></strong> of <%= s.cap %></p>
+<p>Status: <strong><%= s.open ? (s.dryRun ? 'Test mode (nothing is sent)' : 'Live') : 'Off' %></strong> &middot; confirmed numbers <strong><%= s.numbers %> of <%= s.maxSignups %></strong> &middot; follows <strong><%= s.follows %></strong> &middot; stopped <strong><%= s.stopped %></strong> &middot; texts today <strong><%= s.sentToday %></strong> of <%= s.cap %></p>
 
 <form method="post" action="/admin/sms/send" class="quiz-join sms-form">
   <input type="hidden" name="_csrf" value="<%= csrf %>">

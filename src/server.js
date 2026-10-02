@@ -358,7 +358,7 @@ app.get('/rules', (req, res) => res.render('rules', { title: 'Canoe polo rules',
 
 // ---------- Public JSON API (for apps, club sites, etc.) ----------
 const live = require('./live');
-app.use((req, res, next) => { res.locals.smsOpen = require('./sms').available(); next(); }); // shows the text-updates buttons only when switched on
+app.use((req, res, next) => { const m = require('./sms'); res.locals.smsOpen = m.available() && !m.full(); next(); }); // shows the text-updates buttons only when switched on
 // "Support your club" for the ECC: pick a country, then see its teams, games, live scores, scorers and duties
 const ECC_SLUG = 'paddle-europe-canoe-polo-club-championships-2026';
 // Gazebo / boat storage numbers from the organisers' list, only where the club on the list is clearly the same team
@@ -423,7 +423,7 @@ const smsPage = (req, res, extra = {}) => {
   const { sch } = eccCountries();
   const teams = sch.teams.filter((t) => sch.countries[t.name]);
   const q = [].concat(req.query.team || []).map(String);
-  res.render('text-updates', { title: 'Text updates for the ECC 2026', slug: ECC_SLUG, open: sms.available(), teams, picked: q, step: 'form', error: '', done: false, phone: '', metaDescription: 'Get a text when your team is next up and with the result at the ECC 2026.', ...extra });
+  res.render('text-updates', { title: 'Text updates for the ECC 2026', slug: ECC_SLUG, open: sms.available(), full: sms.full(), teams, picked: q, step: 'form', error: '', done: false, phone: '', metaDescription: 'Get a text when your team is next up and with the result at the ECC 2026.', ...extra });
 };
 const smsStartLimit = rateLimit({ windowMs: 60 * 60 * 1000, limit: 6, standardHeaders: false, legacyHeaders: false, handler: tooMany });
 const smsVerifyLimit = rateLimit({ windowMs: 60 * 60 * 1000, limit: 30, standardHeaders: false, legacyHeaders: false, handler: tooMany });
