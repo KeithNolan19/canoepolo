@@ -6,6 +6,18 @@
 <% if (msg) { %><p class="notice green"><%= msg %></p><% } %>
 <p>Status: <strong><%= s.open ? (s.dryRun ? 'Test mode (nothing is sent)' : 'Live') : 'Off' %></strong> &middot; confirmed numbers <strong><%= s.numbers %> of <%= s.maxSignups %></strong> &middot; follows <strong><%= s.follows %></strong> &middot; stopped <strong><%= s.stopped %></strong> &middot; texts today <strong><%= s.sentToday %></strong> of <%= s.cap %></p>
 
+<form method="post" action="/admin/sms/halftime" class="quiz-join sms-form">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <h2>Send a half-time update</h2>
+  <% if (liveGames.length) { %>
+  <label>Game
+    <select name="code"><% liveGames.forEach(g => { %><option value="<%= g.code %>"><%= g.code %>: <%= g.home %> <%= g.score[0] %>-<%= g.score[1] %> <%= g.away %></option><% }) %></select>
+  </label>
+  <label class="sms-consent"><input type="checkbox" name="confirm" value="1"> It is half-time. Send the current score to everyone following either team (once per game).</label>
+  <p><button class="btn primary" type="submit">Send half-time</button></p>
+  <% } else { %><p class="small-note">No game is live on the organiser's page right now.</p><% } %>
+</form>
+
 <form method="post" action="/admin/sms/send" class="quiz-join sms-form">
   <input type="hidden" name="_csrf" value="<%= csrf %>">
   <h2>Send a message now</h2>

@@ -182,7 +182,7 @@ async function run() {
           if (f.created > g.startMs + 45 * 60 * 1000) continue;
           const mine = side === g.home ? state.score[0] : state.score[1], theirs = side === g.home ? state.score[1] : state.score[0];
           key = `res:${g.code}`;
-          body = mine > theirs ? `${side} win ${mine}-${theirs} v ${other}` : mine < theirs ? `${side} lose ${mine}-${theirs} v ${other}` : `${side} draw ${mine}-${theirs} v ${other}`;
+          body = 'Full time: ' + (mine > theirs ? `${side} win ${mine}-${theirs} v ${other}` : mine < theirs ? `${side} lose ${mine}-${theirs} v ${other}` : `${side} draw ${mine}-${theirs} v ${other}`);
         } else if (!finished && !started && now >= g.startMs - 15 * 60 * 1000 && now <= g.startMs + 90 * 60 * 1000) { // games run late, and the organiser only shows the real start time once the game has begun
           key = `next:${g.code}:${g.time}:${g.pitch}`;
           const prior = nextCount.get(f.phone, `next:${g.code}:%`).n;
@@ -244,4 +244,26 @@ async function broadcast(team, text) {
   return { ok, failed, total: list.length };
 }
 
-module.exports = { full, audience, broadcast, available, start, verify, stopByToken, byToken, startTimer, cleanup, summary, send, normalisePhone, run };
+// Half-time text, sent by hand from the admin page for a game that is being played (the organiser's page does not say when half-time is)
+function liveGames() {
+  return games().filter((g) => { const v = live._state.get(g.code); return v && v.status === 'LIVE'; }).map((g) => ({ code: g.code, home: g.home, away: g.away, score: live._state.get(g.code).score }));
+}
+async function halfTime(code) {
+  const g = games().find((x) => x.code === code);
+  const v = live._state.get(code);
+  if (!g || !v || v.status !== 'LIVE' || !sane(v)) return { error: 'That game is not live on the organiser\'s page right now.' };
+  const phones = new Set([...audience(`${g.home}|${g.division}`), ...audience(`${g.away}|${g.division}`)]);
+  const key = `ht:${code}`;
+  const sentBefore = db.prepare('SELECT 1 FROM sms_sent WHERE phone = ? AND key = ?');
+  const mark = db.prepare('INSERT OR IGNORE INTO sms_sent (phone, key, at) VALUES (?, ?, ?)');
+  let ok = 0, skipped = 0, failed = 0;
+  for (const ph of phones) {
+    if (sentBefore.get(ph, key)) { skipped++; continue; }
+    mark.run(ph, key, Date.now());
+    try { await send(ph, `Half time: ${g.home} ${v.score[0]}-${v.score[1]} ${g.away}\n\n${tail(ph)}`); ok++; } catch (e) { failed++; if (/cap/.test(e.message)) break; }
+    await new Promise((r) => setTimeout(r, 250));
+  }
+  return { ok, skipped, failed, total: phones.size, score: `${g.home} ${v.score[0]}-${v.score[1]} ${g.away}` };
+}
+
+module.exports = { liveGames, halfTime, full, audience, broadcast, available, start, verify, stopByToken, byToken, startTimer, cleanup, summary, send, normalisePhone, run };

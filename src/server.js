@@ -452,7 +452,12 @@ app.post('/s/:token', smsVerifyLimit, (req, res) => {
 });
 app.get('/admin/sms', requireAdmin, (req, res) => {
   const { sch } = eccCountries();
-  res.render('admin/sms', { fmt: (ms) => new Date(ms).toLocaleString('en-IE', { timeZone: 'Europe/Dublin', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }), title: 'Text updates', s: sms.summary(), teams: sch.teams.filter((t) => sch.countries[t.name]), msg: String(req.query.msg || '').slice(0, 200), counts: Object.fromEntries(sms.summary().perTeam.map((r) => [`${r.team}|${r.division}`, r.n])) });
+  res.render('admin/sms', { fmt: (ms) => new Date(ms).toLocaleString('en-IE', { timeZone: 'Europe/Dublin', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }), title: 'Text updates', s: sms.summary(), teams: sch.teams.filter((t) => sch.countries[t.name]), msg: String(req.query.msg || '').slice(0, 200), liveGames: sms.liveGames(), counts: Object.fromEntries(sms.summary().perTeam.map((r) => [`${r.team}|${r.division}`, r.n])) });
+});
+app.post('/admin/sms/halftime', requireAdmin, checkCsrf, async (req, res) => {
+  if (!req.body.confirm) return res.redirect('/admin/sms?msg=' + encodeURIComponent('Tick the box to confirm.'));
+  const r = await sms.halfTime(String(req.body.code || '').toUpperCase().slice(0, 6));
+  res.redirect('/admin/sms?msg=' + encodeURIComponent(r.error || `Half time sent (${r.score}) to ${r.ok} of ${r.total} numbers${r.skipped ? `, ${r.skipped} already had it` : ''}${r.failed ? `, ${r.failed} failed` : ''}.`));
 });
 app.post('/admin/sms/send', requireAdmin, checkCsrf, async (req, res) => {
   const team = String(req.body.team || '');
