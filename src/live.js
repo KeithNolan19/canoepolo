@@ -18,6 +18,26 @@ function textOf(html) {
     .replace(/\s+/g, ' ').trim();
 }
 
+// Goals and cards from the Events table. Columns: N, period, clock (counts down), team 1 player, team 1 event, team 2 event, team 2 player.
+function parseEvents(html) {
+  const goals = [], cards = [];
+  const cellText = (c) => textOf(c);
+  (html.match(/<tr[\s\S]*?<\/tr>/gi) || []).forEach((row) => {
+    const c = (row.match(/<t[dh][\s\S]*?<\/t[dh]>/gi) || []).map(cellText);
+    if (c.length < 7 || !/^\d+$/.test(c[0]) || !/^\d$/.test(c[1]) || !/^\d{1,2}:\d{2}$/.test(c[2])) return;
+    const [mm, ss] = c[2].split(':').map(Number);
+    const elapsed = (Number(c[1]) - 1) * 600 + (600 - (mm * 60 + ss));
+    const minute = Math.max(1, Math.floor(elapsed / 60) + 1);
+    [[1, c[3], c[4]], [2, c[6], c[5]]].forEach(([team, player, ev]) => {
+      if (/^goal$/i.test(ev)) goals.push({ team, player, minute });
+      else if (/verde/i.test(ev)) cards.push({ team, player, minute, card: 'green' });
+      else if (/gialla|giallo/i.test(ev)) cards.push({ team, player, minute, card: 'yellow' });
+      else if (/ross[ao]/i.test(ev)) cards.push({ team, player, minute, card: 'red' });
+    });
+  });
+  return { goals, cards };
+}
+
 // Reads one Game Report page. Returns { score, status } or null when there is nothing to show yet.
 function parse(html) {
   const t = textOf(html);
@@ -27,7 +47,11 @@ function parse(html) {
   // 2 - 8 when finished, 4* - 2* while the game is on (asterisks); spaces around the dash keep the date 02-10 out
   const m = /\b(\d{1,3})\*?\s+[-\u2013]\s+(\d{1,3})\*?/.exec(t);
   if (!started || !m) return { debug: t.slice(0, 400), result: null };
-  return { debug: t.slice(0, 400), result: { score: [Number(m[1]), Number(m[2])], status: done ? 'FT' : 'LIVE' } };
+  const score = [Number(m[1]), Number(m[2])];
+  const evs = parseEvents(html);
+  // Only trust the scorers when they add up to the score on the page
+  const ok = evs.goals.filter((g) => g.team === 1).length === score[0] && evs.goals.filter((g) => g.team === 2).length === score[1];
+  return { debug: t.slice(0, 400), events: evs, result: { score, status: done ? 'FT' : 'LIVE', goals: ok ? evs.goals : null, cards: ok ? evs.cards : null } };
 }
 
 async function fetchPage(url) {
@@ -76,8 +100,8 @@ function start() {
 
 function snapshot() {
   const o = {};
-  state.forEach((v, k) => { o[k] = { s: `${v.score[0]} - ${v.score[1]}`, st: v.status }; });
+  state.forEach((v, k) => { o[k] = { s: `${v.score[0]} - ${v.score[1]}`, st: v.status, g: v.goals || undefined, c: v.cards || undefined }; });
   return o;
 }
 
-module.exports = { start, snapshot, parse, fetchPage, textOf, _state: state };
+module.exports = { start, snapshot, parse, parseEvents, fetchPage, textOf, _state: state };

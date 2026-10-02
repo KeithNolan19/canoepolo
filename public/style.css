@@ -891,3 +891,7 @@ h1, h2, h3, .event-name, .event-where, .event-extra { overflow-wrap: anywhere; }
 .ie-games { grid-template-columns: 1fr; }
 .ie-duty-h { margin: 16px 0 6px; font-size: 1rem; }
 .ie-duties { margin: 0 0 8px; padding-left: 20px; }
+
+.sm-goals { grid-column: 2; font-size: .82rem; line-height: 1.45; margin: 2px 0 4px; }
+.sm-goals:empty { display: none; }
+.ie-scorers ul { margin: 0 0 12px; padding-left: 20px; }

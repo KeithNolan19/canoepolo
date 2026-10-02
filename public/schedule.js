@@ -103,7 +103,41 @@
         st.textContent = v.st === 'LIVE' ? 'LIVE' : 'FINAL';
         el.appendChild(st);
       });
+      renderGoals(d);
     }).catch(() => {});
+  }
+  // Who scored (Irish teams page): lines per game, plus a tally per team
+  function renderGoals(d) {
+    const tally = {};
+    document.querySelectorAll('[data-goals]').forEach((el) => {
+      const v = d[el.dataset.goals];
+      el.textContent = '';
+      if (!v || !v.g) return;
+      const side = Number(el.dataset.side), team = el.dataset.team, opp = el.dataset.opp;
+      const own = v.g.filter((x) => x.team === side), theirs = v.g.filter((x) => x.team !== side);
+      const line = (label, arr) => {
+        if (!arr.length) return;
+        const p = document.createElement('div');
+        p.textContent = label + ': ' + arr.map((x) => (x.player || 'unknown') + ' ' + x.minute + "'").join(', ');
+        el.appendChild(p);
+      };
+      line(team, own); line(opp, theirs);
+      (v.c || []).filter((x) => x.team === side).forEach((x) => {
+        const p = document.createElement('div');
+        p.textContent = x.card.charAt(0).toUpperCase() + x.card.slice(1) + ' card: ' + (x.player || 'unknown') + ' ' + x.minute + "'";
+        el.appendChild(p);
+      });
+      const t = (tally[team] = tally[team] || {});
+      own.forEach((x) => { const n = x.player || 'unknown'; t[n] = (t[n] || 0) + 1; });
+    });
+    document.querySelectorAll('[data-scorers]').forEach((box) => {
+      const t = tally[box.dataset.scorers] || {};
+      const rows = Object.entries(t).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+      const ul = box.querySelector('ul');
+      ul.textContent = '';
+      rows.forEach(([name, n]) => { const li = document.createElement('li'); li.textContent = name + ': ' + n + (n === 1 ? ' goal' : ' goals'); ul.appendChild(li); });
+      box.hidden = !rows.length;
+    });
   }
   load();
   setInterval(load, 30000);

@@ -547,7 +547,7 @@ app.get('/admin/live-check', requireAdmin, async (req, res) => {
   try {
     const html = await live.fetchPage(`https://ecc2026milano.it/en/partite/view?id=${id}`);
     const p = live.parse(html);
-    res.type('text/plain').send(`id ${id}\nparsed: ${JSON.stringify(p.result)}\nstart of page text:\n${p.debug}`);
+    res.type('text/plain').send(`id ${id}\nparsed: ${JSON.stringify(p.result)}\ngoals/cards found: ${JSON.stringify(p.events)}\nstart of page text:\n${p.debug}`);
   } catch (e) { res.type('text/plain').send(`id ${id}\nCould not read the page: ${e.message}`); }
 });
 app.get('/admin/stats', requireAdmin, (req, res) => {
