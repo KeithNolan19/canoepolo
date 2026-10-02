@@ -212,7 +212,7 @@ app.get('/tournaments', (req, res) => {
   res.render('index', { title: 'Upcoming tournaments', tournaments, filters, countries: T.countriesInUse(), when: 'upcoming' });
 });
 
-app.get('/support', (req, res) => res.render('support', { title: 'Support and funding', ...require('./support') }));
+app.get('/support', (req, res) => res.render('support-funding', { title: 'Support and funding', ...require('./support') }));
 
 app.get('/shop', (req, res) => res.render('shop', { title: 'Shop', shopImage: findImage('shop') }));
 

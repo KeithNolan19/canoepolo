@@ -7,7 +7,6 @@ A small, fast website where you (the admin) post canoe polo tournaments, and pla
 - Public site: upcoming & past tournaments, filters (country, level, division, month, search), a page per tournament
 - "Add to calendar" per tournament, plus a subscribe-able calendar of everything (`/calendar.ics`)
 - Admin panel at `/admin` - add, edit, cancel, feature or delete tournaments
-- Public JSON API (`/api/tournaments`) so clubs/apps can reuse the data
 - Automatic HTTPS, nightly database backups, sitemap for Google
 - Runs on one **$6/month DigitalOcean Droplet**
 
@@ -163,6 +162,5 @@ deploy/              server setup & update scripts
 
 **API**
 
-- `GET /api/tournaments` - upcoming tournaments. Query: `country` (e.g. `IE`), `level`, `division`, `month` (`2026-11`), `q`, `when=past`, `limit`
-- `GET /api/tournaments/:slug` - one tournament
+- The public JSON API is switched off (copying and scraping are not allowed; see the terms page).
 - `GET /calendar.ics` - all upcoming tournaments as a calendar feed
