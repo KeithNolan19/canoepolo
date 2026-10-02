@@ -47,7 +47,7 @@ const mask = (p) => p.slice(0, 4) + '*'.repeat(Math.max(0, p.length - 7)) + p.sl
 function spent() { const r = db.prepare('SELECT n FROM sms_count WHERE day = ?').get(today()); return r ? r.n : 0; }
 function count() { db.prepare('INSERT INTO sms_count (day, n) VALUES (?, 1) ON CONFLICT(day) DO UPDATE SET n = n + 1').run(today()); }
 
-const plain = (t) => String(t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\x20-\x7e]/g, '');
+const plain = (t) => String(t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\x20-\x7e\n]/g, '');
 async function send(to, body) {
   body = plain(body);
   const shown = body.replace(/code: \d{6}/, 'code: ******'); // the confirmation code is not kept
@@ -80,7 +80,7 @@ async function rawSend(to, body) {
 
 const hash = (code) => crypto.createHash('sha256').update(String(code) + (process.env.SESSION_SECRET || '')).digest('hex');
 const newToken = () => crypto.randomBytes(5).toString('hex');
-const tail = (p) => `Stop: ${BASE().replace(/^https?:\/\//, '')}/s/${db.prepare('SELECT token FROM sms_phones WHERE phone = ?').get(p).token}`;
+const tail = (p) => `To stop texts: ${BASE().replace(/^https?:\/\//, '')}/s/${db.prepare('SELECT token FROM sms_phones WHERE phone = ?').get(p).token}`;
 
 // Step 1: person gives a number and the teams. We text a 6 digit code.
 async function start(rawPhone, teams) {
@@ -129,7 +129,7 @@ async function verify(rawPhone, code) {
   const p = db.prepare('SELECT teams FROM sms_pending WHERE phone = ?').get(phone);
   if (p) { try { addFollows(phone, JSON.parse(p.teams)); } catch (e) { /* ignore */ } db.prepare('DELETE FROM sms_pending WHERE phone = ?').run(phone); }
   const follows = db.prepare('SELECT team, division FROM sms_follows WHERE phone = ?').all(phone);
-  try { await send(phone, `You are signed up for ${follows.map((f) => f.team).join(', ')} at the ECC 2026. ${tail(phone)}`); } catch (e) { /* the sign up still stands */ }
+  try { await send(phone, `You are signed up for ${follows.map((f) => f.team).join(', ')} at the ECC 2026.\n\n${tail(phone)}`); } catch (e) { /* the sign up still stands */ }
   return { done: true, phone };
 }
 
@@ -191,7 +191,7 @@ async function run() {
         }
         if (!key || sentBefore.get(f.phone, key)) continue;
         markSent.run(f.phone, key, now); // mark first: a failed text is not retried, so nobody gets duplicates
-        try { await send(f.phone, `${body}. ${tail(f.phone)}`); } catch (e) { console.error('sms failed', e.message); if (/cap/.test(e.message)) return; }
+        try { await send(f.phone, `${body}\n\n${tail(f.phone)}`); } catch (e) { console.error('sms failed', e.message); if (/cap/.test(e.message)) return; }
         await new Promise((r) => setTimeout(r, 250));
       }
     }
@@ -235,7 +235,7 @@ async function broadcast(team, text) {
   const list = audience(team);
   let ok = 0, failed = 0;
   for (const ph of list) {
-    try { await send(ph, `${String(text).slice(0, 120)}. ${tail(ph)}`); ok++; } catch (e) { failed++; if (/cap/.test(e.message)) break; }
+    try { await send(ph, `${String(text).slice(0, 120)}\n\n${tail(ph)}`); ok++; } catch (e) { failed++; if (/cap/.test(e.message)) break; }
     await new Promise((r) => setTimeout(r, 250));
   }
   return { ok, failed, total: list.length };
