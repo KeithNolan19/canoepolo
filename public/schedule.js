@@ -100,7 +100,7 @@
         el.textContent = el.dataset.flip === '1' ? v.s.split(' - ').reverse().join(' - ') : v.s;
         const st = document.createElement('span');
         st.className = 'st' + (v.st === 'LIVE' ? ' live' : '');
-        st.textContent = v.st === 'LIVE' ? 'LIVE' : 'FINAL';
+        st.textContent = v.st === 'LIVE' ? 'LIVE' : 'Full time';
         el.appendChild(st);
         if (v.ks && el.dataset.start && v.ks !== el.dataset.start) {
           const late = document.createElement('span');
