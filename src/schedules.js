@@ -5,6 +5,7 @@
 const SCHEDULES = {
   'paddle-europe-canoe-polo-club-championships-2026': {
     hidden: false,
+    liveUrl: 'https://ecc2026milano.it/en/campionati/view?id=1',
     notice: 'All files and schedules on this page come directly from the organiser. There may be a discrepancy between them (for example, some Friday match slots and the referee list do not fully agree). The organiser will check this and clear it up soon. Please check back for updates.',
     headline: 'The full timetable is here: Friday, Saturday and Sunday.',
     pending: [],
@@ -259,6 +260,7 @@ function forSlug(slug) {
   return {
     note: s.note,
     notice: s.notice || '',
+    liveUrl: s.liveUrl || '',
     headline: s.headline || '',
     pending: s.pending || [],
     groupsPdf: s.groupsPdf || '',

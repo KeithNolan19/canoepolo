@@ -180,8 +180,9 @@ app.get('/', (req, res) => {
   const today = new Date().toISOString().slice(0, 10);
   const popupT = T.getBySlug('paddle-europe-canoe-polo-club-championships-2026');
   const popup = popupT && popupT.end_date >= today ? popupT : null;
+  const liveUrl = popup ? require('./schedules').forSlug(popup.slug).liveUrl : '';
   res.render('home', {
-    popup,
+    popup, liveUrl,
     title: 'The home of international canoe polo',
     nextUp: next.slice(0, 6),
     recent: past.slice(0, 4),

@@ -30,6 +30,7 @@
       <% if (t.registration_deadline) { %><tr><th scope="row">Registration closes</th><td><%= fmtDate(t.registration_deadline) %><% if (t.registration_deadline < today) { %> <span class="flag-label cancelled">Closed</span><% } %></td></tr><% } %>
     </table>
 
+    <% if (schedule && schedule.liveUrl) { %><div class="notice green"><strong>Live results and stats</strong><br>Scores, results and match stats are on the official ECC 2026 site.<br><a class="btn primary" href="<%= schedule.liveUrl %>" target="_blank" rel="noopener">Open live results</a></div><% } %>
     <% if (schedule && schedule.notice) { %><div class="notice" role="note"><strong>Note:</strong> <%= schedule.notice %></div><% } %>
 
     <% if (t.documents.length) { %>
