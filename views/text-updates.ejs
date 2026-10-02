@@ -9,7 +9,7 @@
 
 <div class="wrap narrow-page">
   <% if (done) { %>
-    <div class="notice" role="status"><strong>You're signed up.</strong> We've sent you a text to confirm. You'll get a text shortly before your team plays and one with the result. Every text has a link to stop them.</div>
+    <div class="notice" role="status"><strong>You're signed up.</strong> We've sent you a text to confirm. You'll get a text shortly before your team plays and one with the result. Every text says how to stop them.</div>
     <p><a class="btn primary" href="/tournaments/<%= slug %>/support">Back to Support your club</a></p>
   <% } else if (!open) { %>
     <div class="notice" role="note">Text updates are not open right now. Scores and times are always on the <a href="/tournaments/<%= slug %>">ECC page</a>.</div>
@@ -43,7 +43,7 @@
         <p><button class="btn primary" type="submit">Text me a code</button></p>
       </form>
     <% } %>
-    <p class="small-note">Free for you, though your phone company may charge for texts. We only text about the games of the teams you pick, and we delete your number after the tournament. Texts are sent through Twilio. Stop at any time with the link in every text. See our <a href="/privacy#sms">privacy page</a>. Times and pitches follow the organiser's system and can change.</p>
+    <p class="small-note">Free for you, though your phone company may charge for texts. We only text about the games of the teams you pick, and we delete your number after the tournament. Texts are sent through Twilio. Stop at any time by messaging us on WhatsApp (the number is in every text). See our <a href="/privacy#sms">privacy page</a>. Times and pitches follow the organiser's system and can change.</p>
   <% } %>
 </div>
 

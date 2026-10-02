@@ -459,6 +459,10 @@ app.post('/admin/sms/halftime', requireAdmin, checkCsrf, async (req, res) => {
   const r = await sms.halfTime(String(req.body.code || '').toUpperCase().slice(0, 6));
   res.redirect('/admin/sms?msg=' + encodeURIComponent(r.error || `Half time sent (${r.score}) to ${r.ok} of ${r.total} numbers${r.skipped ? `, ${r.skipped} already had it` : ''}${r.failed ? `, ${r.failed} failed` : ''}.`));
 });
+app.post('/admin/sms/stop', requireAdmin, checkCsrf, (req, res) => {
+  const ok = sms.stopPhone(String(req.body.phone || ''));
+  res.redirect('/admin/sms?msg=' + encodeURIComponent(ok ? 'That number will not get any more texts.' : 'Number not recognised.'));
+});
 app.post('/admin/sms/send', requireAdmin, checkCsrf, async (req, res) => {
   const team = String(req.body.team || '');
   const text = String(req.body.text || '').trim();

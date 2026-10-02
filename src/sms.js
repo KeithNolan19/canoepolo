@@ -50,7 +50,7 @@ function count() { db.prepare('INSERT INTO sms_count (day, n) VALUES (?, 1) ON C
 const plain = (t) => String(t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\x20-\x7e\n]/g, '');
 async function send(to, body) {
   body = plain(body);
-  const shown = body.replace(/code: \d{6}/, 'code: ******'); // the confirmation code is not kept
+  const shown = body.replace(/code is \d{6}/, 'code is ******'); // the confirmation code is not kept
   const log = (status) => { try { db.prepare('INSERT INTO sms_log (phone, body, status, at) VALUES (?, ?, ?, ?)').run(to, shown, status, Date.now()); } catch (e) { /* ignore */ } };
   try { const r = await rawSend(to, body); log(r === 'dry' ? 'test (not sent)' : 'sent'); return r; } catch (e) { log('failed: ' + e.message); throw e; }
 }
@@ -80,7 +80,8 @@ async function rawSend(to, body) {
 
 const hash = (code) => crypto.createHash('sha256').update(String(code) + (process.env.SESSION_SECRET || '')).digest('hex');
 const newToken = () => crypto.randomBytes(5).toString('hex');
-const tail = (p) => `To stop texts: ${BASE().replace(/^https?:\/\//, '')}/s/${db.prepare('SELECT token FROM sms_phones WHERE phone = ?').get(p).token}`;
+// No web link in the texts (phones flag an unknown sender name plus a link as a likely scam). People stop by messaging us on WhatsApp; the admin page has a Stop button.
+const tail = () => 'To stop these texts, WhatsApp +353 87 678 9927';
 
 // Step 1: person gives a number and the teams. We text a 6 digit code.
 async function start(rawPhone, teams) {
@@ -103,7 +104,7 @@ async function start(rawPhone, teams) {
   if (codesToday >= 4) return { error: 'Too many codes for this number today. Please try again tomorrow.' };
   const code = String(crypto.randomInt(100000, 1000000));
   db.prepare('UPDATE sms_phones SET code_hash = ?, code_expires = ?, attempts = 0, codes_today = ?, codes_day = ?, last_code = ? WHERE phone = ?').run(hash(code), now + 15 * 60 * 1000, codesToday + 1, day, now, phone);
-  try { await send(phone, `canoepolo.eu code: ${code}. By entering it you agree to texts about your chosen teams at the ECC 2026.`); } catch (e) {
+  try { await send(phone, `Your CanoePolo code is ${code}. By entering it you agree to texts about your chosen teams at the ECC 2026.`); } catch (e) {
     console.error('sms code failed', e.message);
     return { error: 'We could not send the text. Please check the number and try again later.' };
   }
@@ -266,4 +267,12 @@ async function halfTime(code) {
   return { ok, skipped, failed, total: phones.size, score: `${g.home} ${v.score[0]}-${v.score[1]} ${g.away}` };
 }
 
-module.exports = { liveGames, halfTime, full, audience, broadcast, available, start, verify, stopByToken, byToken, startTimer, cleanup, summary, send, normalisePhone, run };
+function stopPhone(phone) {
+  const p = normalisePhone(phone);
+  if (!p) return false;
+  db.prepare('UPDATE sms_phones SET stopped = 1 WHERE phone = ?').run(p);
+  db.prepare('DELETE FROM sms_follows WHERE phone = ?').run(p);
+  return true;
+}
+
+module.exports = { stopPhone, liveGames, halfTime, full, audience, broadcast, available, start, verify, stopByToken, byToken, startTimer, cleanup, summary, send, normalisePhone, run };

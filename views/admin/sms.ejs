@@ -37,10 +37,10 @@
 
 <h2>All sign-ups (<%= s.signups.length %>)</h2>
 <div class="table-wrap"><table class="lb-table">
-  <thead><tr><th>Number</th><th>Teams</th><th>Signed up</th><th>Status</th><th>Texts</th></tr></thead>
+  <thead><tr><th>Number</th><th>Teams</th><th>Signed up</th><th>Status</th><th>Texts</th><th></th></tr></thead>
   <tbody>
-  <% s.signups.forEach(r => { %><tr><td><%= r.phone %></td><td><%= r.teams || '-' %></td><td><%= fmt(r.created) %></td><td><%= r.stopped ? 'Stopped' : (r.verified ? 'Confirmed' : 'Code not entered') %></td><td><%= r.texts %></td></tr><% }) %>
-  <% if (!s.signups.length) { %><tr><td colspan="5">No sign-ups yet.</td></tr><% } %>
+  <% s.signups.forEach(r => { %><tr><td><%= r.phone %></td><td><%= r.teams || '-' %></td><td><%= fmt(r.created) %></td><td><%= r.stopped ? 'Stopped' : (r.verified ? 'Confirmed' : 'Code not entered') %></td><td><%= r.texts %></td><td><% if (!r.stopped) { %><form method="post" action="/admin/sms/stop"><input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="phone" value="<%= r.phone %>"><button class="btn small danger" type="submit">Stop texts</button></form><% } %></td></tr><% }) %>
+  <% if (!s.signups.length) { %><tr><td colspan="6">No sign-ups yet.</td></tr><% } %>
   </tbody>
 </table></div>
 
