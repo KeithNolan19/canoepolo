@@ -24,7 +24,8 @@ function parse(html) {
   const done = /Ora termine/i.test(t);
   const ev = /Total\s+(\d+)\s+items/i.exec(t);
   const started = done || (ev && Number(ev[1]) > 0);
-  const m = /\b(\d{1,3}) - (\d{1,3})\b/.exec(t);
+  // 2 - 8 when finished, 4* - 2* while the game is on (asterisks); spaces around the dash keep the date 02-10 out
+  const m = /\b(\d{1,3})\*?\s+[-\u2013]\s+(\d{1,3})\*?/.exec(t);
   if (!started || !m) return { debug: t.slice(0, 400), result: null };
   return { debug: t.slice(0, 400), result: { score: [Number(m[1]), Number(m[2])], status: done ? 'FT' : 'LIVE' } };
 }
