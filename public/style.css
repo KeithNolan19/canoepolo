@@ -881,3 +881,13 @@ h1, h2, h3, .event-name, .event-where, .event-extra { overflow-wrap: anywhere; }
 .sm-score:empty { display: none; }
 .sm-score .st { margin-left: 8px; padding: 1px 8px; border-radius: 999px; font-size: .7rem; letter-spacing: .04em; background: var(--tile); color: var(--ink); }
 .sm-score .st.live { background: var(--green); color: #fff; }
+
+/* Unlisted Irish teams page */
+.ie-links { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 20px; }
+.ie-team { margin: 0 0 32px; }
+.ie-team h2 { display: flex; align-items: center; gap: 10px; margin: 0 0 4px; }
+.ie-sub { margin: 0 0 6px; color: var(--muted); font-weight: 600; }
+.ie-stats { margin: 0 0 12px; }
+.ie-games { grid-template-columns: 1fr; }
+.ie-duty-h { margin: 16px 0 6px; font-size: 1rem; }
+.ie-duties { margin: 0 0 8px; padding-left: 20px; }

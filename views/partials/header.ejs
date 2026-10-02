@@ -6,6 +6,7 @@
   <title><%= title %> | canoepolo.eu</title>
   <meta name="description" content="<%= typeof metaDescription !== 'undefined' ? metaDescription : 'The home of international canoe polo (kayak polo): tournaments, videos, rules, refereeing and ways to get involved, for players, coaches, referees, volunteers and clubs.' %>">
   <link rel="canonical" href="<%= canonical %>">
+  <% if (typeof noindex !== 'undefined' && noindex) { %><meta name="robots" content="noindex, nofollow"><% } %>
   <meta property="og:type" content="<%= typeof ogType !== 'undefined' ? ogType : 'website' %>">
   <meta property="og:url" content="<%= canonical %>">
   <meta property="og:description" content="<%= typeof metaDescription !== 'undefined' ? metaDescription : 'The home of international canoe polo (kayak polo).' %>">

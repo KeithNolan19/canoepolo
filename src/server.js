@@ -358,6 +358,39 @@ app.get('/rules', (req, res) => res.render('rules', { title: 'Canoe polo rules',
 
 // ---------- Public JSON API (for apps, club sites, etc.) ----------
 const live = require('./live');
+// Unlisted page for the Irish teams at the ECC (not linked from the site, not in the sitemap, asks search engines not to index it)
+app.get('/ecc/ireland', (req, res) => {
+  const SLUG = 'paddle-europe-canoe-polo-club-championships-2026';
+  const sch = require('./schedules').forSlug(SLUG);
+  const { OFFICIALS } = require('./officials');
+  const scores = live.snapshot();
+  const GAZEBO = { Ulster: 4, Mullinger: 28 };
+  const teams = {};
+  sch.days.forEach((d) => d.slots.forEach((sl) => sl.matches.forEach((m) => {
+    [m.home, m.away].forEach((name) => {
+      if (sch.countries[name] !== 'IE' || m.group.length !== 1) return;
+      const t = teams[name] = teams[name] || { name, division: m.division, group: m.group, games: [], duties: [], p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gazebo: GAZEBO[name] || null };
+      t.division = m.division; t.group = m.group;
+      const home = m.home === name;
+      const sc = scores[m.code];
+      let result = null;
+      if (sc) {
+        const [a, b] = sc.s.split(' - ').map(Number);
+        const mine = home ? a : b, theirs = home ? b : a;
+        result = { score: `${mine} - ${theirs}`, status: sc.st };
+        if (sc.st === 'FT') { t.p++; t.gf += mine; t.ga += theirs; if (mine > theirs) t.w++; else if (mine < theirs) t.l++; else t.d++; }
+      }
+      t.games.push({ day: d.label, start: sl.start, pitch: m.pitch, code: m.code, opp: home ? m.away : m.home, oppFlag: sch.countries[home ? m.away : m.home] || '', group: m.group, live: m.live || '', away: !home, result });
+    });
+    const off = d.date === '2026-10-02' && OFFICIALS[m.code];
+    if (off) off.forEach((o, i) => {
+      if (!o || sch.countries[o] !== 'IE') return;
+      (teams[o] = teams[o] || { name: o, games: [], duties: [], p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gazebo: GAZEBO[o] || null }).duties.push({ start: sl.start, pitch: m.pitch, code: m.code, match: `${m.home} v ${m.away}`, role: i === 0 ? 'Referee 1' : 'Referee 2 / table' });
+    });
+  })));
+  res.set('X-Robots-Tag', 'noindex, nofollow');
+  res.render('ireland', { title: 'Irish teams at the ECC 2026', noindex: true, teams: Object.values(teams).sort((a, b) => a.name.localeCompare(b.name)), sch, slug: SLUG, canonical: `${BASE_URL}/ecc/ireland` });
+});
 app.get('/api/live-scores', (req, res) => { res.set('Cache-Control', 'public, max-age=20'); res.json(live.snapshot()); });
 app.get('/api/tournaments', (req, res) => {
   res.set('Cache-Control', 'public, max-age=300');
