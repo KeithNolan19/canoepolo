@@ -1,0 +1,28 @@
+<%- include('../partials/header') %>
+
+<%- include('tabs', { tab: 'sms' }) %>
+
+<div class="admin-head"><h1>Text updates</h1></div>
+<% if (msg) { %><p class="notice green"><%= msg %></p><% } %>
+<p>Status: <strong><%= s.open ? (s.dryRun ? 'Test mode (nothing is sent)' : 'Live') : 'Off' %></strong> &middot; confirmed numbers <strong><%= s.numbers %></strong> &middot; follows <strong><%= s.follows %></strong> &middot; stopped <strong><%= s.stopped %></strong> &middot; texts today <strong><%= s.sentToday %></strong> of <%= s.cap %></p>
+
+<form method="post" action="/admin/sms/send" class="quiz-join sms-form">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <h2>Send a message now</h2>
+  <label>To
+    <select name="team">
+      <option value="">Everyone signed up (<%= s.numbers %>)</option>
+      <% teams.forEach(t => { const k = t.name + '|' + t.division; %><option value="<%= k %>"><%= t.name %> (<%= t.division %>)<%= counts[k] ? ' - ' + counts[k] + ' followers' : '' %></option><% }) %>
+    </select>
+  </label>
+  <label>Message (up to 120 characters; the Stop link is added)
+    <input type="text" name="text" maxlength="120" required>
+  </label>
+  <label class="sms-consent"><input type="checkbox" name="confirm" value="1"> I checked the message. It is about the games or the tournament, not advertising.</label>
+  <p><button class="btn primary" type="submit">Send</button></p>
+</form>
+<p class="small-note">People agreed to texts about their teams at the ECC. Keep messages to that: delays, pitch changes, schedule notices.</p>
+
+<% if (s.perTeam.length) { %><h2>Most followed</h2><ul><% s.perTeam.forEach(r => { %><li><%= r.team %> (<%= r.division %>): <%= r.n %></li><% }) %></ul><% } %>
+
+<%- include('../partials/footer') %>

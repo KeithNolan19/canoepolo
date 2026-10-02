@@ -208,4 +208,21 @@ function summary() {
   };
 }
 
-module.exports = { available, start, verify, stopByToken, byToken, startTimer, cleanup, summary, send, normalisePhone, run };
+// A message from the admin page to everyone who follows a team (or to everyone)
+function audience(team) {
+  const q = team
+    ? db.prepare("SELECT DISTINCT f.phone FROM sms_follows f JOIN sms_phones p ON p.phone = f.phone WHERE p.verified = 1 AND p.stopped = 0 AND f.team || '|' || f.division = ?")
+    : db.prepare('SELECT DISTINCT f.phone FROM sms_follows f JOIN sms_phones p ON p.phone = f.phone WHERE p.verified = 1 AND p.stopped = 0');
+  return (team ? q.all(team) : q.all()).map((r) => r.phone);
+}
+async function broadcast(team, text) {
+  const list = audience(team);
+  let ok = 0, failed = 0;
+  for (const ph of list) {
+    try { await send(ph, `${String(text).slice(0, 120)}. ${tail(ph)}`); ok++; } catch (e) { failed++; if (/cap/.test(e.message)) break; }
+    await new Promise((r) => setTimeout(r, 250));
+  }
+  return { ok, failed, total: list.length };
+}
+
+module.exports = { audience, broadcast, available, start, verify, stopByToken, byToken, startTimer, cleanup, summary, send, normalisePhone, run };

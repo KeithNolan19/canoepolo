@@ -450,7 +450,18 @@ app.post('/s/:token', smsVerifyLimit, (req, res) => {
   const ok = sms.stopByToken(req.params.token);
   res.render('text-stop', { title: 'Stop text updates', slug: ECC_SLUG, valid: ok, stopped: ok, token: '', masked: '' });
 });
-app.get('/admin/sms', requireAdmin, (req, res) => res.type('text/plain').send(JSON.stringify(sms.summary(), null, 2)));
+app.get('/admin/sms', requireAdmin, (req, res) => {
+  const { sch } = eccCountries();
+  res.render('admin/sms', { title: 'Text updates', s: sms.summary(), teams: sch.teams.filter((t) => sch.countries[t.name]), msg: String(req.query.msg || '').slice(0, 200), counts: Object.fromEntries(sms.summary().perTeam.map((r) => [`${r.team}|${r.division}`, r.n])) });
+});
+app.post('/admin/sms/send', requireAdmin, checkCsrf, async (req, res) => {
+  const team = String(req.body.team || '');
+  const text = String(req.body.text || '').trim();
+  if (!text || text.length > 120) return res.redirect('/admin/sms?msg=' + encodeURIComponent('Write a message of up to 120 characters.'));
+  if (!req.body.confirm) return res.redirect('/admin/sms?msg=' + encodeURIComponent('Tick the box to confirm.'));
+  const r = await sms.broadcast(team, text);
+  res.redirect('/admin/sms?msg=' + encodeURIComponent(`Sent to ${r.ok} of ${r.total} numbers${r.failed ? ` (${r.failed} failed)` : ''}.`));
+});
 app.get('/api/live-game/:code', (req, res) => { res.set('Cache-Control', 'public, max-age=15'); res.json(live.detail(String(req.params.code).toUpperCase().slice(0, 6)) || {}); });
 app.get('/api/live-changes', (req, res) => { res.set('Cache-Control', 'public, max-age=30'); res.json(live.changes()); });
 app.get('/api/standings', (req, res) => { res.set('Cache-Control', 'public, max-age=20'); res.json(live.standings()); });
