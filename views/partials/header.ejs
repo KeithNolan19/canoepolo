@@ -14,7 +14,9 @@
   <meta property="og:title" content="<%= title %> | canoepolo.eu">
   <meta property="og:site_name" content="canoepolo.eu">
   <meta name="theme-color" content="#0a3b36">
-  <link rel="icon" href="/favicon.svg?v=<%= assetV %>" type="image/svg+xml">
+  <link rel="icon" href="/images/favicon-48.png?v=<%= assetV %>" type="image/png" sizes="48x48">
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png?v=<%= assetV %>">
+  <meta property="og:image" content="<%= BASE_URL %>/images/icon-512.png">
   <link rel="preload" href="/fonts/poppins-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/poppins-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/fonts/fonts.css?v=<%= assetV %>">
@@ -36,8 +38,10 @@
 <header class="site-header">
   <div class="wrap bar">
     <a class="brand" href="/" aria-label="canoepolo.eu home">
-      <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="15" fill="#0a3b36"/><path d="M6 52q6.5-6 13 0t13 0 13 0 13 0" fill="none" stroke="#5cc8ff" stroke-width="4" stroke-linecap="round" opacity=".6"/><g transform="translate(26 39) rotate(-30)"><path d="M-22 0C-13-7 13-7 22 0 13 7-13 7-22 0Z" fill="#fff"/><ellipse cx="0" cy="0" rx="5.5" ry="3" fill="#0a3b36"/><path d="M0 -14V14" stroke="#5cc8ff" stroke-width="2.6" stroke-linecap="round"/><ellipse cx="0" cy="-14" rx="2.8" ry="4.6" fill="#5cc8ff"/><ellipse cx="0" cy="14" rx="2.8" ry="4.6" fill="#5cc8ff"/></g><circle cx="46" cy="19" r="10" fill="#ffc629"/><path d="M36.4 16c6 2.6 13.2 2.6 19.2 0M36.4 22c6-2.6 13.2-2.6 19.2 0M46 9c-4.2 4.4-4.2 15.6 0 20" fill="none" stroke="#0a3b36" stroke-width="1.7"/></svg>
-      <span class="brand-name">canoepolo<span>.eu</span></span>
+      <picture>
+        <source srcset="/images/logo-dark.png?v=<%= assetV %>" media="(prefers-color-scheme: dark)">
+        <img class="brand-logo" src="/images/logo.png?v=<%= assetV %>" width="900" height="216" alt="canoepolo.eu">
+      </picture>
     </a>
     <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-nav"><span class="nav-toggle-bars" aria-hidden="true"></span>Menu</button>
     <nav class="main-nav" id="main-nav" aria-label="Main">
