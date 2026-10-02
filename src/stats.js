@@ -205,14 +205,17 @@ function flow(one) {
   return { pageFlow, visitStats, downloads, downloadKinds, downloadTotal: downloadKinds.reduce((a, x) => a + x.n, 0), funnel, schedTeam: ev.get('sched-team') || 0 };
 }
 
+const FIRST_DAY = '2026-09-30'; // nothing was recorded before this day
 function report(days) {
-  const from = new Date(Date.now() - (days - 1) * 86400000).toISOString().slice(0, 10);
+  const wanted = new Date(Date.now() - (days - 1) * 86400000).toISOString().slice(0, 10);
+  const from = wanted > FIRST_DAY ? wanted : FIRST_DAY;
   const one = (sql) => db.prepare(sql).all(from);
   const daily = one('SELECT day, views, visitors FROM stats_days WHERE day >= ? ORDER BY day');
   const byDay = new Map(daily.map((d) => [d.day, d]));
   const series = [];
   for (let i = days - 1; i >= 0; i--) {
     const day = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
+    if (day < FIRST_DAY) continue;
     series.push(byDay.get(day) || { day, views: 0, visitors: 0 });
   }
   return {
