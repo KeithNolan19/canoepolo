@@ -357,6 +357,8 @@ app.get('/terms', (req, res) => res.render('terms', { title: 'Terms of use' }));
 app.get('/rules', (req, res) => res.render('rules', { title: 'Canoe polo rules', ...require('./rules') }));
 
 // ---------- Public JSON API (for apps, club sites, etc.) ----------
+const live = require('./live');
+app.get('/api/live-scores', (req, res) => { res.set('Cache-Control', 'public, max-age=20'); res.json(live.snapshot()); });
 app.get('/api/tournaments', (req, res) => {
   res.set('Cache-Control', 'public, max-age=300');
   const when = req.query.when === 'past' ? 'past' : 'upcoming';
@@ -506,6 +508,15 @@ app.get('/admin', requireAdmin, (req, res) => {
   res.render('admin/dashboard', { title: 'Admin', tournaments: T.listAll(), msg: req.query.msg || '' });
 });
 
+// Admin check of the live-score reader: /admin/live-check?id=1 shows what the server reads from the official match page
+app.get('/admin/live-check', requireAdmin, async (req, res) => {
+  const id = Number(req.query.id) || 1;
+  try {
+    const html = await live.fetchPage(`https://ecc2026milano.it/en/partite/view?id=${id}`);
+    const p = live.parse(html);
+    res.type('text/plain').send(`id ${id}\nparsed: ${JSON.stringify(p.result)}\nstart of page text:\n${p.debug}`);
+  } catch (e) { res.type('text/plain').send(`id ${id}\nCould not read the page: ${e.message}`); }
+});
 app.get('/admin/stats', requireAdmin, (req, res) => {
   const days = [7, 30, 90, 365].includes(Number(req.query.days)) ? Number(req.query.days) : 30;
   const r = stats.report(days);
@@ -620,6 +631,6 @@ app.use((err, req, res, next) => {
 });
 
 if (require.main === module) {
-  app.listen(PORT, () => console.log(`canoepolo.eu running on ${BASE_URL} (port ${PORT})`));
+  app.listen(PORT, () => { console.log(`canoepolo.eu running on ${BASE_URL} (port ${PORT})`); live.start(); });
 }
 module.exports = app;

@@ -283,7 +283,7 @@ function forSlug(slug) {
       slots.sort((a, b) => a.start.localeCompare(b.start));
       slots.forEach((x) => x.matches.sort((a, b) => a.pitch - b.pitch));
       const all = slots.flatMap((x) => x.matches);
-      if (d.liveFirstId && s.liveMatchBase) all.forEach((m, i) => { m.live = s.liveMatchBase + (d.liveFirstId + i); });
+      if (d.liveFirstId && s.liveMatchBase) all.forEach((m, i) => { m.liveId = d.liveFirstId + i; m.live = s.liveMatchBase + m.liveId; });
       return {
         date: d.date, label: d.label, pdf: d.pdf, slots,
         groups: [...new Set(all.map((m) => m.group))].sort(),

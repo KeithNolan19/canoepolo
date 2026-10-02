@@ -86,3 +86,26 @@
     });
   });
 })();
+
+// Live scores (read by the server from the official ECC match pages): refresh while the page is open
+(function () {
+  const boxes = document.querySelectorAll('[data-score]');
+  if (!boxes.length || !window.fetch) return;
+  function load() {
+    if (document.hidden) return;
+    fetch('/api/live-scores').then((r) => r.json()).then((d) => {
+      boxes.forEach((el) => {
+        const v = d[el.dataset.score];
+        if (!v) { el.textContent = ''; return; }
+        el.textContent = v.s;
+        const st = document.createElement('span');
+        st.className = 'st' + (v.st === 'LIVE' ? ' live' : '');
+        st.textContent = v.st === 'LIVE' ? 'LIVE' : 'FINAL';
+        el.appendChild(st);
+      });
+    }).catch(() => {});
+  }
+  load();
+  setInterval(load, 30000);
+  document.addEventListener('visibilitychange', load);
+})();
