@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS sms_phones (phone TEXT PRIMARY KEY, token TEXT NOT NU
 CREATE TABLE IF NOT EXISTS sms_follows (phone TEXT NOT NULL, team TEXT NOT NULL, division TEXT NOT NULL, created INTEGER NOT NULL, PRIMARY KEY (phone, team, division));
 CREATE TABLE IF NOT EXISTS sms_sent (phone TEXT NOT NULL, key TEXT NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (phone, key));
 CREATE TABLE IF NOT EXISTS sms_pending (phone TEXT PRIMARY KEY, teams TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS sms_log (id INTEGER PRIMARY KEY AUTOINCREMENT, phone TEXT NOT NULL, body TEXT NOT NULL, status TEXT NOT NULL, at INTEGER NOT NULL);
 CREATE TABLE IF NOT EXISTS sms_count (day TEXT PRIMARY KEY, n INTEGER NOT NULL DEFAULT 0);
 `);
 
@@ -44,6 +45,11 @@ function count() { db.prepare('INSERT INTO sms_count (day, n) VALUES (?, 1) ON C
 const plain = (t) => String(t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\x20-\x7e]/g, '');
 async function send(to, body) {
   body = plain(body);
+  const shown = body.replace(/code: \d{6}/, 'code: ******'); // the confirmation code is not kept
+  const log = (status) => { try { db.prepare('INSERT INTO sms_log (phone, body, status, at) VALUES (?, ?, ?, ?)').run(to, shown, status, Date.now()); } catch (e) { /* ignore */ } };
+  try { const r = await rawSend(to, body); log(r === 'dry' ? 'test (not sent)' : 'sent'); return r; } catch (e) { log('failed: ' + e.message); throw e; }
+}
+async function rawSend(to, body) {
   if (spent() >= cap()) throw new Error('daily cap reached');
   if (dryRun()) { console.log(`[sms dry run] ${mask(to)}: ${body}`); count(); return 'dry'; }
   if (!configured()) throw new Error('not configured');
@@ -194,7 +200,7 @@ function startTimer() {
 // After the tournament the numbers are deleted
 function cleanup() {
   if (Date.now() < END + 24 * 3600 * 1000) return;
-  db.exec('DELETE FROM sms_follows; DELETE FROM sms_sent; DELETE FROM sms_pending; DELETE FROM sms_phones;');
+  db.exec('DELETE FROM sms_follows; DELETE FROM sms_sent; DELETE FROM sms_pending; DELETE FROM sms_phones; DELETE FROM sms_log;');
 }
 
 function summary() {
@@ -204,6 +210,8 @@ function summary() {
     numbers: n('SELECT COUNT(*) AS n FROM sms_phones WHERE verified = 1 AND stopped = 0'),
     stopped: n('SELECT COUNT(*) AS n FROM sms_phones WHERE stopped = 1'),
     follows: n('SELECT COUNT(*) AS n FROM sms_follows'),
+    signups: db.prepare("SELECT p.phone, p.verified, p.stopped, p.created, (SELECT group_concat(team || ' (' || division || ')', ', ') FROM sms_follows f WHERE f.phone = p.phone) AS teams, (SELECT COUNT(*) FROM sms_log l WHERE l.phone = p.phone) AS texts FROM sms_phones p ORDER BY p.created DESC").all(),
+    log: db.prepare('SELECT phone, body, status, at FROM sms_log ORDER BY id DESC LIMIT 300').all(),
     perTeam: db.prepare('SELECT team, division, COUNT(*) AS n FROM sms_follows GROUP BY team, division ORDER BY n DESC LIMIT 20').all(),
   };
 }

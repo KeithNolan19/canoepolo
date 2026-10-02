@@ -452,7 +452,7 @@ app.post('/s/:token', smsVerifyLimit, (req, res) => {
 });
 app.get('/admin/sms', requireAdmin, (req, res) => {
   const { sch } = eccCountries();
-  res.render('admin/sms', { title: 'Text updates', s: sms.summary(), teams: sch.teams.filter((t) => sch.countries[t.name]), msg: String(req.query.msg || '').slice(0, 200), counts: Object.fromEntries(sms.summary().perTeam.map((r) => [`${r.team}|${r.division}`, r.n])) });
+  res.render('admin/sms', { fmt: (ms) => new Date(ms).toLocaleString('en-IE', { timeZone: 'Europe/Dublin', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }), title: 'Text updates', s: sms.summary(), teams: sch.teams.filter((t) => sch.countries[t.name]), msg: String(req.query.msg || '').slice(0, 200), counts: Object.fromEntries(sms.summary().perTeam.map((r) => [`${r.team}|${r.division}`, r.n])) });
 });
 app.post('/admin/sms/send', requireAdmin, checkCsrf, async (req, res) => {
   const team = String(req.body.team || '');

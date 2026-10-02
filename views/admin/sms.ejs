@@ -23,6 +23,24 @@
 </form>
 <p class="small-note">People agreed to texts about their teams at the ECC. Keep messages to that: delays, pitch changes, schedule notices.</p>
 
+<h2>All sign-ups (<%= s.signups.length %>)</h2>
+<div class="table-wrap"><table class="lb-table">
+  <thead><tr><th>Number</th><th>Teams</th><th>Signed up</th><th>Status</th><th>Texts</th></tr></thead>
+  <tbody>
+  <% s.signups.forEach(r => { %><tr><td><%= r.phone %></td><td><%= r.teams || '-' %></td><td><%= fmt(r.created) %></td><td><%= r.stopped ? 'Stopped' : (r.verified ? 'Confirmed' : 'Code not entered') %></td><td><%= r.texts %></td></tr><% }) %>
+  <% if (!s.signups.length) { %><tr><td colspan="5">No sign-ups yet.</td></tr><% } %>
+  </tbody>
+</table></div>
+
+<h2>Texts sent (latest 300)</h2>
+<div class="table-wrap"><table class="lb-table">
+  <thead><tr><th>When</th><th>To</th><th>Message</th><th>Result</th></tr></thead>
+  <tbody>
+  <% s.log.forEach(r => { %><tr><td><%= fmt(r.at) %></td><td><%= r.phone %></td><td><%= r.body %></td><td><%= r.status %></td></tr><% }) %>
+  <% if (!s.log.length) { %><tr><td colspan="4">Nothing sent yet.</td></tr><% } %>
+  </tbody>
+</table></div>
+
 <% if (s.perTeam.length) { %><h2>Most followed</h2><ul><% s.perTeam.forEach(r => { %><li><%= r.team %> (<%= r.division %>): <%= r.n %></li><% }) %></ul><% } %>
 
 <%- include('../partials/footer') %>
