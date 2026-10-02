@@ -946,3 +946,5 @@ h1, h2, h3, .event-name, .event-where, .event-extra { overflow-wrap: anywhere; }
 .sms-form .sms-consent { align-items: flex-start; font-size: .92rem; }
 .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .sms-cta { margin: 10px 0; }
+.sms-form .sms-team[hidden] { display: none; }
+.sms-form input[type="search"] { font: inherit; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); width: 100%; margin: 4px 0 8px; }

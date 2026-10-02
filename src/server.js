@@ -421,7 +421,7 @@ app.get(`/tournaments/${ECC_SLUG}/support/:cc`, (req, res, next) => {
 const sms = require('./sms');
 const smsPage = (req, res, extra = {}) => {
   const { sch } = eccCountries();
-  const teams = sch.teams.filter((t) => sch.countries[t.name]);
+  const teams = sch.teams.filter((t) => sch.countries[t.name]).map((t) => ({ ...t, country: COUNTRIES[sch.countries[t.name]] || '' }));
   const q = [].concat(req.query.team || []).map(String);
   res.render('text-updates', { title: 'Text updates for the ECC 2026', slug: ECC_SLUG, open: sms.available(), full: sms.full(), teams, picked: q, step: 'form', error: '', done: false, phone: '', metaDescription: 'Get a text when your team is next up and with the result at the ECC 2026.', ...extra });
 };

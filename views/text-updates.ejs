@@ -32,8 +32,10 @@
         </label>
         <fieldset class="sms-teams">
           <legend>Which teams? (pick up to 6)</legend>
+          <input type="search" id="sms-search" placeholder="Search for your team or country" autocomplete="off" aria-label="Search for your team or country" hidden>
+          <p class="small-note" id="sms-none" hidden>No team found.</p>
           <% teams.forEach(t => { const k = t.name + '|' + t.division; %>
-          <label class="sms-team"><input type="checkbox" name="teams" value="<%= k %>" <%= picked.includes(k) ? 'checked' : '' %>> <%= t.name %> <small>(<%= t.division %>)</small></label>
+          <label class="sms-team" data-search="<%= (t.name + ' ' + t.division + ' ' + t.country).toLowerCase() %>"><input type="checkbox" name="teams" value="<%= k %>" <%= picked.includes(k) ? 'checked' : '' %>> <%= t.name %> <small>(<%= t.division %>)</small></label>
           <% }) %>
         </fieldset>
         <div class="hp" aria-hidden="true"><label>Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
@@ -45,4 +47,5 @@
   <% } %>
 </div>
 
+<script src="/sms.js?v=<%= assetV %>"></script>
 <%- include('partials/footer') %>
