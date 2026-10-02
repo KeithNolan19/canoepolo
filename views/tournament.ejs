@@ -113,7 +113,7 @@
           <h4><%= sl.start %> - <%= sl.end %></h4>
           <ul class="sched-matches">
             <% sl.matches.forEach(m => { %>
-            <li class="sched-match <%= m.division === 'Women' ? 'is-women' : 'is-men' %>" data-div="<%= m.division %>" data-grp="<%= m.group %>" data-pitch="<%= m.pitch %>" data-teams="<%= (m.home + ' ' + m.away).toLowerCase() %>" data-keys="<%= m.home %>|<%= m.division %>||<%= m.away %>|<%= m.division %>">
+            <li class="sched-match <%= m.division === 'Women' ? 'is-women' : 'is-men' %>" data-code="<%= m.code %>" data-home="<%= m.home %>" data-away="<%= m.away %>" data-time="<%= sl.start %>" data-live="<%= m.live || '' %>" tabindex="0" role="button" data-div="<%= m.division %>" data-grp="<%= m.group %>" data-pitch="<%= m.pitch %>" data-teams="<%= (m.home + ' ' + m.away).toLowerCase() %>" data-keys="<%= m.home %>|<%= m.division %>||<%= m.away %>|<%= m.division %>">
               <span class="sm-pitch">Pitch <%= m.pitch %></span>
               <span class="sm-teams"><strong><% if (schedule.countries[m.home]) { %><span class="tflag" aria-hidden="true"><%- flagImg(schedule.countries[m.home]) %></span> <% } %><%= m.home %></strong> <em>v</em> <strong><% if (schedule.countries[m.away]) { %><span class="tflag" aria-hidden="true"><%- flagImg(schedule.countries[m.away]) %></span> <% } %><%= m.away %></strong></span>
               <% if (m.live) { %><span class="sm-score" data-score="<%= m.code %>" data-start="<%= sl.start %>" aria-live="polite"></span><% } %>

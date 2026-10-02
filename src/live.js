@@ -38,6 +38,31 @@ function parseEvents(html) {
   return { goals, cards };
 }
 
+// Everything on the Game Report that we show in the game pop-up: full event list, line-ups, officials, field and round.
+function parseDetail(html) {
+  const t = textOf(html);
+  const events = [], lineups = [];
+  (html.match(/<table[\s\S]*?<\/table>/gi) || []).forEach((tb) => {
+    const rows = (tb.match(/<tr[\s\S]*?<\/tr>/gi) || []).map((r) => (r.match(/<t[dh][\s\S]*?<\/t[dh]>/gi) || []).map(textOf));
+    if (rows.some((c) => c.length >= 7 && /^\d+$/.test(c[0]) && /^\d$/.test(c[1]) && /^\d{1,2}:\d{2}$/.test(c[2]))) {
+      rows.forEach((c) => {
+        if (c.length < 7 || !/^\d+$/.test(c[0]) || !/^\d$/.test(c[1]) || !/^\d{1,2}:\d{2}$/.test(c[2])) return;
+        const [mm, ss] = c[2].split(':').map(Number);
+        const elapsed = (Number(c[1]) - 1) * 600 + (600 - (mm * 60 + ss));
+        events.push({ period: Number(c[1]), clock: c[2], minute: Math.max(0, Math.floor(elapsed / 60) + 1), p1: c[3], e1: c[4], e2: c[5], p2: c[6] });
+      });
+    } else if (rows[0] && /name/i.test(rows[0][1] || '')) {
+      lineups.push(rows.slice(1).filter((c) => /^\d+$/.test(c[0])).map((c) => ({ n: c[0], name: c[1] })));
+    }
+  });
+  const pick = (re) => { const m = re.exec(t); return m ? m[1].trim() : ''; };
+  const officials = {
+    referee1: pick(/Primo Arbitro\s+(.+?)\s+Secondo Arbitro/i), referee2: pick(/Secondo Arbitro\s+(.+?)\s+Segnapunti/i),
+    scorer: pick(/Segnapunti\s+(.+?)\s+Cronometrista/i), timekeeper: pick(/Cronometrista\s+(.+?)\s+Guardialinee/i),
+  };
+  return { events, lineups, officials, field: pick(/FIELD\s+(\S+)/i), round: pick(/ROUND\s+(\S+)/i) };
+}
+
 // Reads one Game Report page. Returns { score, status } or null when there is nothing to show yet.
 function parse(html) {
   const t = textOf(html);
@@ -52,7 +77,7 @@ function parse(html) {
   // Only trust the scorers when they add up to the score on the page
   const ok = evs.goals.filter((g) => g.team === 1).length === score[0] && evs.goals.filter((g) => g.team === 2).length === score[1];
   const ts = /TIME\s+(\d{1,2}:\d{2})\s+\((\d{1,2}:\d{2})\)/i.exec(t); // scheduled time and the time the game really started
-  return { debug: t.slice(0, 400), events: evs, result: { ks: ts ? ts[2].padStart(5, '0') : undefined, score, status: done ? 'FT' : 'LIVE', goals: ok ? evs.goals : null, cards: ok ? evs.cards : null } };
+  return { debug: t.slice(0, 400), events: evs, result: { detail: parseDetail(html), ks: ts ? ts[2].padStart(5, '0') : undefined, score, status: done ? 'FT' : 'LIVE', goals: ok ? evs.goals : null, cards: ok ? evs.cards : null } };
 }
 
 async function fetchPage(url) {
@@ -105,4 +130,6 @@ function snapshot() {
   return o;
 }
 
-module.exports = { start, snapshot, parse, parseEvents, fetchPage, textOf, _state: state };
+function detail(code) { const v = state.get(code); return v && v.detail ? { s: `${v.score[0]} - ${v.score[1]}`, st: v.status, ks: v.ks, ...v.detail } : null; }
+
+module.exports = { start, snapshot, detail, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };

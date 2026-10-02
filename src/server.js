@@ -410,6 +410,7 @@ app.get(`/tournaments/${ECC_SLUG}/support/:cc`, (req, res, next) => {
   const rows = Object.values(teams).sort((a, b) => a.name.localeCompare(b.name) || a.division.localeCompare(b.division));
   res.render('support-country', { title: `${country.name} at the ECC 2026`, country, teams: rows, duties, sch, slug: ECC_SLUG, metaDescription: `Every ${country.name} club at the 2026 European Club Championships: games, live scores, scorers and duties.` });
 });
+app.get('/api/live-game/:code', (req, res) => { res.set('Cache-Control', 'public, max-age=15'); res.json(live.detail(String(req.params.code).toUpperCase().slice(0, 6)) || {}); });
 app.get('/api/live-scores', (req, res) => { res.set('Cache-Control', 'public, max-age=20'); res.json(live.snapshot()); });
 app.get('/api/tournaments', (req, res) => {
   res.set('Cache-Control', 'public, max-age=300');

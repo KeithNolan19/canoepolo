@@ -149,3 +149,69 @@
   setInterval(load, 30000);
   document.addEventListener('visibilitychange', load);
 })();
+
+// Game pop-up: click a match to see the score, scorers, cards, full event list and line-ups (read from the official match page)
+(function () {
+  const items = document.querySelectorAll('.sched-match[data-code]');
+  if (!items.length || typeof HTMLDialogElement === 'undefined') return;
+  const LABEL = { 'Inizio tempo': 'Start of half', 'Fine tempo': 'End of half', 'Fine partita': 'Full time', 'Palla al centro': 'Throw-off', Goal: 'Goal', Verde: 'Green card', Gialla: 'Yellow card', Giallo: 'Yellow card', Rossa: 'Red card', Rosso: 'Red card', 'Rigore subito': 'Penalty conceded', Rigore: 'Penalty', Timeout: 'Timeout' };
+  const label = (e) => LABEL[e] || e;
+  const dlg = document.createElement('dialog');
+  dlg.className = 'gm';
+  dlg.setAttribute('aria-labelledby', 'gm-title');
+  document.body.appendChild(dlg);
+  const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; };
+  dlg.addEventListener('click', (e) => { if (e.target === dlg || e.target.closest('[data-gm-close]')) dlg.close(); });
+
+  function open(li) {
+    const d = li.dataset, home = d.home, away = d.away;
+    dlg.textContent = '';
+    const x = el('button', 'gm-x', '\u00d7'); x.type = 'button'; x.setAttribute('data-gm-close', ''); x.setAttribute('aria-label', 'Close');
+    const h = el('h2', '', home + ' v ' + away); h.id = 'gm-title';
+    const meta = el('p', 'gm-meta', (d.time || '') + (d.pitch ? ' \u00b7 Pitch ' + d.pitch : '') + ' \u00b7 ' + d.code);
+    const score = el('p', 'gm-score', 'Loading...');
+    const body = el('div', 'gm-body');
+    dlg.append(x, h, meta, score, body);
+    if (d.live) { const a = el('a', 'btn small', 'Official match page'); a.href = d.live; a.target = '_blank'; a.rel = 'noopener'; dlg.append(a); }
+    dlg.showModal();
+    fetch('/api/live-game/' + encodeURIComponent(d.code)).then((r) => r.json()).then((g) => {
+      if (!g || !g.s) { score.textContent = 'Not started yet'; return; }
+      score.textContent = home + ' ' + g.s + ' ' + away;
+      const st = el('span', 'st' + (g.st === 'LIVE' ? ' live' : ''), g.st === 'LIVE' ? 'LIVE' : 'Full time'); score.append(' ', st);
+      if (g.ks && g.ks !== d.time) body.append(el('p', 'gm-note', 'Started ' + g.ks));
+      const ev = g.events || [];
+      const rows = ev.filter((e) => e.e1 || e.e2);
+      if (rows.length) {
+        body.append(el('h3', '', 'Match events'));
+        const ul = el('ul', 'gm-events');
+        rows.forEach((e) => {
+          [[home, e.e1, e.p1], [away, e.e2, e.p2]].forEach(([team, evn, pl]) => {
+            if (!evn) return;
+            const li2 = el('li');
+            li2.append(el('span', 'gm-min', e.minute + "'"));
+            const t = el('span', '', team + ': ' + label(evn) + (pl ? ', ' + pl : ''));
+            if (/^goal$/i.test(evn)) t.className = 'gm-goal';
+            li2.append(t); ul.append(li2);
+          });
+        });
+        body.append(ul);
+      }
+      if (g.lineups && g.lineups.length) {
+        body.append(el('h3', '', 'Line-ups'));
+        const wrap = el('div', 'gm-lineups');
+        g.lineups.slice(0, 2).forEach((pl, i) => {
+          const col = el('div'); col.append(el('strong', '', i === 0 ? home : away));
+          const ul = el('ul'); pl.forEach((p) => ul.append(el('li', '', p.n + '  ' + p.name))); col.append(ul); wrap.append(col);
+        });
+        body.append(wrap);
+      }
+      const o = g.officials || {};
+      const line = [['Referee', o.referee1], ['Referee 2', o.referee2], ['Scorer', o.scorer], ['Timekeeper', o.timekeeper]].filter((x2) => x2[1] && x2[1] !== '-');
+      if (line.length) { body.append(el('h3', '', 'Officials')); body.append(el('p', '', line.map((x2) => x2[0] + ': ' + x2[1]).join(' \u00b7 '))); }
+    }).catch(() => { score.textContent = 'Could not load the game details'; });
+  }
+  items.forEach((li) => {
+    li.addEventListener('click', (e) => { if (!e.target.closest('a')) open(li); });
+    li.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('a')) { e.preventDefault(); open(li); } });
+  });
+})();

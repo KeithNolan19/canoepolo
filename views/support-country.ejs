@@ -26,7 +26,7 @@
     <div class="ie-scorers" data-scorers="<%= t.name %>|<%= t.division %>" hidden><h3 class="ie-duty-h">Scorers and cards so far</h3><ul></ul></div>
     <ul class="sched-matches ie-games">
       <% t.games.forEach(g => { %>
-      <li class="sched-match <%= t.division === 'Women' ? 'is-women' : 'is-men' %>">
+      <li class="sched-match <%= t.division === 'Women' ? 'is-women' : 'is-men' %>" data-code="<%= g.code %>" data-home="<%= g.away ? g.opp : t.name %>" data-away="<%= g.away ? t.name : g.opp %>" data-time="<%= g.start %>" data-pitch="<%= g.pitch %>" data-group="<%= g.group %>" data-live="<%= g.live %>" tabindex="0" role="button">
         <span class="sm-pitch"><%= g.day.split(' ')[0].slice(0, 3) %><br><%= g.start %></span>
         <span class="sm-teams">v <strong><% if (g.oppFlag) { %><span class="tflag" aria-hidden="true"><%- flagImg(g.oppFlag) %></span> <% } %><%= g.opp %></strong></span>
         <% if (g.live) { %><span class="sm-score" data-score="<%= g.code %>" data-start="<%= g.start %>" data-flip="<%= g.away ? 1 : 0 %>" aria-live="polite"></span><% } %>

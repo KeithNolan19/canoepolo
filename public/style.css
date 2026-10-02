@@ -901,3 +901,24 @@ h1, h2, h3, .event-name, .event-where, .event-extra { overflow-wrap: anywhere; }
 .sup-grid a:hover { border-color: var(--ink); }
 .sup-flag { display: block; width: 56px; }
 .sup-flag img, .sup-flag svg { width: 100%; height: auto; display: block; }
+
+/* Game pop-up */
+.sched-match[data-code] { cursor: pointer; }
+.sched-match[data-code]:hover { border-color: var(--ink); }
+.gm { border: 0; border-radius: 16px; padding: 24px 20px 20px; width: min(94vw, 520px); max-height: 88vh; overflow: auto; background: var(--card); color: var(--ink); box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+.gm::backdrop { background: rgba(0,0,0,.55); }
+.gm-x { position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--line); background: var(--card); color: var(--ink); font: inherit; font-size: 1.7rem; line-height: 1; cursor: pointer; }
+.gm h2 { margin: 0 44px 4px 0; font-size: 1.3rem; line-height: 1.25; }
+.gm h3 { margin: 16px 0 6px; font-size: 1rem; }
+.gm-meta { margin: 0 0 8px; color: var(--muted); font-weight: 600; }
+.gm-score { margin: 0 0 8px; font-size: 1.25rem; font-weight: 700; }
+.gm-score .st { margin-left: 8px; padding: 1px 8px; border-radius: 999px; font-size: .7rem; background: var(--tile); color: var(--ink); }
+.gm-score .st.live { background: var(--green); color: #fff; }
+.gm-note { margin: 0 0 6px; color: var(--muted); }
+.gm-events { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: .9rem; }
+.gm-events li { display: flex; gap: 10px; }
+.gm-min { flex: none; width: 34px; font-weight: 700; color: var(--muted); }
+.gm-goal { font-weight: 700; }
+.gm-lineups { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: .88rem; }
+.gm-lineups ul { list-style: none; margin: 4px 0 0; padding: 0; }
+.gm .btn { margin-top: 14px; }
