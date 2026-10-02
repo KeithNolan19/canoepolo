@@ -364,7 +364,7 @@ app.get('/ecc/ireland', (req, res) => {
   const sch = require('./schedules').forSlug(SLUG);
   const { OFFICIALS } = require('./officials');
   const scores = live.snapshot();
-  const GAZEBO = { Ulster: 4, Mullinger: 28 };
+  const GAZEBO = { Ulster: 4, Mullingar: 28 };
   const teams = {};
   sch.days.forEach((d) => d.slots.forEach((sl) => sl.matches.forEach((m) => {
     [m.home, m.away].forEach((name) => {
