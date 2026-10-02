@@ -384,7 +384,7 @@ app.get(`/tournaments/${ECC_SLUG}/support/:cc`, (req, res, next) => {
   const { sch, list } = eccCountries();
   const country = list.find((c) => c.cc === cc);
   if (!country) return next();
-  const { OFFICIALS } = require('./officials');
+  const { OFFICIALS, OFFICIALS_SAT } = require('./officials');
   const scores = live.snapshot();
   const names = new Set(country.teams.map((t) => t.name));
   const teams = {}; const duties = {};
@@ -407,11 +407,14 @@ app.get(`/tournaments/${ECC_SLUG}/support/:cc`, (req, res, next) => {
     const po = pg && pg.detail && pg.detail.officials;
     let off = null;
     if (po && (po.referee1 || po.referee2)) off = [[po.referee1, 'Referee 1'], [po.referee2, 'Referee 2'], [po.scorer, 'Scorer'], [po.timekeeper, 'Timekeeper']];
-    else if (d.date === '2026-10-02' && OFFICIALS[m.code]) off = [[OFFICIALS[m.code][0], 'Referee 1'], [OFFICIALS[m.code][1], 'Referee 2 / table']];
+    else {
+      const sheet = d.date === '2026-10-02' ? OFFICIALS[m.code] : d.date === '2026-10-03' ? OFFICIALS_SAT[m.code] : null;
+      if (sheet) off = [[sheet[0], 'Referee 1'], [sheet[1], 'Referee 2 / table']];
+    }
     if (off) off.forEach(([o, role]) => {
-      const club = o && [...names].find((n) => n.toLowerCase() === o.trim().toLowerCase());
+      const club = o && [...names].find((n) => n.toLowerCase() === o.replace(/\s*\((Men|Women)\)$/i, '').trim().toLowerCase());
       if (!club) return;
-      (duties[club] = duties[club] || []).push({ start: sl.start, pitch: m.pitch, code: m.code, match: `${m.home} v ${m.away}`, role });
+      (duties[club] = duties[club] || []).push({ day: d.label.split(' ')[0].slice(0, 3), start: sl.start, pitch: m.pitch, code: m.code, match: `${m.home} v ${m.away}`, role });
     });
   })));
   const rows = Object.values(teams).sort((a, b) => a.name.localeCompare(b.name) || a.division.localeCompare(b.division));
