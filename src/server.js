@@ -358,38 +358,57 @@ app.get('/rules', (req, res) => res.render('rules', { title: 'Canoe polo rules',
 
 // ---------- Public JSON API (for apps, club sites, etc.) ----------
 const live = require('./live');
-// Unlisted page for the Irish teams at the ECC (not linked from the site, not in the sitemap, asks search engines not to index it)
-app.get('/ecc/ireland', (req, res) => {
-  const SLUG = 'paddle-europe-canoe-polo-club-championships-2026';
-  const sch = require('./schedules').forSlug(SLUG);
+// "Support your club" for the ECC: pick a country, then see its teams, games, live scores, scorers and duties
+const ECC_SLUG = 'paddle-europe-canoe-polo-club-championships-2026';
+// Gazebo / boat storage numbers from the organisers' list, only where the club on the list is clearly the same team
+const GAZEBO = {
+  'Corbeil-Essenos|Men': 1, 'KGV Essen|Men': 2, 'Zurich|Men': 3, 'Ulster|Men': 4, 'Neptun|Women': 5, 'Skovshoveld|Men': 6, 'Odysseus|Men': 7,
+  'Avranches|Men': 8, 'KSVH Berlin|Men': 9, 'Coimbra|Men': 10, 'Napoli|Men': 11, 'KRM Essen|Women': 13, 'Duisburg|Women': 14, "Pont D'ouilly|Women": 15,
+  'Linkopig|Men': 16, 'Burriana|Women': 17, 'Alaquas|Women': 18, 'Kingston|Women': 19, 'Poznan|Men': 20, 'Malaga|Men': 21, 'Gent|Men': 22, 'Setubal|Men': 23,
+  'Iper|Men': 24, 'Avranches|Women': 25, 'Dispersus|Men': 26, 'Thurgauer|Men': 27, 'Mullingar|Women': 28, 'Castellón|Men': 30,
+};
+function eccCountries() {
+  const sch = require('./schedules').forSlug(ECC_SLUG);
+  const byCc = {};
+  sch.teams.forEach((t) => { const cc = sch.countries[t.name]; if (cc) (byCc[cc] = byCc[cc] || []).push(t); });
+  return { sch, list: Object.entries(byCc).map(([cc, teams]) => ({ cc, name: COUNTRIES[cc] || cc, teams })).sort((a, b) => a.name.localeCompare(b.name)) };
+}
+app.get(`/tournaments/${ECC_SLUG}/support`, (req, res) => {
+  const { list } = eccCountries();
+  res.render('support', { title: 'Support your club at the ECC 2026', countries: list, slug: ECC_SLUG, metaDescription: 'Pick your country to see every club, game, live score and scorer at the 2026 European Club Championships in Milan.' });
+});
+app.get('/ecc/ireland', (req, res) => res.redirect(301, `/tournaments/${ECC_SLUG}/support/IE`));
+app.get(`/tournaments/${ECC_SLUG}/support/:cc`, (req, res, next) => {
+  const cc = String(req.params.cc || '').toUpperCase();
+  const { sch, list } = eccCountries();
+  const country = list.find((c) => c.cc === cc);
+  if (!country) return next();
   const { OFFICIALS } = require('./officials');
   const scores = live.snapshot();
-  const GAZEBO = { Ulster: 4, Mullingar: 28 };
-  const teams = {};
+  const names = new Set(country.teams.map((t) => t.name));
+  const teams = {}; const duties = {};
   sch.days.forEach((d) => d.slots.forEach((sl) => sl.matches.forEach((m) => {
     [m.home, m.away].forEach((name) => {
-      if (sch.countries[name] !== 'IE' || m.group.length !== 1) return;
-      const t = teams[name] = teams[name] || { name, division: m.division, group: m.group, games: [], duties: [], p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gazebo: GAZEBO[name] || null };
-      t.division = m.division; t.group = m.group;
+      if (!names.has(name) || m.group.length !== 1) return;
+      const key = `${name}|${m.division}`;
+      const t = teams[key] = teams[key] || { name, division: m.division, group: m.group, games: [], p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gazebo: GAZEBO[key] || null };
       const home = m.home === name;
       const sc = scores[m.code];
-      let result = null;
       if (sc) {
         const [a, b] = sc.s.split(' - ').map(Number);
         const mine = home ? a : b, theirs = home ? b : a;
-        result = { score: `${mine} - ${theirs}`, status: sc.st };
         if (sc.st === 'FT') { t.p++; t.gf += mine; t.ga += theirs; if (mine > theirs) t.w++; else if (mine < theirs) t.l++; else t.d++; }
       }
-      t.games.push({ day: d.label, start: sl.start, pitch: m.pitch, code: m.code, opp: home ? m.away : m.home, oppFlag: sch.countries[home ? m.away : m.home] || '', group: m.group, live: m.live || '', away: !home, result });
+      t.games.push({ day: d.label, start: sl.start, pitch: m.pitch, code: m.code, opp: home ? m.away : m.home, oppFlag: sch.countries[home ? m.away : m.home] || '', group: m.group, live: m.live || '', away: !home });
     });
     const off = d.date === '2026-10-02' && OFFICIALS[m.code];
     if (off) off.forEach((o, i) => {
-      if (!o || sch.countries[o] !== 'IE') return;
-      (teams[o] = teams[o] || { name: o, games: [], duties: [], p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gazebo: GAZEBO[o] || null }).duties.push({ start: sl.start, pitch: m.pitch, code: m.code, match: `${m.home} v ${m.away}`, role: i === 0 ? 'Referee 1' : 'Referee 2 / table' });
+      if (!o || !names.has(o)) return;
+      (duties[o] = duties[o] || []).push({ start: sl.start, pitch: m.pitch, code: m.code, match: `${m.home} v ${m.away}`, role: i === 0 ? 'Referee 1' : 'Referee 2 / table' });
     });
   })));
-  res.set('X-Robots-Tag', 'noindex, nofollow');
-  res.render('ireland', { title: 'Irish teams at the ECC 2026', noindex: true, teams: Object.values(teams).sort((a, b) => a.name.localeCompare(b.name)), sch, slug: SLUG, canonical: `${BASE_URL}/ecc/ireland` });
+  const rows = Object.values(teams).sort((a, b) => a.name.localeCompare(b.name) || a.division.localeCompare(b.division));
+  res.render('support-country', { title: `${country.name} at the ECC 2026`, country, teams: rows, duties, sch, slug: ECC_SLUG, metaDescription: `Every ${country.name} club at the 2026 European Club Championships: games, live scores, scorers and duties.` });
 });
 app.get('/api/live-scores', (req, res) => { res.set('Cache-Control', 'public, max-age=20'); res.json(live.snapshot()); });
 app.get('/api/tournaments', (req, res) => {

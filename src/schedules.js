@@ -5,6 +5,7 @@
 const SCHEDULES = {
   'paddle-europe-canoe-polo-club-championships-2026': {
     hidden: false,
+    support: true,
     liveUrl: 'https://ecc2026milano.it/en/campionati/view?id=1',
     // Official match pages are liveMatchBase + id. Ids run in timetable order (time, then pitch); a day sets liveFirstId once its ids are confirmed.
     liveMatchBase: 'https://ecc2026milano.it/en/partite/view?id=',
@@ -263,6 +264,7 @@ function forSlug(slug) {
   return {
     note: s.note,
     notice: s.notice || '',
+    support: !!s.support,
     liveUrl: s.liveUrl || '',
     headline: s.headline || '',
     pending: s.pending || [],

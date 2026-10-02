@@ -2,51 +2,55 @@
 
 <div class="page-banner">
   <div class="wrap">
-    <p class="crumbs">Private page for friends</p>
-    <h1>Irish teams at the ECC 2026</h1>
+    <p class="crumbs"><a href="/">Home</a> / <a href="/tournaments/<%= slug %>">ECC 2026</a> / <a href="/tournaments/<%= slug %>/support">Support your club</a> / <%= country.name %></p>
+    <h1><span class="tflag" aria-hidden="true"><%- flagImg(country.cc) %></span> <%= country.name %> at the ECC 2026</h1>
   </div>
 </div>
 
 <div class="wrap narrow-page">
   <div class="notice" role="note"><strong>Note:</strong> <%= sch.notice %></div>
-  <p class="lead">Every game for the Irish clubs in Milan, with live scores, their referee and table duties and the official links. Scores refresh while this page is open.</p>
+  <p class="lead">Every game for the clubs from <%= country.name %> in Milan, with live scores, scorers, referee and table duties and the official links. Scores refresh while this page is open.</p>
   <p class="ie-links">
-    <a class="btn small primary" href="<%= sch.liveUrl %>" target="_blank" rel="noopener">Official live results</a>
+    <a class="btn small primary" href="/tournaments/<%= slug %>/support">All countries</a>
     <a class="btn small" href="/tournaments/<%= slug %>">Full timetable</a>
     <a class="btn small" href="/tournaments/<%= slug %>/gazebos">Gazebos and site map</a>
     <a class="btn small" href="/docs/milan-ecc-2026-friday-officials.pdf" target="_blank" rel="noopener">Friday referees (PDF)</a>
   </p>
 
-  <% teams.forEach(t => { const full = t.games.length > 0; %>
+  <% teams.forEach(t => { %>
   <section class="ie-team">
-    <h2><span class="tflag" aria-hidden="true"><%- flagImg('IE') %></span> <%= t.name %></h2>
-    <% if (full) { %>
+    <h2><span class="tflag" aria-hidden="true"><%- flagImg(country.cc) %></span> <%= t.name %><% if (teams.filter(x => x.name === t.name).length > 1) { %> <small>(<%= t.division %>)</small><% } %></h2>
+    <% { %>
     <p class="ie-sub"><%= t.division %> &middot; Group <%= t.group %><% if (t.gazebo) { %> &middot; Gazebo and boat storage <%= t.gazebo %><% } %></p>
     <p class="ie-stats">Played <strong><%= t.p %></strong> &middot; Won <strong><%= t.w %></strong> &middot; Drawn <strong><%= t.d %></strong> &middot; Lost <strong><%= t.l %></strong> &middot; Goals <strong><%= t.gf %> - <%= t.ga %></strong></p>
-    <div class="ie-scorers" data-scorers="<%= t.name %>" hidden><h3 class="ie-duty-h">Scorers and cards so far</h3><ul></ul></div>
+    <div class="ie-scorers" data-scorers="<%= t.name %>|<%= t.division %>" hidden><h3 class="ie-duty-h">Scorers and cards so far</h3><ul></ul></div>
     <ul class="sched-matches ie-games">
       <% t.games.forEach(g => { %>
       <li class="sched-match <%= t.division === 'Women' ? 'is-women' : 'is-men' %>">
         <span class="sm-pitch"><%= g.day.split(' ')[0].slice(0, 3) %><br><%= g.start %></span>
         <span class="sm-teams">v <strong><% if (g.oppFlag) { %><span class="tflag" aria-hidden="true"><%- flagImg(g.oppFlag) %></span> <% } %><%= g.opp %></strong></span>
         <% if (g.live) { %><span class="sm-score" data-score="<%= g.code %>" data-start="<%= g.start %>" data-flip="<%= g.away ? 1 : 0 %>" aria-live="polite"></span><% } %>
-        <% if (g.live) { %><span class="sm-goals" data-goals="<%= g.code %>" data-side="<%= g.away ? 2 : 1 %>" data-team="<%= t.name %>" data-opp="<%= g.opp %>"></span><% } %>
+        <% if (g.live) { %><span class="sm-goals" data-goals="<%= g.code %>" data-side="<%= g.away ? 2 : 1 %>" data-team="<%= t.name %>" data-key="<%= t.name %>|<%= t.division %>" data-opp="<%= g.opp %>"></span><% } %>
         <span class="sm-meta">Pitch <%= g.pitch %> &middot; Group <%= g.group %> &middot; <%= g.code %><% if (g.live) { %> &middot; <a class="sm-live" href="<%= g.live %>" target="_blank" rel="noopener">Live score</a><% } %></span>
       </li>
       <% }) %>
     </ul>
     <p class="small-note">Knockout games are added once the group stage is over.</p>
     <% } %>
-    <% if (t.duties.length) { %>
-    <h3 class="ie-duty-h">Duties on Friday</h3>
-    <ul class="ie-duties">
-      <% t.duties.forEach(d => { %><li><strong><%= d.start %></strong> &middot; <%= d.role %> &middot; <%= d.match %> (pitch <%= d.pitch %>, <%= d.code %>)</li><% }) %>
-    </ul>
-    <% } %>
   </section>
   <% }) %>
 
-  <p class="small-note">Scores and match details come directly from the ECC organiser. Group order and the goals column count finished games only. Not for sharing publicly.</p>
+  <% const dn = Object.keys(duties).sort(); if (dn.length) { %>
+  <section class="ie-team">
+    <h2>Referee and table duties on Friday</h2>
+    <% dn.forEach(n => { %>
+    <h3 class="ie-duty-h"><%= n %></h3>
+    <ul class="ie-duties"><% duties[n].forEach(d => { %><li><strong><%= d.start %></strong> &middot; <%= d.role %> &middot; <%= d.match %> (pitch <%= d.pitch %>, <%= d.code %>)</li><% }) %></ul>
+    <% }) %>
+  </section>
+  <% } %>
+
+  <p class="small-note">Scores and match details come directly from the ECC organiser. The played, won and goals figures count finished games only.</p>
 </div>
 
 <script src="/schedule.js?v=<%= assetV %>"></script>

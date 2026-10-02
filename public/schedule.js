@@ -133,7 +133,7 @@
         p.textContent = x.card.charAt(0).toUpperCase() + x.card.slice(1) + ' card: ' + (x.player || 'unknown') + ' ' + x.minute + "'";
         el.appendChild(p);
       });
-      const t = (tally[team] = tally[team] || {});
+      const t = (tally[el.dataset.key || team] = tally[el.dataset.key || team] || {});
       own.forEach((x) => { const n = x.player || 'unknown'; t[n] = (t[n] || 0) + 1; });
     });
     document.querySelectorAll('[data-scorers]').forEach((box) => {

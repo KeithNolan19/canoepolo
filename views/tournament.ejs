@@ -30,6 +30,7 @@
       <% if (t.registration_deadline) { %><tr><th scope="row">Registration closes</th><td><%= fmtDate(t.registration_deadline) %><% if (t.registration_deadline < today) { %> <span class="flag-label cancelled">Closed</span><% } %></td></tr><% } %>
     </table>
 
+    <% if (schedule && schedule.support) { %><div class="notice green"><strong>Support your club</strong><br>Pick your country to see its clubs, games, live scores and scorers.<br><a class="btn primary" href="/tournaments/<%= t.slug %>/support">Support your club</a></div><% } %>
     <% if (schedule && schedule.notice) { %><div class="notice" role="note"><strong>Note:</strong> <%= schedule.notice %></div><% } %>
 
     <% if (t.documents.length) { %>
