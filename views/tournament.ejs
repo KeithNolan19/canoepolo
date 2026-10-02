@@ -116,7 +116,7 @@
             <li class="sched-match <%= m.division === 'Women' ? 'is-women' : 'is-men' %>" data-div="<%= m.division %>" data-grp="<%= m.group %>" data-pitch="<%= m.pitch %>" data-teams="<%= (m.home + ' ' + m.away).toLowerCase() %>" data-keys="<%= m.home %>|<%= m.division %>||<%= m.away %>|<%= m.division %>">
               <span class="sm-pitch">Pitch <%= m.pitch %></span>
               <span class="sm-teams"><strong><% if (schedule.countries[m.home]) { %><span class="tflag" aria-hidden="true"><%- flagImg(schedule.countries[m.home]) %></span> <% } %><%= m.home %></strong> <em>v</em> <strong><% if (schedule.countries[m.away]) { %><span class="tflag" aria-hidden="true"><%- flagImg(schedule.countries[m.away]) %></span> <% } %><%= m.away %></strong></span>
-              <span class="sm-meta"><%= m.division %> &middot; <%= m.group.length === 1 ? 'Group ' + m.group : m.group %> &middot; <%= m.code %></span>
+              <span class="sm-meta"><%= m.division %> &middot; <%= m.group.length === 1 ? 'Group ' + m.group : m.group %> &middot; <%= m.code %><% if (m.live) { %> &middot; <a class="sm-live" href="<%= m.live %>" target="_blank" rel="noopener">Live score</a><% } %></span>
             </li>
             <% }) %>
           </ul>

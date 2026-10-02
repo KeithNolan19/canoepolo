@@ -875,3 +875,4 @@ h1, h2, h3, .event-name, .event-where, .event-extra { overflow-wrap: anywhere; }
 .gz-n { flex: none; display: grid; place-items: center; min-width: 40px; height: 40px; border-radius: 10px; background: var(--ball); color: var(--on-ball); font-weight: 700; }
 .gz-name { font-weight: 600; }
 .gz-map { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 10px; margin: 12px 0; }
+.sm-live { font-weight: 700; white-space: nowrap; }

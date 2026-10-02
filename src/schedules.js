@@ -6,6 +6,8 @@ const SCHEDULES = {
   'paddle-europe-canoe-polo-club-championships-2026': {
     hidden: false,
     liveUrl: 'https://ecc2026milano.it/en/campionati/view?id=1',
+    // Official match pages are liveMatchBase + id. Ids run in timetable order (time, then pitch); a day sets liveFirstId once its ids are confirmed.
+    liveMatchBase: 'https://ecc2026milano.it/en/partite/view?id=',
     notice: 'All files and schedules on this page come directly from the organiser. There may be a discrepancy between them (for example, some Friday match slots and the referee list do not fully agree). The organiser will check this and clear it up soon. Please check back for updates.',
     headline: 'The full timetable is here: Friday, Saturday and Sunday.',
     pending: [],
@@ -54,6 +56,7 @@ const SCHEDULES = {
     days: [
       {
         date: '2026-10-02',
+        liveFirstId: 1,
         label: 'Friday 2 October',
         pdf: '/docs/milan-ecc-2026-schedule-update-1-oct.pdf',
         matches: [
@@ -280,6 +283,7 @@ function forSlug(slug) {
       slots.sort((a, b) => a.start.localeCompare(b.start));
       slots.forEach((x) => x.matches.sort((a, b) => a.pitch - b.pitch));
       const all = slots.flatMap((x) => x.matches);
+      if (d.liveFirstId && s.liveMatchBase) all.forEach((m, i) => { m.live = s.liveMatchBase + (d.liveFirstId + i); });
       return {
         date: d.date, label: d.label, pdf: d.pdf, slots,
         groups: [...new Set(all.map((m) => m.group))].sort(),
