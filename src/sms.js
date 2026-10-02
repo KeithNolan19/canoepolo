@@ -183,11 +183,14 @@ async function run() {
           const mine = side === g.home ? state.score[0] : state.score[1], theirs = side === g.home ? state.score[1] : state.score[0];
           key = `res:${g.code}`;
           body = mine > theirs ? `${side} win ${mine}-${theirs} v ${other}` : mine < theirs ? `${side} lose ${mine}-${theirs} v ${other}` : `${side} draw ${mine}-${theirs} v ${other}`;
-        } else if (!finished && !started && now >= g.startMs - 15 * 60 * 1000 && now <= g.startMs + 40 * 60 * 1000 && f.created < g.startMs) {
+        } else if (!finished && !started && now >= g.startMs - 15 * 60 * 1000 && now <= g.startMs + 90 * 60 * 1000) { // games run late, and the organiser only shows the real start time once the game has begun
           key = `next:${g.code}:${g.time}:${g.pitch}`;
           const prior = nextCount.get(f.phone, `next:${g.code}:%`).n;
           if (prior >= 3) continue;
-          body = prior ? `UPDATE: ${side} v ${other} is now at ${g.time} on pitch ${g.pitch}` : `${side} are next up: v ${other} at ${g.time} on pitch ${g.pitch}`;
+          const late = now > g.startMs + 5 * 60 * 1000;
+          body = prior ? `UPDATE: ${side} v ${other} is now at ${g.time} on pitch ${g.pitch}`
+            : late ? `${side} are next up: v ${other} on pitch ${g.pitch}. Scheduled for ${g.time}, running late`
+            : `${side} are next up: v ${other} at ${g.time} on pitch ${g.pitch}`;
         }
         if (!key || sentBefore.get(f.phone, key)) continue;
         markSent.run(f.phone, key, now); // mark first: a failed text is not retried, so nobody gets duplicates
