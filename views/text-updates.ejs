@@ -16,7 +16,7 @@
   <% } else if (full && !done && step !== 'code') { %>
     <div class="notice" role="note">Text updates are full. We limit the number of sign-ups to keep this free for everyone. Scores and times are always on the <a href="/tournaments/<%= slug %>">ECC page</a>.</div>
   <% } else { %>
-    <p class="lead">Get a text when your team is next up, and again with the result. For example: "Mullingar are next up: v Kilkenny at 14:20 on pitch 3" and "Mullingar win 7-1 v Kilkenny".</p>
+    <p class="lead">Get a text when your team is next up, and again with the result.</p>
     <% if (error) { %><div class="notice" role="alert"><strong><%= error %></strong></div><% } %>
     <% if (step === 'code') { %>
       <form method="post" action="/tournaments/<%= slug %>/text-updates/verify" class="quiz-join sms-form" autocomplete="off">
