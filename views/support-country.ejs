@@ -22,6 +22,7 @@
     <h2><span class="tflag" aria-hidden="true"><%- flagImg(country.cc) %></span> <%= t.name %><% if (teams.filter(x => x.name === t.name).length > 1) { %> <small>(<%= t.division %>)</small><% } %></h2>
     <% { %>
     <p class="ie-sub"><%= t.division %> &middot; Group <%= t.group %><% if (t.gazebo) { %> &middot; Gazebo and boat storage <%= t.gazebo %><% } %></p>
+    <% if (smsOpen) { %><p class="sms-cta"><a class="btn small primary" href="/tournaments/<%= slug %>/text-updates?team=<%= encodeURIComponent(t.name + '|' + t.division) %>">Text me when <%= t.name %> play</a></p><% } %>
     <p class="ie-stats">Played <strong><%= t.p %></strong> &middot; Won <strong><%= t.w %></strong> &middot; Drawn <strong><%= t.d %></strong> &middot; Lost <strong><%= t.l %></strong> &middot; Goals <strong><%= t.gf %> - <%= t.ga %></strong></p>
     <details class="gt" open><summary>Group <%= t.group %> table</summary><div data-standings="<%= t.division %>|<%= t.group %>" data-team="<%= t.name %>"></div></details>
     <div class="ie-scorers" data-scorers="<%= t.name %>|<%= t.division %>" hidden><h3 class="ie-duty-h">Scorers and cards so far</h3><ul></ul></div>

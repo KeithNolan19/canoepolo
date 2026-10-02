@@ -1,0 +1,46 @@
+<%- include('partials/header', { fullWidth: true }) %>
+
+<div class="page-banner">
+  <div class="wrap">
+    <p class="crumbs"><a href="/">Home</a> / <a href="/tournaments/<%= slug %>">ECC 2026</a> / <a href="/tournaments/<%= slug %>/support">Support your club</a> / Text updates</p>
+    <h1>Text updates</h1>
+  </div>
+</div>
+
+<div class="wrap narrow-page">
+  <% if (done) { %>
+    <div class="notice" role="status"><strong>You're signed up.</strong> We've sent you a text to confirm. You'll get a text shortly before your team plays and one with the result. Every text has a link to stop them.</div>
+    <p><a class="btn primary" href="/tournaments/<%= slug %>/support">Back to Support your club</a></p>
+  <% } else if (!open) { %>
+    <div class="notice" role="note">Text updates are not open right now. Scores and times are always on the <a href="/tournaments/<%= slug %>">ECC page</a>.</div>
+  <% } else { %>
+    <p class="lead">Get a text when your team is next up, and again with the result. For example: "Mullingar are next up: v Kilkenny at 14:20 on pitch 3" and "Mullingar win 7-1 v Kilkenny".</p>
+    <% if (error) { %><div class="notice" role="alert"><strong><%= error %></strong></div><% } %>
+    <% if (step === 'code') { %>
+      <form method="post" action="/tournaments/<%= slug %>/text-updates/verify" class="quiz-join sms-form" autocomplete="off">
+        <p>We sent a 6-digit code to <strong><%= phone %></strong>. It can take a minute to arrive.</p>
+        <input type="hidden" name="phone" value="<%= phone %>">
+        <label>Code <input type="text" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" required></label>
+        <p><button class="btn primary" type="submit">Confirm</button> <a class="btn" href="/tournaments/<%= slug %>/text-updates">Start again</a></p>
+      </form>
+    <% } else { %>
+      <form method="post" action="/tournaments/<%= slug %>/text-updates" class="quiz-join sms-form" autocomplete="on">
+        <label>Mobile number (with country code)
+          <input type="tel" name="phone" placeholder="+353 85 123 4567" value="<%= phone || '' %>" autocomplete="tel" required>
+        </label>
+        <fieldset class="sms-teams">
+          <legend>Which teams? (pick up to 6)</legend>
+          <% teams.forEach(t => { const k = t.name + '|' + t.division; %>
+          <label class="sms-team"><input type="checkbox" name="teams" value="<%= k %>" <%= picked.includes(k) ? 'checked' : '' %>> <%= t.name %> <small>(<%= t.division %>)</small></label>
+          <% }) %>
+        </fieldset>
+        <div class="hp" aria-hidden="true"><label>Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+        <label class="sms-consent"><input type="checkbox" name="agree" value="1" required> I agree to receive texts about the teams I picked, and I'm happy for my number to be used for that only and deleted after the tournament.</label>
+        <p><button class="btn primary" type="submit">Text me a code</button></p>
+      </form>
+    <% } %>
+    <p class="small-note">Free for you, though your phone company may charge for texts. We only text about the games of the teams you pick, and we delete your number after the tournament. Texts are sent through Twilio. Stop at any time with the link in every text. See our <a href="/privacy#sms">privacy page</a>. Times and pitches follow the organiser's system and can change.</p>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

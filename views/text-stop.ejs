@@ -1,0 +1,17 @@
+<%- include('partials/header', { fullWidth: true }) %>
+
+<div class="page-banner"><div class="wrap"><h1>Stop text updates</h1></div></div>
+
+<div class="wrap narrow-page">
+  <% if (stopped) { %>
+    <div class="notice" role="status"><strong>Done.</strong> We won't text you again and we've deleted your choices.</div>
+  <% } else if (!valid) { %>
+    <div class="notice" role="note">This link is not valid, or you have already stopped the texts.</div>
+  <% } else { %>
+    <p class="lead">Stop all text updates to <strong><%= masked %></strong>?</p>
+    <form method="post" action="/s/<%= token %>"><button class="btn primary" type="submit">Yes, stop the texts</button></form>
+  <% } %>
+  <p><a href="/tournaments/<%= slug %>">Back to the ECC page</a></p>
+</div>
+
+<%- include('partials/footer') %>

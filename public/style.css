@@ -936,3 +936,13 @@ h1, h2, h3, .event-name, .event-where, .event-extra { overflow-wrap: anywhere; }
 .st-table tr.me td { background: var(--tile); font-weight: 700; }
 .st-table img { vertical-align: -1px; }
 @media (max-width: 460px) { .st-table .hide-s { display: none; } }
+
+/* Text (SMS) updates */
+.sms-form { display: grid; gap: 14px; max-width: 560px; }
+.sms-form input[type="tel"], .sms-form input[type="text"] { font: inherit; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); width: 100%; }
+.sms-form fieldset { border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 14px; margin: 0; max-height: 320px; overflow: auto; }
+.sms-form legend { font-weight: 600; padding: 0 6px; }
+.sms-form .sms-team, .sms-form .sms-consent { display: flex; flex-direction: row; align-items: center; gap: 10px; font-weight: 500; padding: 4px 0; }
+.sms-form .sms-consent { align-items: flex-start; font-size: .92rem; }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.sms-cta { margin: 10px 0; }

@@ -358,6 +358,7 @@ app.get('/rules', (req, res) => res.render('rules', { title: 'Canoe polo rules',
 
 // ---------- Public JSON API (for apps, club sites, etc.) ----------
 const live = require('./live');
+app.use((req, res, next) => { res.locals.smsOpen = require('./sms').available(); next(); }); // shows the text-updates buttons only when switched on
 // "Support your club" for the ECC: pick a country, then see its teams, games, live scores, scorers and duties
 const ECC_SLUG = 'paddle-europe-canoe-polo-club-championships-2026';
 // Gazebo / boat storage numbers from the organisers' list, only where the club on the list is clearly the same team
@@ -416,6 +417,40 @@ app.get(`/tournaments/${ECC_SLUG}/support/:cc`, (req, res, next) => {
   const rows = Object.values(teams).sort((a, b) => a.name.localeCompare(b.name) || a.division.localeCompare(b.division));
   res.render('support-country', { title: `${country.name} at the ECC 2026`, country, teams: rows, duties, sch, slug: ECC_SLUG, metaDescription: `Every ${country.name} club at the 2026 European Club Championships: games, live scores, scorers and duties.` });
 });
+// Text (SMS) updates: sign up with a phone number, confirm with a code, get "next up" and result texts
+const sms = require('./sms');
+const smsPage = (req, res, extra = {}) => {
+  const { sch } = eccCountries();
+  const teams = sch.teams.filter((t) => sch.countries[t.name]);
+  const q = [].concat(req.query.team || []).map(String);
+  res.render('text-updates', { title: 'Text updates for the ECC 2026', slug: ECC_SLUG, open: sms.available(), teams, picked: q, step: 'form', error: '', done: false, phone: '', metaDescription: 'Get a text when your team is next up and with the result at the ECC 2026.', ...extra });
+};
+const smsStartLimit = rateLimit({ windowMs: 60 * 60 * 1000, limit: 6, standardHeaders: false, legacyHeaders: false, handler: tooMany });
+const smsVerifyLimit = rateLimit({ windowMs: 60 * 60 * 1000, limit: 30, standardHeaders: false, legacyHeaders: false, handler: tooMany });
+app.get(`/tournaments/${ECC_SLUG}/text-updates`, (req, res) => smsPage(req, res));
+app.post(`/tournaments/${ECC_SLUG}/text-updates`, smsStartLimit, async (req, res) => {
+  if (req.body.website) return smsPage(req, res, { error: 'Something went wrong.' }); // hidden field filled in: a bot
+  const { sch } = eccCountries();
+  const ok = new Set(sch.teams.filter((t) => sch.countries[t.name]).map((t) => `${t.name}|${t.division}`));
+  const picked = [].concat(req.body.teams || []).map(String).filter((k) => ok.has(k));
+  const teams = picked.map((k) => { const [team, division] = k.split('|'); return { team, division }; });
+  if (!req.body.agree) return smsPage(req, res, { error: 'Please tick the box to agree.', phone: String(req.body.phone || '').slice(0, 20), picked });
+  const r = await sms.start(req.body.phone, teams);
+  smsPage(req, res, { step: r.step || 'form', error: r.error || '', done: !!r.done, phone: r.phone || String(req.body.phone || '').slice(0, 20), picked });
+});
+app.post(`/tournaments/${ECC_SLUG}/text-updates/verify`, smsVerifyLimit, async (req, res) => {
+  const r = await sms.verify(req.body.phone, req.body.code);
+  smsPage(req, res, { step: r.step || 'form', error: r.error || '', done: !!r.done, phone: r.phone || '' });
+});
+app.get('/s/:token', (req, res) => {
+  const r = sms.byToken(req.params.token);
+  res.render('text-stop', { title: 'Stop text updates', slug: ECC_SLUG, valid: !!r && !r.stopped, stopped: false, token: r ? r.token : '', masked: r ? r.phone.slice(0, 4) + '***' + r.phone.slice(-2) : '' });
+});
+app.post('/s/:token', smsVerifyLimit, (req, res) => {
+  const ok = sms.stopByToken(req.params.token);
+  res.render('text-stop', { title: 'Stop text updates', slug: ECC_SLUG, valid: ok, stopped: ok, token: '', masked: '' });
+});
+app.get('/admin/sms', requireAdmin, (req, res) => res.type('text/plain').send(JSON.stringify(sms.summary(), null, 2)));
 app.get('/api/live-game/:code', (req, res) => { res.set('Cache-Control', 'public, max-age=15'); res.json(live.detail(String(req.params.code).toUpperCase().slice(0, 6)) || {}); });
 app.get('/api/live-changes', (req, res) => { res.set('Cache-Control', 'public, max-age=30'); res.json(live.changes()); });
 app.get('/api/standings', (req, res) => { res.set('Cache-Control', 'public, max-age=20'); res.json(live.standings()); });
@@ -698,6 +733,6 @@ app.use((err, req, res, next) => {
 });
 
 if (require.main === module) {
-  app.listen(PORT, () => { console.log(`canoepolo.eu running on ${BASE_URL} (port ${PORT})`); live.start(); });
+  app.listen(PORT, () => { console.log(`canoepolo.eu running on ${BASE_URL} (port ${PORT})`); live.start(); sms.startTimer(); sms.cleanup(); });
 }
 module.exports = app;
