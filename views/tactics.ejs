@@ -14,6 +14,15 @@
     <label class="tb-preset"><span>Start from</span>
       <select id="tb-preset" aria-label="Start from a preset"></select>
     </label>
+    <label class="tb-preset"><span>Team to set up</span>
+      <select id="tb-team" aria-label="Team to set up"><option value="w">White</option><option value="r">Red</option></select>
+    </label>
+    <label class="tb-preset"><span>Defence</span>
+      <select id="tb-defence" aria-label="Put the chosen team into a defence"></select>
+    </label>
+    <label class="tb-preset"><span>Attack</span>
+      <select id="tb-attack" aria-label="Put the chosen team into an attacking pattern"></select>
+    </label>
     <div class="tb-tools" role="radiogroup" aria-label="Tool">
       <button type="button" class="tb-tool on" data-tool="move" role="radio" aria-checked="true" title="Move boats and ball (M)">Move</button>
       <button type="button" class="tb-tool" data-tool="run" role="radio" aria-checked="false" title="Draw a paddling run (R)"><span class="sw sw-run" aria-hidden="true"></span>Run</button>
@@ -57,6 +66,7 @@
     <h2 class="sub-head">How to use it</h2>
     <ul>
       <li><strong>Move boats:</strong> drag a kayak. Drag the small dot at its nose to turn it. With a boat selected you can also use the arrow keys, and <kbd>Q</kbd>/<kbd>E</kbd> to turn.</li>
+      <li><strong>Defence and attack:</strong> choose a team, then pick a <em>Defence</em> (2:2, 1:3:1, flat four, man on and more) or an <em>Attack</em> (horseshoe, diamond, overload and more). The team is arranged on the current step; Undo puts it back. White defends the right-hand goal and Red the left. In the formations the first number counts the goalkeeper.</li>
       <li><strong>Draw:</strong> pick <em>Run</em>, <em>Pass</em> or <em>Shot</em>, then drag across the pitch. Use <em>Erase line</em> and click a line to remove it.</li>
       <li><strong>Build a play:</strong> press <em>+ Add step</em>, move the boats to where they go next, and repeat. <em>Play</em> animates the whole move.</li>
       <li><strong>Share:</strong> <em>Copy share link</em> puts the whole play in a link you can send to your team. Your board is also kept in this browser for next time.</li>

@@ -96,6 +96,103 @@
     },
   };
 
+
+  // ---------- Formations (written for a team defending / attacking the RIGHT-hand goal) ----------
+  // Order: boat 1 is the goalkeeper, then boats 2 to 5. Angles: 180 faces down the pitch, 0 faces the goal.
+  const DEFENCES = {
+    d22: { name: '2:2 (two on the posts, two high)', pos: [[34, 11.5], [31.2, 8.8], [31.2, 14.2], [28.2, 8], [28.2, 15]] },
+    d131: { name: '1:3:1 (three across, one high)', pos: [[34, 11.5], [31.2, 8], [30.2, 11.5], [31.2, 15], [26.5, 11.5]] },
+    d211: { name: '2:1:1 (posts, middle, high)', pos: [[34, 11.5], [31.6, 9], [31.6, 14], [28.8, 11.5], [25.5, 11.5]] },
+    flat: { name: 'Flat four (line across)', pos: [[34, 11.5], [30.2, 6.5], [30.2, 10], [30.2, 13], [30.2, 16.5]] },
+    deep: { name: 'Deep box (all close to goal)', pos: [[34, 11.5], [32.2, 8.2], [32.2, 14.8], [30, 10], [30, 13]] },
+    manon: { name: 'Man on (one-on-one marking)', man: true },
+  };
+  const ATTACKS = {
+    horseshoe: {
+      name: 'Horseshoe (arc round the defence)',
+      pos: [[1.2, 11.5, 0], [31.9, 3, 0], [26.8, 7.6, 0], [26.8, 15.4, 0], [31.9, 20, 0]],
+      carrier: 2,
+      arrows: [['pass', 2, 3], ['pass', 3, 4]],
+      note: 'Players form a horseshoe around the defence. The ball is swung round the arc until a gap opens or a defender is dragged out of position.',
+    },
+    diamond: {
+      name: 'Diamond (1:2:1 around the zone)',
+      pos: [[1.2, 11.5, 0], [22.5, 11.5, 0], [26.3, 6.5, 0], [26.3, 16.5, 0], [29.8, 11.5, 0]],
+      carrier: 1,
+      arrows: [['pass', 1, 2], ['pass', 2, 4]],
+      note: 'A diamond: a playmaker at the top, two wide, and a pivot close to the goal. Pass wide to pull the defence apart, then in to the pivot.',
+    },
+    overload: {
+      name: 'Overload one side',
+      pos: [[1.2, 11.5, 0], [27.5, 4.2, 0], [29.5, 8, 0], [25, 7, 0], [27, 18.5, 0]],
+      carrier: 3,
+      arrows: [['pass', 3, 2], ['run', 4, 5]],
+      note: 'Three attackers crowd one side so the defence has to shift across. The weak-side player waits for a quick switch.',
+    },
+    wide: {
+      name: 'Wide and cut in',
+      pos: [[1.2, 11.5, 0], [24, 11.5, 0], [27.5, 3, 0], [27.5, 20, 0], [22, 11.5, 0]],
+      carrier: 1,
+      arrows: [['pass', 1, 2], ['run', 2, 5]],
+      note: 'Spread the defence by going wide, then the wide player cuts in across the front of the goal for the shot.',
+    },
+    twoup: {
+      name: 'Two up front (1:2:2)',
+      pos: [[1.2, 11.5, 0], [21, 9.5, 0], [21, 13.5, 0], [28.5, 8.8, 0], [28.5, 14.2, 0]],
+      carrier: 1,
+      arrows: [['pass', 1, 4], ['shot', 4, null]],
+      note: 'Two players hold the ball outside while two sit close to the goal for rebounds and screens.',
+    },
+  };
+
+  function mirrorPos(p) { return [W - p[0], p[1], 180 - (p[2] || 0)]; }
+  const OTHER = { r: 'w', w: 'r' };
+
+  function applyDefence(team, key) {
+    const f = DEFENCES[key];
+    if (!f) return;
+    const st = S();
+    const right = team === 'w'; // White defends the right-hand goal, Red the left
+    const goalX = right ? W : 0;
+    const ids = [1, 2, 3, 4, 5].map((n) => team + n);
+    if (f.man) {
+      const att = [2, 3, 4, 5].map((n) => ({ id: OTHER[team] + n, p: st.pos[OTHER[team] + n] })).sort((a, b) => a.p[1] - b.p[1]);
+      const def = ids.slice(1).sort((a, b) => st.pos[a][1] - st.pos[b][1]);
+      def.forEach((id, i) => {
+        const a = att[i].p;
+        const dx = goalX - a[0], dy = CY - a[1];
+        const len = Math.hypot(dx, dy) || 1;
+        const x = a[0] + (dx / len) * 1.9, y = a[1] + (dy / len) * 1.9;
+        st.pos[id] = [x, y, Math.round(Math.atan2(a[1] - y, a[0] - x) * 180 / Math.PI)];
+      });
+      st.pos[ids[0]] = [right ? W - 1 : 1, CY, right ? 180 : 0];
+      return;
+    }
+    f.pos.forEach((q, i) => {
+      const p = right ? [q[0], q[1], 180] : [W - q[0], q[1], 0];
+      st.pos[ids[i]] = p;
+    });
+  }
+
+  function applyAttack(team, key) {
+    const f = ATTACKS[key];
+    if (!f) return;
+    const st = S();
+    const right = team === 'r'; // Red attacks the right-hand goal, White the left
+    const pts = f.pos.map((q) => (right ? q.slice() : mirrorPos(q)));
+    // attackers' goalkeeper stays near their own goal, so boat 1 is placed from the pattern too
+    pts.forEach((p, i) => { st.pos[team + (i + 1)] = p; });
+    const c = st.pos[team + f.carrier];
+    st.ball = [c[0] + (right ? 1 : -1), c[1]];
+    const pt = (n) => { const p = st.pos[team + n]; return [p[0], p[1]]; };
+    st.arrows = (f.arrows.map(([k, a, b]) => {
+      const A1 = pt(a);
+      const B1 = b == null ? [right ? W : 0, CY] : pt(b);
+      return { k, x1: A1[0], y1: A1[1], x2: B1[0], y2: B1[1] };
+    }));
+    st.note = f.note;
+  }
+
   // ---------- State ----------
   const clone = (o) => JSON.parse(JSON.stringify(o));
   let state = { steps: clone(PRESETS.zone.steps), cur: 0 };
@@ -448,6 +545,32 @@
     if (location.hash) window.history.replaceState(null, '', location.pathname);
     commit();
     say(`Loaded “${p.name}”. Undo brings back your previous board.`);
+  });
+
+  function fillSelect(sel, label, map) {
+    const ph = document.createElement('option');
+    ph.value = ''; ph.textContent = label;
+    sel.appendChild(ph);
+    Object.entries(map).forEach(([k, f]) => {
+      const o = document.createElement('option');
+      o.value = k; o.textContent = f.name;
+      sel.appendChild(o);
+    });
+  }
+  const teamSel = $('tb-team');
+  fillSelect($('tb-defence'), 'Choose a defence…', DEFENCES);
+  fillSelect($('tb-attack'), 'Choose an attack…', ATTACKS);
+  $('tb-defence').addEventListener('change', (evt) => {
+    const k = evt.target.value; evt.target.value = '';
+    if (!k) return;
+    snapshot(); applyDefence(teamSel.value, k); selected = null; commit();
+    say(`${TEAMS[teamSel.value]}: ${DEFENCES[k].name}. Drag any boat to fine-tune.`);
+  });
+  $('tb-attack').addEventListener('change', (evt) => {
+    const k = evt.target.value; evt.target.value = '';
+    if (!k) return;
+    snapshot(); applyAttack(teamSel.value, k); selected = null; commit();
+    say(`${TEAMS[teamSel.value]}: ${ATTACKS[k].name}. Drag any boat to fine-tune.`);
   });
 
   // ---------- Steps ----------
