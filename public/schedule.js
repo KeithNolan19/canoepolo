@@ -145,6 +145,26 @@
       box.hidden = !rows.length;
     });
   }
+  // Games the official site has moved: add a note on the match
+  function loadChanges() {
+    if (document.hidden) return;
+    fetch('/api/live-changes').then((r) => r.json()).then((c) => {
+      document.querySelectorAll('.sched-match[data-code]').forEach((li) => {
+        const old = li.querySelector('.sm-changed');
+        if (old) old.remove();
+        const v = c[li.dataset.code];
+        if (!v) return;
+        const n = document.createElement('span');
+        n.className = 'sm-changed';
+        n.textContent = 'Changed on the official site: ' + [v.time ? 'now ' + v.time : '', v.pitch ? 'pitch ' + v.pitch : ''].filter(Boolean).join(', ');
+        const meta = li.querySelector('.sm-meta');
+        (meta || li).appendChild(document.createElement('br'));
+        (meta || li).appendChild(n);
+      });
+    }).catch(() => {});
+  }
+  loadChanges();
+  setInterval(loadChanges, 60000);
   load();
   setInterval(load, 30000);
   document.addEventListener('visibilitychange', load);
@@ -175,7 +195,8 @@
     if (d.live) { const a = el('a', 'btn small', 'Official match page'); a.href = d.live; a.target = '_blank'; a.rel = 'noopener'; dlg.append(a); }
     dlg.showModal();
     fetch('/api/live-game/' + encodeURIComponent(d.code)).then((r) => r.json()).then((g) => {
-      if (!g || !g.s) { score.textContent = 'Not started yet'; return; }
+      if (!g || (!g.s && !g.officials)) { score.textContent = 'Not started yet'; return; }
+      if (!g.s) { score.textContent = 'Not started yet'; const o0 = g.officials || {}; const l0 = [['Referee', o0.referee1], ['Referee 2', o0.referee2], ['Scorer', o0.scorer], ['Timekeeper', o0.timekeeper]].filter((x3) => x3[1] && x3[1] !== '-'); if (g.time || g.field) body.append(el('p', 'gm-note', 'Official site: ' + [g.time, g.field ? 'pitch ' + g.field : ''].filter(Boolean).join(', '))); if (l0.length) { body.append(el('h3', '', 'Officials')); body.append(el('p', '', l0.map((x3) => x3[0] + ': ' + x3[1]).join(' \u00b7 '))); } return; }
       score.textContent = home + ' ' + g.s + ' ' + away;
       const st = el('span', 'st' + (g.st === 'LIVE' ? ' live' : ''), g.st === 'LIVE' ? 'LIVE' : 'Full time'); score.append(' ', st);
       if (g.ks && g.ks !== d.time) body.append(el('p', 'gm-note', 'Started ' + g.ks));

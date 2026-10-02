@@ -9,6 +9,7 @@ const TZ_OFFSET = '+02:00'; // Milan in October (CEST)
 const POLL_MS = 45 * 1000;
 const state = new Map(); // code -> { score:[a,b], status:'LIVE'|'FT', at:ms }
 const finished = new Set();
+const meta = new Map(); // code -> what the official page says about the game itself (time, field, officials), even before it starts
 let timer = null;
 
 function textOf(html) {
@@ -92,7 +93,7 @@ function matchList() {
   const out = [];
   s.days.forEach((d) => d.slots.forEach((sl) => sl.matches.forEach((m) => {
     if (!m.live) return;
-    out.push({ code: m.code, url: m.live, start: Date.parse(`${d.date}T${sl.start}:00${TZ_OFFSET}`) });
+    out.push({ code: m.code, url: m.live, time: sl.start, pitch: m.pitch, day: d.date, start: Date.parse(`${d.date}T${sl.start}:00${TZ_OFFSET}`) });
   })));
   return out;
 }
@@ -102,25 +103,63 @@ function due(m, now) {
   return !finished.has(m.code) && now >= m.start - 10 * 60 * 1000 && now <= m.start + 4 * 60 * 60 * 1000;
 }
 
+// Reads a page and remembers both the live score (if any) and the game details
+function ingest(m, html) {
+  const p = parse(html);
+  const t = textOf(html);
+  const tm = /TIME\s+(\d{1,2}:\d{2})/i.exec(t), fm = /FIELD\s+(\S+)/i.exec(t);
+  meta.set(m.code, { time: tm ? tm[1].padStart(5, '0') : '', field: fm ? fm[1] : '', detail: parseDetail(html), at: Date.now() });
+  if (p.result) {
+    state.set(m.code, { ...p.result, at: Date.now() });
+    if (p.result.status === 'FT') finished.add(m.code);
+  }
+}
+
 async function tick() {
   const now = Date.now();
   const todo = matchList().filter((m) => due(m, now));
   for (const m of todo) {
-    try {
-      const { result } = parse(await fetchPage(m.url));
-      if (result) {
-        state.set(m.code, { ...result, at: Date.now() });
-        if (result.status === 'FT') finished.add(m.code);
-      }
-    } catch (e) { /* keep the last known score; try again next time */ }
+    try { ingest(m, await fetchPage(m.url)); } catch (e) { /* keep the last known score; try again next time */ }
     await new Promise((r) => setTimeout(r, 400));
   }
+}
+
+// Every 10 minutes during the tournament: look at games not played yet, so a change of time, pitch or referee shows up
+let sweeping = false;
+async function sweep() {
+  const now = Date.now();
+  if (sweeping || now < Date.parse('2026-10-02T05:00:00+02:00') || now > Date.parse('2026-10-05T00:00:00+02:00')) return;
+  sweeping = true;
+  try {
+    for (const m of matchList()) {
+      if (finished.has(m.code)) continue;
+      try { ingest(m, await fetchPage(m.url)); } catch (e) { /* try again next time */ }
+      await new Promise((r) => setTimeout(r, 700));
+    }
+  } finally { sweeping = false; }
+}
+
+// Games where the official page disagrees with our timetable
+function changes() {
+  const out = {};
+  matchList().forEach((m) => {
+    const v = meta.get(m.code);
+    if (!v) return;
+    const c = {};
+    if (v.time && v.time !== m.time.padStart(5, '0')) c.time = v.time;
+    if (v.field && Number(v.field) && Number(v.field) !== m.pitch) c.pitch = Number(v.field);
+    if (Object.keys(c).length) out[m.code] = c;
+  });
+  return out;
 }
 
 function start() {
   if (timer || process.env.LIVE_SCORES === 'off') return;
   timer = setInterval(() => { tick().catch(() => {}); }, POLL_MS);
   timer.unref();
+  const sw = setInterval(() => { sweep().catch(() => {}); }, 10 * 60 * 1000);
+  sw.unref();
+  setTimeout(() => { sweep().catch(() => {}); }, 20000).unref();
   tick().catch(() => {});
 }
 
@@ -130,6 +169,10 @@ function snapshot() {
   return o;
 }
 
-function detail(code) { const v = state.get(code); return v && v.detail ? { s: `${v.score[0]} - ${v.score[1]}`, st: v.status, ks: v.ks, ...v.detail } : null; }
+function detail(code) {
+  const v = state.get(code), m = meta.get(code);
+  if (v) return { s: `${v.score[0]} - ${v.score[1]}`, st: v.status, ks: v.ks, ...(m ? m.detail : v.detail || {}), time: m && m.time, field: m && m.field };
+  return m ? { ...m.detail, time: m.time, field: m.field } : null;
+}
 
-module.exports = { start, snapshot, detail, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };
+module.exports = { start, snapshot, detail, changes, meta, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };

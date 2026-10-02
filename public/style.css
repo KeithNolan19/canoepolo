@@ -922,3 +922,4 @@ h1, h2, h3, .event-name, .event-where, .event-extra { overflow-wrap: anywhere; }
 .gm-lineups { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: .88rem; }
 .gm-lineups ul { list-style: none; margin: 4px 0 0; padding: 0; }
 .gm .btn { margin-top: 14px; }
+.sm-changed { color: var(--red); font-weight: 700; }

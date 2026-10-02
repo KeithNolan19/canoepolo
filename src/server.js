@@ -411,6 +411,7 @@ app.get(`/tournaments/${ECC_SLUG}/support/:cc`, (req, res, next) => {
   res.render('support-country', { title: `${country.name} at the ECC 2026`, country, teams: rows, duties, sch, slug: ECC_SLUG, metaDescription: `Every ${country.name} club at the 2026 European Club Championships: games, live scores, scorers and duties.` });
 });
 app.get('/api/live-game/:code', (req, res) => { res.set('Cache-Control', 'public, max-age=15'); res.json(live.detail(String(req.params.code).toUpperCase().slice(0, 6)) || {}); });
+app.get('/api/live-changes', (req, res) => { res.set('Cache-Control', 'public, max-age=30'); res.json(live.changes()); });
 app.get('/api/live-scores', (req, res) => { res.set('Cache-Control', 'public, max-age=20'); res.json(live.snapshot()); });
 app.get('/api/tournaments', (req, res) => {
   res.set('Cache-Control', 'public, max-age=300');
@@ -569,6 +570,12 @@ app.get('/admin/live-check', requireAdmin, async (req, res) => {
     const p = live.parse(html);
     res.type('text/plain').send(`id ${id}\nparsed: ${JSON.stringify(p.result)}\ngoals/cards found: ${JSON.stringify(p.events)}\nstart of page text:\n${p.debug}`);
   } catch (e) { res.type('text/plain').send(`id ${id}\nCould not read the page: ${e.message}`); }
+});
+// Admin: which games the official site has moved or changed compared with our timetable
+app.get('/admin/live-changes', requireAdmin, (req, res) => {
+  const c = live.changes();
+  const lines = Object.entries(c).map(([k, v]) => `${k}: official site says ${v.time ? 'time ' + v.time : ''} ${v.pitch ? 'pitch ' + v.pitch : ''}`.replace(/\s+/g, ' ').trim());
+  res.type('text/plain').send(`Games checked: ${live.meta.size}\n` + (lines.length ? lines.join('\n') : 'No differences from our timetable.'));
 });
 app.get('/admin/stats', requireAdmin, (req, res) => {
   const days = [7, 30, 90, 365].includes(Number(req.query.days)) ? Number(req.query.days) : 30;
