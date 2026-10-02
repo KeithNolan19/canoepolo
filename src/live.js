@@ -76,9 +76,11 @@ function parse(html) {
   const score = [Number(m[1]), Number(m[2])];
   const evs = parseEvents(html);
   // Only trust the scorers when they add up to the score on the page
-  const ok = evs.goals.filter((g) => g.team === 1).length === score[0] && evs.goals.filter((g) => g.team === 2).length === score[1];
+  // Each side is checked on its own: if the goals listed for a side do not add up to its score (for example a goal that was cancelled but is still in the list), that side is marked unconfirmed (u:1), and the other side is still trusted
+  const sideOk = { 1: evs.goals.filter((g) => g.team === 1).length === score[0], 2: evs.goals.filter((g) => g.team === 2).length === score[1] };
+  const goals = evs.goals.map((g) => (sideOk[g.team] ? g : { ...g, u: 1 }));
   const ts = /TIME\s+(\d{1,2}:\d{2})\s+\((\d{1,2}:\d{2})\)/i.exec(t); // scheduled time and the time the game really started
-  return { debug: t.slice(0, 400), events: evs, result: { detail: parseDetail(html), ks: ts ? ts[2].padStart(5, '0') : undefined, score, status: done ? 'FT' : 'LIVE', goals: ok ? evs.goals : null, cards: ok ? evs.cards : null } };
+  return { debug: t.slice(0, 400), events: evs, result: { detail: parseDetail(html), ks: ts ? ts[2].padStart(5, '0') : undefined, score, status: done ? 'FT' : 'LIVE', goals: goals.length ? goals : null, cards: evs.cards.length ? evs.cards : null } };
 }
 
 async function fetchPage(url) {

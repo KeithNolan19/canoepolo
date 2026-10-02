@@ -124,7 +124,7 @@
       const line = (label, arr) => {
         if (!arr.length) return;
         const p = document.createElement('div');
-        p.textContent = label + ': ' + arr.map((x) => (x.player || 'unknown') + ' ' + x.minute + "'").join(', ');
+        p.textContent = label + ': ' + arr.map((x) => (x.player || 'unknown') + ' ' + x.minute + "'").join(', ') + (arr.some((x) => x.u) ? ' (this list does not match the score, the organiser may be correcting it)' : '');
         el.appendChild(p);
       };
       line(team, own); line(opp, theirs);
@@ -134,7 +134,7 @@
         el.appendChild(p);
       });
       const t = (tally[el.dataset.key || team] = tally[el.dataset.key || team] || {});
-      own.forEach((x) => { const n = x.player || 'unknown'; t[n] = (t[n] || 0) + 1; });
+      own.filter((x) => !x.u).forEach((x) => { const n = x.player || 'unknown'; t[n] = (t[n] || 0) + 1; });
     });
     document.querySelectorAll('[data-scorers]').forEach((box) => {
       const t = tally[box.dataset.scorers] || {};
