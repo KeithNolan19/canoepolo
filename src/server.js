@@ -62,6 +62,16 @@ app.use(helmet({
 const FLAGS = new Set(require('fs').readdirSync(path.join(__dirname, '..', 'public', 'flags')).filter((f) => f.endsWith('.svg')).map((f) => f.slice(0, 2)));
 // Flag as a small picture (emoji flags do not show on every computer)
 const flagImg = (c) => { c = String(c || '').toLowerCase(); return FLAGS.has(c) ? `<img class="fl" src="/flags/${c}.svg" alt="" width="20" height="15" loading="lazy">` : ''; };
+// Keeping scrapers and AI crawlers out. Real browsers, search engines (Google, Bing and similar) and link previews (WhatsApp, Facebook, X, Telegram, Slack) are let in.
+// This stops simple tools and well-behaved bots. It can not stop a determined person: anything a browser can show can be copied by hand.
+const SCRAPER_UA = /(python-requests|python-urllib|aiohttp|httpx|urllib|libwww|curl\/|wget|scrapy|go-http-client|okhttp|java\/|apache-httpclient|node-fetch|undici|axios|got \(|headlesschrome|phantomjs|puppeteer|playwright|selenium|httrack|webcopier|site(sucker|snagger)|offline ?explorer|gptbot|chatgpt|oai-searchbot|claudebot|claude-web|claude-user|claude-searchbot|anthropic|ccbot|perplexity|bytespider|bytedance|amazonbot|applebot-extended|meta-external|facebookbot|cohere|diffbot|imagesift|omgili|youbot|semrush|ahrefs|mj12bot|dotbot|petalbot|dataforseo|blexbot|serpstat|barkrowler|seekport|scrapingbot|zyte|apify|crawl4ai|firecrawl|bright ?data|brightdata|timpibot|ai2bot|kangaroo|webzio|webz\.io|exabot|megaindex|screaming frog)/i;
+app.use((req, res, next) => {
+  res.set('X-Robots-Tag', 'noai, noimageai');
+  if (req.path === '/health' || req.path === '/robots.txt') return next();
+  const ua = String(req.get('user-agent') || '');
+  if (!ua || ua.length < 12 || SCRAPER_UA.test(ua)) return res.status(403).type('text/plain').send('Automated copying of this site is not allowed.\n');
+  next();
+});
 app.use(express.urlencoded({ extended: true, limit: '100kb' }));
 app.use(stats.middleware); // before the static files so downloads of documents are counted
 // Caching: CSS and JS are linked with ?v=<start time>, so they can be kept for a year (a new deploy changes the link).
@@ -474,20 +484,19 @@ app.get('/api/live-game/:code', (req, res) => { res.set('Cache-Control', 'public
 app.get('/api/live-changes', (req, res) => { res.set('Cache-Control', 'public, max-age=30'); res.json(live.changes()); });
 app.get('/api/standings', (req, res) => { res.set('Cache-Control', 'public, max-age=20'); res.json(live.standings()); });
 app.get('/api/live-scores', (req, res) => { res.set('Cache-Control', 'public, max-age=20'); res.json(live.snapshot()); });
-app.get('/api/tournaments', (req, res) => {
+app.get(['/api/tournaments', '/api/tournaments/:slug'], (req, res) => res.status(404).type('text/plain').send('Not found\n')); // the public data feed is closed
+app.get('/api/tournaments-closed', (req, res) => {
   res.set('Cache-Control', 'public, max-age=300');
   const when = req.query.when === 'past' ? 'past' : 'upcoming';
   const rows = T.listPublic({ ...pickFilters(req.query), when, limit: req.query.limit });
-  res.set('Access-Control-Allow-Origin', '*');
   res.json({
     count: rows.length,
     tournaments: rows.map(({ id, contact_email, created_at, ...pub }) => ({ ...pub, url: `${BASE_URL}/tournaments/${pub.slug}` })),
   });
 });
 
-app.get('/api/tournaments/:slug', (req, res) => {
+app.get('/api/tournaments-closed/:slug', (req, res) => {
   const t = T.getBySlug(req.params.slug);
-  res.set('Access-Control-Allow-Origin', '*');
   if (!t) return res.status(404).json({ error: 'Not found' });
   const { id, created_at, ...pub } = t;
   res.json({ ...pub, url: `${BASE_URL}/tournaments/${t.slug}` });
@@ -513,10 +522,45 @@ app.get('/health', (req, res) => res.json({ ok: true }));
 const textFile = (body) => (req, res) => res.type('text/plain').set('Cache-Control', 'public, max-age=3600').send(body);
 // Search engines and AI assistants are welcome to read the public pages. Kept out: the admin area, the quiz leaderboard
 // (people's names), files made on request, internal endpoints and filtered or searched copies of pages.
-app.get('/robots.txt', textFile(`User-agent: *
+app.get('/robots.txt', textFile(`# canoepolo.eu: search engines may index the pages. Copying, scraping and using the site to train or feed AI is not allowed (see /terms).
+User-agent: GPTBot
+User-agent: ChatGPT-User
+User-agent: OAI-SearchBot
+User-agent: ClaudeBot
+User-agent: Claude-Web
+User-agent: Claude-User
+User-agent: Claude-SearchBot
+User-agent: anthropic-ai
+User-agent: CCBot
+User-agent: Google-Extended
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Bytespider
+User-agent: Amazonbot
+User-agent: Applebot-Extended
+User-agent: Meta-ExternalAgent
+User-agent: FacebookBot
+User-agent: cohere-ai
+User-agent: Diffbot
+User-agent: ImagesiftBot
+User-agent: Omgilibot
+User-agent: YouBot
+User-agent: SemrushBot
+User-agent: AhrefsBot
+User-agent: MJ12bot
+User-agent: DotBot
+User-agent: PetalBot
+User-agent: DataForSeoBot
+User-agent: Timpibot
+User-agent: Kangaroo Bot
+Disallow: /
+
+User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /_c
+Disallow: /api/
+Disallow: /s/
 Disallow: /thumb/
 Disallow: /referee/leaderboard
 Disallow: /referee/quiz/
@@ -526,55 +570,9 @@ Disallow: /*?
 
 Sitemap: ${BASE_URL}/sitemap.xml
 `));
-app.get(['/llms.txt', '/llm.txt'], textFile(`# canoepolo.eu
-
-> The home of international canoe polo (kayak polo): tournaments, schedules, rules, referee resources, videos and a tactics board. Run by volunteers (not a legal entity).
-
-## Main pages
-- [Upcoming tournaments](${BASE_URL}/tournaments): calendar of canoe polo tournaments worldwide
-- [Tournament map](${BASE_URL}/tournaments/map): where tournaments are
-- [Past tournaments](${BASE_URL}/past)
-- [Rules in plain English](${BASE_URL}/rules)
-- [Referee guide and quiz](${BASE_URL}/referee)
-- [Blog](${BASE_URL}/blog): guides for clubs, grants, safeguarding and more
-- [Watch](${BASE_URL}/watch): highlights and finals
-- [Get involved](${BASE_URL}/get-involved)
-
-## Data
-- [Tournaments as JSON](${BASE_URL}/api/tournaments): open API, add ?when=past, ?country=XX, ?limit=N
-- [Calendar feed (iCal)](${BASE_URL}/calendar.ics)
-- [Blog RSS](${BASE_URL}/blog/feed.xml)
-- [Sitemap](${BASE_URL}/sitemap.xml)
-
-## Notes
-- Information is gathered from organisers' announcements and from Kayakers.nl (used with permission). Always check the organiser's own page for final details.
-- Please link back to canoepolo.eu when you use this information. See ${BASE_URL}/agents.txt for rules for automated agents.
-`));
-app.get('/agents.txt', textFile(`# agents.txt for canoepolo.eu: how automated agents and AI assistants may use this site
-
-Site: ${BASE_URL}
-Summary: ${BASE_URL}/llms.txt
-
-Allowed
-- Read and summarise public pages, the sitemap, the JSON API (/api/tournaments) and the RSS and iCal feeds.
-- Quote short extracts with a link back to the page.
-
-Not allowed
-- The admin area (/admin), logging in or trying to guess passwords.
-- Submitting forms or the referee quiz, or posting to the leaderboard.
-- Collecting personal data, for example names on the quiz leaderboard.
-- Buying, booking or registering for tournaments on someone's behalf without the person confirming each step with the organiser.
-
-Rate limits
-- Be gentle: no more than about 1 request per second. Over the limit the site answers 429 with a Retry-After header, so back off when you see it.
-- Use the JSON API or the sitemap rather than crawling every page.
-- Cache what you fetch. Pages send ETag headers, so use conditional requests.
-
-Accuracy
-- Tournament details can change. Tell people to confirm dates and entry with the organiser (link on each tournament page).
-
-Contact
-- WhatsApp +353 87 678 9927 (see ${BASE_URL}/about)
+app.get('/agents.txt', textFile(`# agents.txt for canoepolo.eu
+Automated agents, scrapers, crawlers for AI training or AI answers, and bulk copying are NOT allowed on this site.
+Search engines may index the pages. Links to pages are welcome. See ${BASE_URL}/terms.
 `));
 
 app.get('/sitemap.xml', (req, res) => {
