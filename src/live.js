@@ -141,6 +141,13 @@ function parseDetail(html) {
   return { events, lineups, officials, field: pick(/FIELD\s+(\S+)/i), round: pick(/ROUND\s+(\S+)/i) };
 }
 
+// The organiser's page can carry a slip for the real start time (for example 01:00 for a 16:20 game). Show it only when it is believable.
+function plausibleStart(sched, actual) {
+  const mins = (x) => { const [h, m] = x.split(':').map(Number); return h * 60 + m; };
+  const d = mins(actual) - mins(sched);
+  return d >= -45 && d <= 240;
+}
+
 // Reads one Game Report page. Returns { score, status } or null when there is nothing to show yet.
 function parse(html) {
   const t = textOf(html);
@@ -157,7 +164,7 @@ function parse(html) {
   const sideOk = { 1: evs.goals.filter((g) => g.team === 1).length === score[0], 2: evs.goals.filter((g) => g.team === 2).length === score[1] };
   const goals = evs.goals.map((g) => (sideOk[g.team] ? g : { ...g, u: 1 }));
   const ts = /TIME\s+(\d{1,2}:\d{2})\s+\((\d{1,2}:\d{2})\)/i.exec(t); // scheduled time and the time the game really started
-  return { debug: t.slice(0, 400), events: evs, result: { detail: parseDetail(html), ks: ts ? ts[2].padStart(5, '0') : undefined, score, status: done ? 'FT' : 'LIVE', goals: goals.length ? goals : null, cards: evs.cards.length ? evs.cards : null } };
+  return { debug: t.slice(0, 400), events: evs, result: { detail: parseDetail(html), ks: ts && plausibleStart(ts[1], ts[2]) ? ts[2].padStart(5, '0') : undefined, score, status: done ? 'FT' : 'LIVE', goals: goals.length ? goals : null, cards: evs.cards.length ? evs.cards : null } };
 }
 
 // If the organisers' site fails (error, slow or no answer) we stop asking for 10 minutes, and 20 minutes if it fails again straight after
