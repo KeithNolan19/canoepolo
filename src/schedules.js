@@ -256,6 +256,7 @@ let overrides = {};
 function setOverrides(o) { overrides = o || {}; }
 // Team names the organisers' match pages show for knockout games that are still placeholders in our timetable ("1st in Group A", "Winner of M69")
 let teamOv = {};
+const { SHEET_TEAMS } = require('./officials');
 function setTeamOverrides(o) { teamOv = o || {}; }
 const isPlaceholder = (n) => /\b(Group|Winner|Loser)\b|\d(st|nd|rd|th) in /.test(n);
 const addMinutes = (hhmm, min) => { const [h, m] = hhmm.split(':').map(Number); const t = h * 60 + m + min; return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`; };
@@ -293,8 +294,11 @@ function forSlug(slug, opts = {}) {
         if (!slot) { slot = { start, end, matches: [] }; slots.push(slot); }
         const t = teamOv[code] || [];
         // each side is filled in on its own, as soon as the organisers' page names a club for it
-        const h2 = t[0] && isPlaceholder(home) ? t[0] : home, a2 = t[1] && isPlaceholder(away) ? t[1] : away;
-        slot.matches.push({ pitch, code, home: h2, away: a2, homeOrig: home, awayOrig: away, group, division: code[0] === 'F' ? 'Women' : 'Men', resolved: (h2 !== home || a2 !== away) ? true : undefined, ph: isPlaceholder(h2) || isPlaceholder(a2) });
+        const sh = SHEET_TEAMS[code] || [];
+        const pickSide = (live, sheet, orig) => (isPlaceholder(orig) ? (live || sheet || orig) : orig);
+        const h2 = pickSide(t[0], sh[0], home), a2 = pickSide(t[1], sh[1], away);
+        const fromSheet = (h2 !== home && h2 !== t[0]) || (a2 !== away && a2 !== t[1]);
+        slot.matches.push({ pitch, code, home: h2, away: a2, homeOrig: home, awayOrig: away, group, division: code[0] === 'F' ? 'Women' : 'Men', resolved: (h2 !== home || a2 !== away) ? true : undefined, ph: isPlaceholder(h2) || isPlaceholder(a2) || fromSheet, fromSheet: fromSheet || undefined });
       });
       slots.sort((a, b) => a.start.localeCompare(b.start));
       slots.forEach((x) => x.matches.sort((a, b) => a.pitch - b.pitch));

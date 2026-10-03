@@ -32,5 +32,13 @@ const OFFICIALS_SAT = {
   M59: ['WATTS Steve', 'Corbeil-Essenos'], F30: ['KOERBER Swantje', "Pont D'ouilly"], M60: ['ANASTASI Martina', 'Odysseus'],
   M61: ['ANDERSON Brian', 'Skovshoveld'], M62: ['DIEDRICH Henning', 'Zurich'], M15: ['BRACKEZ Virginie', 'Thurgauer'],
   M24: ['ANDZIAK Marzena', 'Castellón'], M65: ['PILAR Lukasz', 'Branik'], M53: ['PELLI Maurizio', 'Ulster'],
+  // Saturday 14:00 to 15:00, from the organiser's referee sheet
+  F31: ['WINTERS Thom', 'Burriana'], F32: ['ABBATE Giulio', 'Deventer'], F33: ['WATTS Steve', 'KRM Essen'],
+  F34: ['ANDZIAK Marzena', "Pont D'ouilly"], F35: ['ANDERSON Brian', 'Thurgauer'],
 };
-module.exports = { OFFICIALS, OFFICIALS_SAT };
+
+// Teams the organiser's own sheets name for play-off games before their live match pages do. The live page always wins once it names a club.
+const SHEET_TEAMS = {
+  F31: ['Duisburg', 'Rovigo'], F32: ['Zurich', 'Alaquas'], F33: ['Neptun', 'Praha'], F34: ['Kingston', 'Ichnusa'], F35: ['Avranches', 'Mullingar'],
+};
+module.exports = { OFFICIALS, OFFICIALS_SAT, SHEET_TEAMS };
