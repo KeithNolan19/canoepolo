@@ -561,8 +561,8 @@ const ev = (n) => { if (window.cpEvent) window.cpEvent(n); };
     });
   }
   const teamSel = $('tb-team');
-  fillSelect($('tb-defence'), 'Choose a defence…', DEFENCES);
-  fillSelect($('tb-attack'), 'Choose an attack…', ATTACKS);
+  fillSelect($('tb-defence'), 'Pick a defence…', DEFENCES);
+  fillSelect($('tb-attack'), 'Pick an attack…', ATTACKS);
   $('tb-defence').addEventListener('change', (evt) => {
     const k = evt.target.value; evt.target.value = '';
     if (!k) return;

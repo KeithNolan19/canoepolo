@@ -953,3 +953,19 @@ h1, h2, h3, .event-name, .event-where, .event-extra { overflow-wrap: anywhere; }
 .pstats h5 { margin: 8px 0 6px; font-size: 1rem; }
 .pstats .st-table td:first-child, .pstats .st-table th:first-child { text-align: left; }
 .pstats-div { margin-bottom: 18px; overflow-x: auto; }
+
+/* Phone polish: roomier tap targets, no clipped filter text, a compact tactics toolbar, tidy pop-up buttons */
+@media (max-width: 600px) {
+  .sched-filters { grid-template-columns: 1fr; }
+  .sched-filters label:nth-child(-n+2) { grid-column: auto; }
+  .sm-live { display: inline-block; padding: 8px 6px; margin: -8px -6px; }
+  .promo .btn { display: flex; align-items: center; justify-content: center; text-align: center; width: 100%; min-height: 48px; }
+  .tb-bar { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .tb-bar > .tb-preset:first-child, .tb-tools, .tb-actions { grid-column: 1 / -1; }
+  .tb-preset select { width: 100%; font-size: .95rem; padding-left: 10px; }
+  .tb-tools { border-radius: 22px; }
+  .tb-tool { flex: 1 1 auto; text-align: center; }
+  .tb-tool { min-height: 40px; }
+  .tb-actions { margin-left: 0; }
+  .tb-actions .btn { flex: 1; min-height: 44px; white-space: nowrap; padding-left: 8px; padding-right: 8px; }
+}
