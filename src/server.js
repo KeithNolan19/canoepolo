@@ -630,6 +630,26 @@ app.get('/admin', requireAdmin, (req, res) => {
   res.render('admin/dashboard', { title: 'Admin', tournaments: T.listAll(), msg: req.query.msg || '' });
 });
 
+// Admin look at Kayakers.nl (used with the maintainer's permission). One manual request per visit, only to cpt.kayakers.nl, nothing is stored.
+// /admin/kayakers-check?path=/View/20pylkwier26 shows the page's text, links and any data addresses it mentions, so we can see where scores come from.
+app.get('/admin/kayakers-check', requireAdmin, async (req, res) => {
+  const path = String(req.query.path || '/View/20pylkwier26');
+  if (!/^\/[A-Za-z0-9_\-\/.?=&%]{0,200}$/.test(path) || path.startsWith('//')) return res.type('text/plain').send('Path must start with / and use plain characters.');
+  try {
+    const r = await fetch('https://cpt.kayakers.nl' + path, { headers: { 'User-Agent': 'canoepolo.eu (volunteer site, used with the Kayakers.nl maintainer\'s permission; keith.nolan19@outlook.com)', Accept: '*/*' }, signal: AbortSignal.timeout(10000) });
+    const body = await r.text();
+    const type = r.headers.get('content-type') || '';
+    let out = `GET ${path}\nstatus ${r.status}, ${type}, ${body.length} characters\n\n`;
+    if (/html/i.test(type)) {
+      const uniq = (a) => [...new Set(a)].slice(0, 60);
+      out += 'scripts: ' + JSON.stringify(uniq([...body.matchAll(/<script[^>]+src="([^"]+)"/gi)].map((m) => m[1]))) + '\n';
+      out += 'links: ' + JSON.stringify(uniq([...body.matchAll(/<a[^>]+href="([^"#]+)"/gi)].map((m) => m[1]))) + '\n';
+      out += 'data addresses mentioned: ' + JSON.stringify(uniq([...body.matchAll(/["'(]((?:https?:\/\/cpt\.kayakers\.nl)?\/(?:api|Api|hub|signalr)[A-Za-z0-9_\-\/.?=&{}$]*)/g)].map((m) => m[1]))) + '\n\n';
+      out += 'page text:\n' + body.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').slice(0, 3500);
+    } else out += body.slice(0, 6000);
+    res.type('text/plain').send(out);
+  } catch (e) { res.type('text/plain').send(`Could not read it: ${e.message}`); }
+});
 // Admin check of the live-score reader: /admin/live-check?id=1 shows what the server reads from the official match page
 app.get('/admin/live-check', requireAdmin, async (req, res) => {
   const id = Number(req.query.id) || 1;
