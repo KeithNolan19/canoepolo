@@ -124,6 +124,30 @@ function fits(sch, division, placeholder, team) {
 }
 const teamsFor = {};
 
+
+// For /admin/live-check: what the server would do with this game's page, step by step, so a game that does not fill in can be explained
+const CODE_VERSION = 'sunday-pools-and-far-reads-2026-10-03';
+function explain(m, html) {
+  const out = [`code version: ${CODE_VERSION}`];
+  const sch = schedules.forSlug(SLUG, { raw: true });
+  const org = parseTeams(html);
+  const orig = originalOf(sch, m.code);
+  out.push(`our placeholders for ${m.code}: ${JSON.stringify(orig)}; game still waiting for teams: ${!!m.ph}`);
+  out.push(`organiser page header names: ${JSON.stringify(org)}`);
+  if (!org) out.push('=> the page header could not be read as "team - team", so nothing can be filled in');
+  if (org && orig) {
+    const division = m.code[0] === 'F' ? 'Women' : 'Men';
+    const names = (sch.teams || []).filter((x) => x.division === division).map((x) => x.name);
+    [0, 1].forEach((i) => {
+      const same = names.filter((n) => sameClub(org[i], n));
+      const ok = same.filter((n) => fits(sch, division, orig[i], n));
+      out.push(`side ${i + 1}: organiser "${org[i]}" vs placeholder "${orig[i]}": spelling matches ${JSON.stringify(same)}, of those that fit: ${JSON.stringify(ok)}${ok.length === 1 ? ' => will fill in' : ' => NOT filled in'}`);
+    });
+  }
+  out.push(`currently on the site: ${JSON.stringify(teamsFor[m.code] || null)}`);
+  return out.join('\n');
+}
+
 // Everything on the Game Report that we show in the game pop-up: full event list, line-ups, officials, field and round.
 function parseDetail(html) {
   const t = textOf(html);
@@ -495,4 +519,5 @@ function detail(code) {
   return m ? { ...m.detail, time: m.time, field: m.field } : null;
 }
 
-module.exports = { readLog, logKinds, logChange, health, paused, readAll, readAllStatus, verify, parseTeams, ingest, start, snapshot, detail, changes, standings, playerStats, meta, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };
+const matchByCode = (id) => matchList().find((m) => String(m.url).endsWith('id=' + Number(id))) || null; // by the organiser's N°
+module.exports = { matchByCode, explain, readLog, logKinds, logChange, health, paused, readAll, readAllStatus, verify, parseTeams, ingest, start, snapshot, detail, changes, standings, playerStats, meta, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };
