@@ -397,20 +397,27 @@ app.get(`/tournaments/${ECC_SLUG}/support/:cc`, (req, res, next) => {
   const { OFFICIALS, OFFICIALS_SAT } = require('./officials');
   const scores = live.snapshot();
   const names = new Set(country.teams.map((t) => t.name));
-  const teams = {}; const duties = {};
+  const teams = {}; const duties = {}; const knockouts = [];
+  const addGame = (d, sl, m, name) => {
+    const key = `${name}|${m.division}`;
+    const t = teams[key];
+    const home = m.home === name;
+    const sc = scores[m.code];
+    // Only group games count towards the played, won, lost and goals figures
+    if (sc && m.group.length === 1) {
+      const [a, b] = sc.s.split(' - ').map(Number);
+      const mine = home ? a : b, theirs = home ? b : a;
+      if (sc.st === 'FT') { t.p++; t.gf += mine; t.ga += theirs; if (mine > theirs) t.w++; else if (mine < theirs) t.l++; else t.d++; }
+    }
+    t.games.push({ day: d.label, start: sl.start, pitch: m.pitch, code: m.code, opp: home ? m.away : m.home, oppFlag: sch.countries[home ? m.away : m.home] || '', group: m.group, stage: m.group.length === 1 ? `Group ${m.group}` : m.group, live: m.live || '', away: !home });
+  };
   sch.days.forEach((d) => d.slots.forEach((sl) => sl.matches.forEach((m) => {
     [m.home, m.away].forEach((name) => {
-      if (!names.has(name) || m.group.length !== 1) return;
+      if (!names.has(name)) return;
+      if (m.group.length !== 1) { knockouts.push([d, sl, m, name]); return; } // play-offs: added below, once the organiser has named the club in the game
       const key = `${name}|${m.division}`;
-      const t = teams[key] = teams[key] || { name, division: m.division, group: m.group, games: [], p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gazebo: GAZEBO[key] || null };
-      const home = m.home === name;
-      const sc = scores[m.code];
-      if (sc) {
-        const [a, b] = sc.s.split(' - ').map(Number);
-        const mine = home ? a : b, theirs = home ? b : a;
-        if (sc.st === 'FT') { t.p++; t.gf += mine; t.ga += theirs; if (mine > theirs) t.w++; else if (mine < theirs) t.l++; else t.d++; }
-      }
-      t.games.push({ day: d.label, start: sl.start, pitch: m.pitch, code: m.code, opp: home ? m.away : m.home, oppFlag: sch.countries[home ? m.away : m.home] || '', group: m.group, live: m.live || '', away: !home });
+      if (!teams[key]) teams[key] = { name, division: m.division, group: m.group, games: [], p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gazebo: GAZEBO[key] || null };
+      addGame(d, sl, m, name);
     });
     // Duties follow the organisers' own match page; the Friday sheet is only the fallback before a page has been read
     const pg = live.meta.get(m.code);
@@ -427,6 +434,7 @@ app.get(`/tournaments/${ECC_SLUG}/support/:cc`, (req, res, next) => {
       (duties[club] = duties[club] || []).push({ day: d.label.split(' ')[0].slice(0, 3), start: sl.start, pitch: m.pitch, code: m.code, match: `${m.home} v ${m.away}`, role });
     });
   })));
+  knockouts.forEach(([d, sl, m, name]) => { if (teams[`${name}|${m.division}`]) addGame(d, sl, m, name); });
   const rows = Object.values(teams).sort((a, b) => a.name.localeCompare(b.name) || a.division.localeCompare(b.division));
   res.render('support-country', { title: `${country.name} at the ECC 2026`, country, teams: rows, duties, sch, slug: ECC_SLUG, metaDescription: `Every ${country.name} club at the 2026 European Club Championships: games, live scores, scorers and duties.` });
 });
