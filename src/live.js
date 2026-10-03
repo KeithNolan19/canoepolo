@@ -156,7 +156,7 @@ function ingest(m, html) {
   const p = parse(html);
   const t = textOf(html);
   const tm = /TIME\s+(\d{1,2}:\d{2})/i.exec(t), fm = /FIELD\s+(\S+)/i.exec(t);
-  meta.set(m.code, { time: tm ? tm[1].padStart(5, '0') : '', field: fm ? fm[1] : '', detail: parseDetail(html), at: Date.now() });
+  meta.set(m.code, { time: tm ? tm[1].padStart(5, '0') : '', field: fm ? fm[1] : '', detail: parseDetail(html), org: parseTeams(html), at: Date.now() });
   schedules.setOverrides(changes());
   if (m.ph) {
     // Teams are only filled in when the organiser's page names two clubs AND each club fits the placeholder in our timetable
@@ -279,6 +279,30 @@ function playerStats() {
   return res;
 }
 
+// Compares everything the server has read from the organiser's pages with our timetable: time, pitch, home and away team, and whether a score is shown
+function verify() {
+  const sch = schedules.forSlug(SLUG, { raw: true });
+  const lines = [], stats = { listed: 0, read: 0, ok: 0, bad: 0, notRead: 0 };
+  if (!sch || sch.hidden) return { lines: ['No ECC timetable loaded.'], stats };
+  sch.days.forEach((d) => d.slots.forEach((sl) => sl.matches.forEach((m) => {
+    if (!m.live) return;
+    stats.listed++;
+    const v = meta.get(m.code);
+    if (!v) { stats.notRead++; return; }
+    stats.read++;
+    const bad = [];
+    if (v.time && v.time !== sl.start.padStart(5, '0')) bad.push(`time: organiser ${v.time}, ours ${sl.start}`);
+    if (v.field && Number(v.field) && Number(v.field) !== m.pitch) bad.push(`pitch: organiser ${v.field}, ours ${m.pitch}`);
+    const ph = /\b(Group|Winner|Loser)\b|\d(st|nd|rd|th) in /;
+    if (v.org && !ph.test(m.home) && !ph.test(m.away)) {
+      if (!sameClub(v.org[0], m.home)) bad.push(`home team: organiser "${v.org[0]}", ours "${m.home}"`);
+      if (!sameClub(v.org[1], m.away)) bad.push(`away team: organiser "${v.org[1]}", ours "${m.away}"`);
+    } else if (!v.org) bad.push('could not read the team names from the organiser page');
+    if (bad.length) { stats.bad++; lines.push(`${m.code} (organiser N° ${m.liveId}, ${d.date} ${sl.start} pitch ${m.pitch}): ${bad.join('; ')}`); } else stats.ok++;
+  })));
+  return { lines, stats };
+}
+
 // Games where the official page disagrees with our timetable
 function changes() {
   const out = {};
@@ -315,4 +339,4 @@ function detail(code) {
   return m ? { ...m.detail, time: m.time, field: m.field } : null;
 }
 
-module.exports = { parseTeams, ingest, start, snapshot, detail, changes, standings, playerStats, meta, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };
+module.exports = { verify, parseTeams, ingest, start, snapshot, detail, changes, standings, playerStats, meta, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };

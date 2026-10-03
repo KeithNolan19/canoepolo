@@ -647,6 +647,11 @@ app.get('/admin/live-changes', requireAdmin, (req, res) => {
   const lines = Object.entries(c).map(([k, v]) => `${k}: official site says ${v.time ? 'time ' + v.time : ''} ${v.pitch ? 'pitch ' + v.pitch : ''}`.replace(/\s+/g, ' ').trim());
   res.type('text/plain').send(`Games checked: ${live.meta.size}\n` + (lines.length ? lines.join('\n') : 'No differences from our timetable.'));
 });
+// Admin: compare every game the server has read from the organiser's pages with our timetable
+app.get('/admin/live-verify', requireAdmin, (req, res) => {
+  const { lines, stats } = live.verify();
+  res.type('text/plain').send(`Games with an organiser link: ${stats.listed}\nRead so far: ${stats.read} (not read yet: ${stats.notRead})\nMatching our timetable: ${stats.ok}\nDifferent: ${stats.bad}\n\n` + (lines.length ? lines.join('\n') : 'No differences in the games read so far.') + '\n\nGames not read yet are checked automatically when they are due. Placeholder knockout games are checked for time and pitch only.');
+});
 app.get('/admin/stats', requireAdmin, (req, res) => {
   const days = [7, 30, 90, 365].includes(Number(req.query.days)) ? Number(req.query.days) : 30;
   const r = stats.report(days);
