@@ -628,7 +628,9 @@ app.get('/admin/live-check', requireAdmin, async (req, res) => {
   try {
     const html = await live.fetchPage(`https://ecc2026milano.it/en/partite/view?id=${id}`);
     const p = live.parse(html);
-    res.type('text/plain').send(`id ${id}\nparsed: ${JSON.stringify(p.result)}\ngoals/cards found: ${JSON.stringify(p.events)}\nstart of page text:\n${p.debug}`);
+    const sch0 = require('./schedules').forSlug('paddle-europe-canoe-polo-club-championships-2026', { raw: true });
+    const teamsFound = live.parseTeams(html, (sch0.teams || []).map((x) => x.name));
+    res.type('text/plain').send(`id ${id}\nteams named at the top of the page: ${JSON.stringify(teamsFound)}\nparsed: ${JSON.stringify(p.result)}\ngoals/cards found: ${JSON.stringify(p.events)}\nstart of page text:\n${p.debug}`);
   } catch (e) { res.type('text/plain').send(`id ${id}\nCould not read the page: ${e.message}`); }
 });
 // Admin: which games the official site has moved or changed compared with our timetable

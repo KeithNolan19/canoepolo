@@ -39,6 +39,24 @@ function parseEvents(html) {
   return { goals, cards };
 }
 
+// The two teams named at the top of an official match page, found by looking for the known club names there (longest names first so
+// "Praha B" is not read as "Praha"). Only used for knockout games whose teams are still placeholders in our timetable.
+function parseTeams(html, names) {
+  const head = textOf(html).slice(0, 700).toLowerCase();
+  const found = [];
+  const taken = [];
+  [...names].sort((a, b) => b.length - a.length).forEach((n) => {
+    let i = head.indexOf(n.toLowerCase());
+    while (i !== -1 && taken.some(([a, b]) => i < b && i + n.length > a)) i = head.indexOf(n.toLowerCase(), i + 1);
+    if (i === -1) return;
+    taken.push([i, i + n.length]);
+    found.push({ n, i });
+  });
+  found.sort((a, b) => a.i - b.i);
+  return found.length === 2 ? [found[0].n, found[1].n] : null;
+}
+const teamsFor = {}; // code -> [home, away]
+
 // Everything on the Game Report that we show in the game pop-up: full event list, line-ups, officials, field and round.
 function parseDetail(html) {
   const t = textOf(html);
@@ -95,7 +113,7 @@ function matchList() {
   const out = [];
   s.days.forEach((d) => d.slots.forEach((sl) => sl.matches.forEach((m) => {
     if (!m.live) return;
-    out.push({ code: m.code, url: m.live, time: sl.start, pitch: m.pitch, day: d.date, start: Date.parse(`${d.date}T${sl.start}:00${TZ_OFFSET}`) });
+    out.push({ code: m.code, url: m.live, ph: !!m.ph, time: sl.start, pitch: m.pitch, day: d.date, start: Date.parse(`${d.date}T${sl.start}:00${TZ_OFFSET}`) });
   })));
   return out;
 }
@@ -112,6 +130,13 @@ function ingest(m, html) {
   const tm = /TIME\s+(\d{1,2}:\d{2})/i.exec(t), fm = /FIELD\s+(\S+)/i.exec(t);
   meta.set(m.code, { time: tm ? tm[1].padStart(5, '0') : '', field: fm ? fm[1] : '', detail: parseDetail(html), at: Date.now() });
   schedules.setOverrides(changes());
+  if (m.ph) {
+    const sch = schedules.forSlug(SLUG, { raw: true });
+    const division = m.code[0] === 'F' ? 'Women' : 'Men';
+    const names = (sch.teams || []).filter((x) => x.division === division).map((x) => x.name);
+    const tt = parseTeams(html, names);
+    if (tt && tt[0] !== tt[1]) { teamsFor[m.code] = tt; schedules.setTeamOverrides(teamsFor); }
+  }
   if (p.result) {
     state.set(m.code, { ...p.result, at: Date.now() });
     if (p.result.status === 'FT') finished.add(m.code);
@@ -135,7 +160,7 @@ async function sweep() {
   sweeping = true;
   try {
     for (const m of matchList()) {
-      if (finished.has(m.code) || m.start > now + 3 * 60 * 60 * 1000) continue; // only games that are due within 3 hours or already past: kind to the organiser's site
+      if (finished.has(m.code) || (m.start > now + 3 * 60 * 60 * 1000 && !(m.ph && m.start < now + 9 * 60 * 60 * 1000))) continue; // only games that are due within 3 hours or already past: kind to the organiser's site
       try { ingest(m, await fetchPage(m.url)); } catch (e) { /* try again next time */ }
       await new Promise((r) => setTimeout(r, 700));
     }
@@ -245,4 +270,4 @@ function detail(code) {
   return m ? { ...m.detail, time: m.time, field: m.field } : null;
 }
 
-module.exports = { start, snapshot, detail, changes, standings, playerStats, meta, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };
+module.exports = { parseTeams, start, snapshot, detail, changes, standings, playerStats, meta, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };

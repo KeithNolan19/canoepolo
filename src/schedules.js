@@ -254,6 +254,10 @@ const SCHEDULES = {
 // The organisers' own system is always right: live.js reports games whose time or pitch differs from this timetable and they are moved here
 let overrides = {};
 function setOverrides(o) { overrides = o || {}; }
+// Team names the organisers' match pages show for knockout games that are still placeholders in our timetable ("1st in Group A", "Winner of M69")
+let teamOv = {};
+function setTeamOverrides(o) { teamOv = o || {}; }
+const isPlaceholder = (n) => /\b(Group|Winner|Loser)\b|\d(st|nd|rd|th) in /.test(n);
 const addMinutes = (hhmm, min) => { const [h, m] = hhmm.split(':').map(Number); const t = h * 60 + m + min; return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`; };
 const toMin = (hhmm) => { const [h, m] = hhmm.split(':').map(Number); return h * 60 + m; };
 
@@ -287,7 +291,9 @@ function forSlug(slug, opts = {}) {
       d.matches.forEach(([start, end, pitch, code, home, away, group]) => {
         let slot = slots.find((x) => x.start === start);
         if (!slot) { slot = { start, end, matches: [] }; slots.push(slot); }
-        slot.matches.push({ pitch, code, home, away, group, division: code[0] === 'F' ? 'Women' : 'Men' });
+        const t = teamOv[code];
+        const fixed = t && (isPlaceholder(home) || isPlaceholder(away));
+        slot.matches.push({ pitch, code, home: fixed ? t[0] : home, away: fixed ? t[1] : away, group, division: code[0] === 'F' ? 'Women' : 'Men', resolved: fixed ? true : undefined, ph: !fixed && (isPlaceholder(home) || isPlaceholder(away)) });
       });
       slots.sort((a, b) => a.start.localeCompare(b.start));
       slots.forEach((x) => x.matches.sort((a, b) => a.pitch - b.pitch));
@@ -318,4 +324,4 @@ function forSlug(slug, opts = {}) {
   };
 }
 
-module.exports = { forSlug, setOverrides };
+module.exports = { forSlug, setOverrides, setTeamOverrides };
