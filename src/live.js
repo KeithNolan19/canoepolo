@@ -55,7 +55,35 @@ function parseTeams(html, names) {
   found.sort((a, b) => a.i - b.i);
   return found.length === 2 ? [found[0].n, found[1].n] : null;
 }
-const teamsFor = {}; // code -> [home, away]
+
+// The placeholder wording our timetable has for a game, and whether a club is a sensible fit for it
+function originalOf(sch, code) {
+  let r = null;
+  sch.days.forEach((d) => d.slots.forEach((sl) => sl.matches.forEach((m) => { if (m.code === code) r = [m.home, m.away]; })));
+  return r;
+}
+function teamsOf(sch, code) {
+  if (teamsFor[code]) return teamsFor[code];
+  const o = originalOf(sch, code);
+  return o && !/\b(Group|Winner|Loser)\b|\d(st|nd|rd|th) in /.test(o.join(' ')) ? o : null; // a group game has real names
+}
+function fits(sch, division, placeholder, team) {
+  let g = /\d(?:st|nd|rd|th) in Group ([A-Z])/.exec(placeholder);
+  if (g) { const list = ((sch.groupsTable || {})[division] || {})[g[1]]; return !!list && list.includes(team); }
+  g = /(Winner|Loser) of (\w+)/.exec(placeholder);
+  if (g) {
+    const pair = teamsOf(sch, g[2]);
+    if (!pair || !pair.includes(team)) return false;
+    const v = state.get(g[2]);
+    if (v && v.status === 'FT' && v.score[0] !== v.score[1]) {
+      const winner = v.score[0] > v.score[1] ? pair[0] : pair[1];
+      return g[1] === 'Winner' ? team === winner : team !== winner;
+    }
+    return true;
+  }
+  return false; // not a placeholder we understand: leave it alone
+}
+const teamsFor = {};
 
 // Everything on the Game Report that we show in the game pop-up: full event list, line-ups, officials, field and round.
 function parseDetail(html) {
@@ -131,11 +159,16 @@ function ingest(m, html) {
   meta.set(m.code, { time: tm ? tm[1].padStart(5, '0') : '', field: fm ? fm[1] : '', detail: parseDetail(html), at: Date.now() });
   schedules.setOverrides(changes());
   if (m.ph) {
+    // Teams are only filled in when the organiser's page names two clubs AND each club fits the placeholder in our timetable
+    // (a club from the right group, or the real winner or loser of the earlier game). Otherwise the placeholder stays.
     const sch = schedules.forSlug(SLUG, { raw: true });
     const division = m.code[0] === 'F' ? 'Women' : 'Men';
     const names = (sch.teams || []).filter((x) => x.division === division).map((x) => x.name);
     const tt = parseTeams(html, names);
-    if (tt && tt[0] !== tt[1]) { teamsFor[m.code] = tt; schedules.setTeamOverrides(teamsFor); }
+    const orig = originalOf(sch, m.code);
+    if (tt && tt[0] !== tt[1] && orig && fits(sch, division, orig[0], tt[0]) && fits(sch, division, orig[1], tt[1])) {
+      teamsFor[m.code] = tt; schedules.setTeamOverrides(teamsFor);
+    }
   }
   if (p.result) {
     state.set(m.code, { ...p.result, at: Date.now() });
@@ -270,4 +303,4 @@ function detail(code) {
   return m ? { ...m.detail, time: m.time, field: m.field } : null;
 }
 
-module.exports = { parseTeams, start, snapshot, detail, changes, standings, playerStats, meta, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };
+module.exports = { parseTeams, ingest, start, snapshot, detail, changes, standings, playerStats, meta, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };
