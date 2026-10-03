@@ -291,9 +291,10 @@ function forSlug(slug, opts = {}) {
       d.matches.forEach(([start, end, pitch, code, home, away, group]) => {
         let slot = slots.find((x) => x.start === start);
         if (!slot) { slot = { start, end, matches: [] }; slots.push(slot); }
-        const t = teamOv[code];
-        const fixed = t && (isPlaceholder(home) || isPlaceholder(away));
-        slot.matches.push({ pitch, code, home: fixed ? t[0] : home, away: fixed ? t[1] : away, group, division: code[0] === 'F' ? 'Women' : 'Men', resolved: fixed ? true : undefined, ph: !fixed && (isPlaceholder(home) || isPlaceholder(away)) });
+        const t = teamOv[code] || [];
+        // each side is filled in on its own, as soon as the organisers' page names a club for it
+        const h2 = t[0] && isPlaceholder(home) ? t[0] : home, a2 = t[1] && isPlaceholder(away) ? t[1] : away;
+        slot.matches.push({ pitch, code, home: h2, away: a2, group, division: code[0] === 'F' ? 'Women' : 'Men', resolved: (h2 !== home || a2 !== away) ? true : undefined, ph: isPlaceholder(h2) || isPlaceholder(a2) });
       });
       slots.sort((a, b) => a.start.localeCompare(b.start));
       slots.forEach((x) => x.matches.sort((a, b) => a.pitch - b.pitch));

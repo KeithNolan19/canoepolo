@@ -49,10 +49,11 @@ function parseTeams(html) {
   return h && a && h !== a ? [h, a] : null;
 }
 const tokens = (n) => String(n).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').split(/[^a-z0-9]+/).filter(Boolean);
-// Our clubs the organiser's spelling could mean: every word of one name appears in the other ("K. Branik" and "Branik", "Corbeil" and "Corbeil-Essenos")
+// Our clubs the organiser's spelling could mean. The organiser shortens names ("MKC Duisb." for Duisburg, "Zürich W"), so a word of 4 or more
+// letters in one name starting the same as a word in the other counts. This is only used on clubs from the right group, and only when exactly one fits.
 function sameClub(org, ours) {
-  const o = tokens(org), u = tokens(ours);
-  return o.length && u.length && (o.every((x) => u.includes(x)) || u.every((x) => o.includes(x)));
+  const o = tokens(org).filter((x) => x.length >= 4), u = tokens(ours).filter((x) => x.length >= 4);
+  return o.some((x) => u.some((y) => y.startsWith(x) || x.startsWith(y)));
 }
 // The placeholder wording our timetable has for a game, and whether a club is a sensible fit for it
 function originalOf(sch, code) {
@@ -61,7 +62,7 @@ function originalOf(sch, code) {
   return r;
 }
 function teamsOf(sch, code) {
-  if (teamsFor[code]) return teamsFor[code];
+  if (teamsFor[code] && teamsFor[code][0] && teamsFor[code][1]) return teamsFor[code];
   const o = originalOf(sch, code);
   return o && !/\b(Group|Winner|Loser)\b|\d(st|nd|rd|th) in /.test(o.join(' ')) ? o : null; // a group game has real names
 }
@@ -168,7 +169,8 @@ function ingest(m, html) {
       // each side must match exactly one of our clubs that also fits the placeholder (right group, or the real winner or loser)
       const pick = (o, ph) => { const c = names.filter((n) => sameClub(o, n) && fits(sch, division, ph, n)); return c.length === 1 ? c[0] : null; };
       const tt = [pick(org[0], orig[0]), pick(org[1], orig[1])];
-      if (tt[0] && tt[1] && tt[0] !== tt[1]) { teamsFor[m.code] = tt; schedules.setTeamOverrides(teamsFor); }
+      if (tt[0] && tt[1] && tt[0] === tt[1]) tt[0] = tt[1] = null;
+      if (tt[0] || tt[1]) { teamsFor[m.code] = tt; schedules.setTeamOverrides(teamsFor); } // either side can be known before the other
     }
   }
   if (p.result) {
