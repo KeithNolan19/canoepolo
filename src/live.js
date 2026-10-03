@@ -6,13 +6,27 @@ const db = require('./db');
 
 // A permanent record of every change the live reader makes to what the site shows (scores, times, pitches, teams, officials, cards, outages).
 db.exec(`CREATE TABLE IF NOT EXISTS live_log (id INTEGER PRIMARY KEY AUTOINCREMENT, at INTEGER NOT NULL, code TEXT NOT NULL DEFAULT '', kind TEXT NOT NULL, detail TEXT NOT NULL)`);
-const insLog = db.prepare('INSERT INTO live_log (at, code, kind, detail) VALUES (?, ?, ?, ?)');
+try { db.exec("ALTER TABLE live_log ADD COLUMN comp TEXT NOT NULL DEFAULT ''"); } catch (e) { /* already there */ }
+try { db.exec("ALTER TABLE live_log ADD COLUMN source TEXT NOT NULL DEFAULT ''"); } catch (e) { /* already there */ }
+const insLog = db.prepare('INSERT INTO live_log (at, code, kind, detail, comp, source) VALUES (?, ?, ?, ?, ?, ?)');
 const lastLog = db.prepare('SELECT detail FROM live_log WHERE code = ? AND kind = ? ORDER BY id DESC LIMIT 1');
+// Which competition an entry belongs to, and where the information came from. Only what we really know: the game code says Men or Women, the match page has the organiser's N°.
+function compFor(code) {
+  const c = String(code || '').charAt(0);
+  return 'ECC 2026' + (c === 'M' ? ' (Men)' : c === 'F' ? ' (Women)' : '');
+}
+function sourceFor(code, kind) {
+  if (!code) return 'Organiser website (' + (kind === 'Full read' ? 'full read' : 'availability check') + ')';
+  let n = '';
+  const sch = schedules.forSlug(SLUG);
+  if (sch && !sch.hidden) sch.days.forEach((d) => d.slots.forEach((sl) => sl.matches.forEach((m) => { if (m.code === code && m.liveId) n = m.liveId; })));
+  return 'Organiser match page' + (n ? ' N° ' + n : '') + ' (live reader)';
+}
 function logChange(code, kind, detail) {
   try {
     detail = String(detail).slice(0, 400);
     if (code && (lastLog.get(code, kind) || {}).detail === detail) return; // the same thing seen again after a restart
-    insLog.run(Date.now(), code || '', kind, detail);
+    insLog.run(Date.now(), code || '', kind, detail, compFor(code), sourceFor(code, kind));
   } catch (e) { /* the log must never break the reader */ }
 }
 function readLog(limit, kind) {

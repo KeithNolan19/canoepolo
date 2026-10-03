@@ -5,7 +5,7 @@
 <div class="admin-head">
   <h1>Live changes log</h1>
 </div>
-<p class="small-note">Every change the site has made from the organiser's pages: scores, full times, corrections, moved times and pitches, teams filled in, referees, cards, mismatched goal lists and outages. Newest first, times in Dublin time. The latest 500 are shown. This log is kept after a restart.</p>
+<p class="small-note">Every change the site has made from the organiser's pages: scores, full times, corrections, moved times and pitches, teams filled in, referees, cards, mismatched goal lists and outages. Each entry says which competition it is for and where the information came from (older entries show a default). Newest first, times in Dublin time. The latest 500 are shown. This log is kept after a restart.</p>
 
 <p>
   <a class="btn small<%= kind ? '' : ' primary' %>" href="/admin/live-log">All</a>
@@ -14,12 +14,12 @@
 
 <div class="table-wrap">
 <table class="admin-table">
-  <thead><tr><th>When</th><th>What</th><th>Detail</th></tr></thead>
+  <thead><tr><th>When</th><th>Competition</th><th>What</th><th>Detail</th><th>Source</th></tr></thead>
   <tbody>
   <% rows.forEach(function (r) { %>
-    <tr><td class="nowrap"><%= new Date(r.at).toLocaleString('en-GB', { timeZone: 'Europe/Dublin', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit' }) %></td><td><strong><%= r.kind %></strong></td><td class="wrap-any"><%= r.detail %></td></tr>
+    <tr><td class="nowrap"><%= new Date(r.at).toLocaleString('en-GB', { timeZone: 'Europe/Dublin', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit' }) %></td><td><%= r.comp || 'ECC 2026' %></td><td><strong><%= r.kind %></strong></td><td class="wrap-any"><%= r.detail %></td><td class="wrap-any"><%= r.source || 'Organiser website' %></td></tr>
   <% }) %>
-  <% if (!rows.length) { %><tr><td class="muted" colspan="3">Nothing logged yet. Entries appear as the live reader sees changes.</td></tr><% } %>
+  <% if (!rows.length) { %><tr><td class="muted" colspan="5">Nothing logged yet. Entries appear as the live reader sees changes.</td></tr><% } %>
   </tbody>
 </table>
 </div>
