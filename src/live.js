@@ -370,6 +370,11 @@ function start() {
   const sw = setInterval(() => { sweep().catch(() => {}); }, 10 * 60 * 1000);
   sw.unref();
   setTimeout(() => { sweep().catch(() => {}); }, 20000).unref();
+  // During the tournament the whole timetable is also read once shortly after each start and then hourly, so the admin check is always filled in
+  const inWindow = () => Date.now() >= Date.parse('2026-10-02T05:00:00+02:00') && Date.now() <= Date.parse('2026-10-05T00:00:00+02:00');
+  setTimeout(() => { if (inWindow()) readAll(); }, 90 * 1000).unref();
+  const full = setInterval(() => { if (inWindow()) readAll(); }, 60 * 60 * 1000);
+  full.unref();
   tick().catch(() => {});
 }
 
