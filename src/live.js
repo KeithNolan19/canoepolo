@@ -280,6 +280,7 @@ async function tick() {
 
 // Every 10 minutes during the tournament: look at games not played yet, so a change of time, pitch or referee shows up
 let sweeping = false;
+const farRead = new Map(); // code -> when a game that is still waiting for its teams was last read ahead of time
 async function sweep() {
   const now = Date.now();
   if (sweeping || now < Date.parse('2026-10-02T05:00:00+02:00') || now > Date.parse('2026-10-05T00:00:00+02:00')) return;
@@ -294,7 +295,12 @@ async function sweep() {
         await new Promise((r) => setTimeout(r, 700));
         continue;
       }
-      if (finished.has(m.code) || (m.start > now + 3 * 60 * 60 * 1000 && !(m.ph && m.start < now + 9 * 60 * 60 * 1000))) continue; // only games that are due within 3 hours or already past: kind to the organiser's site
+      // Only games due within 3 hours or already past are read every time: kind to the organiser's site.
+      // Games still waiting for their teams are read from 9 hours ahead every time, and from 36 hours ahead every 25 minutes, so a name the organiser adds the evening before shows up the same evening.
+      const near = m.start <= now + 3 * 60 * 60 * 1000 || (m.ph && m.start < now + 9 * 60 * 60 * 1000);
+      const far = !near && m.ph && m.start < now + 36 * 60 * 60 * 1000 && now - (farRead.get(m.code) || 0) > 25 * 60 * 1000;
+      if (finished.has(m.code) || (!near && !far)) continue;
+      if (far) farRead.set(m.code, now);
       try { ingest(m, await fetchPage(m.url)); } catch (e) { /* try again next time */ }
       await new Promise((r) => setTimeout(r, 700));
     }
