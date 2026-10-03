@@ -1,0 +1,27 @@
+<%- include('../partials/header') %>
+
+<%- include('tabs', { tab: 'livelog' }) %>
+
+<div class="admin-head">
+  <h1>Live changes log</h1>
+</div>
+<p class="small-note">Every change the site has made from the organiser's pages: scores, full times, corrections, moved times and pitches, teams filled in, referees, cards, mismatched goal lists and outages. Newest first, times in Dublin time. The latest 500 are shown. This log is kept after a restart.</p>
+
+<p>
+  <a class="btn small<%= kind ? '' : ' primary' %>" href="/admin/live-log">All</a>
+  <% kinds.forEach(function (k) { %><a class="btn small<%= kind === k.kind ? ' primary' : '' %>" href="/admin/live-log?kind=<%= encodeURIComponent(k.kind) %>"><%= k.kind %> (<%= k.n %>)</a> <% }) %>
+</p>
+
+<div class="table-wrap">
+<table class="admin-table">
+  <thead><tr><th>When</th><th>What</th><th>Detail</th></tr></thead>
+  <tbody>
+  <% rows.forEach(function (r) { %>
+    <tr><td class="nowrap"><%= new Date(r.at).toLocaleString('en-GB', { timeZone: 'Europe/Dublin', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit' }) %></td><td><strong><%= r.kind %></strong></td><td class="wrap-any"><%= r.detail %></td></tr>
+  <% }) %>
+  <% if (!rows.length) { %><tr><td class="muted" colspan="3">Nothing logged yet. Entries appear as the live reader sees changes.</td></tr><% } %>
+  </tbody>
+</table>
+</div>
+
+<%- include('../partials/footer') %>

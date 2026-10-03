@@ -655,6 +655,11 @@ app.get('/admin/live-verify', requireAdmin, (req, res) => {
   const { lines, stats, po, unmatched, map } = live.verify();
   res.type('text/plain').send(prog + `Games with an organiser link: ${stats.listed}\nRead so far: ${stats.read} (not read yet: ${stats.notRead})\nMatching our timetable: ${stats.ok}\nDifferent: ${stats.bad}\n\n` + (lines.length ? lines.join('\n') : 'No differences in the games read so far.') + '\n\nPLAY-OFF GAMES (organiser page v what we show):\n' + (po.length ? po.join('\n') : 'none read yet') + '\n\nPROBLEMS WITH PLAY-OFF NAMES:\n' + (unmatched.length ? unmatched.join('\n') : 'none') + '\n\nCLUB NAME CHECK (organiser spelling -> our club):\n' + (map.length ? map.join('\n') : 'no names read yet') + '\n\nGames not read yet are checked automatically when they are due. Placeholder knockout games are checked for time and pitch only.');
 });
+// Admin: everything the live reader has changed on the site, newest first
+app.get('/admin/live-log', requireAdmin, (req, res) => {
+  const kind = typeof req.query.kind === 'string' ? req.query.kind.slice(0, 40) : '';
+  res.render('admin/live-log', { title: 'Live changes log', rows: live.readLog(500, kind), kinds: live.logKinds(), kind });
+});
 app.get('/admin/stats', requireAdmin, (req, res) => {
   const days = [7, 30, 90, 365].includes(Number(req.query.days)) ? Number(req.query.days) : 30;
   const r = stats.report(days);

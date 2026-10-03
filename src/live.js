@@ -2,6 +2,23 @@
 // Polite by design: nothing is fetched before a match is due, finished matches are never fetched again,
 // and visitors only ever read our in-memory copy, so traffic to their site does not grow with our visitors.
 const schedules = require('./schedules');
+const db = require('./db');
+
+// A permanent record of every change the live reader makes to what the site shows (scores, times, pitches, teams, officials, cards, outages).
+db.exec(`CREATE TABLE IF NOT EXISTS live_log (id INTEGER PRIMARY KEY AUTOINCREMENT, at INTEGER NOT NULL, code TEXT NOT NULL DEFAULT '', kind TEXT NOT NULL, detail TEXT NOT NULL)`);
+const insLog = db.prepare('INSERT INTO live_log (at, code, kind, detail) VALUES (?, ?, ?, ?)');
+const lastLog = db.prepare('SELECT detail FROM live_log WHERE code = ? AND kind = ? ORDER BY id DESC LIMIT 1');
+function logChange(code, kind, detail) {
+  try {
+    detail = String(detail).slice(0, 400);
+    if (code && (lastLog.get(code, kind) || {}).detail === detail) return; // the same thing seen again after a restart
+    insLog.run(Date.now(), code || '', kind, detail);
+  } catch (e) { /* the log must never break the reader */ }
+}
+function readLog(limit, kind) {
+  return kind ? db.prepare('SELECT * FROM live_log WHERE kind = ? ORDER BY id DESC LIMIT ?').all(kind, limit) : db.prepare('SELECT * FROM live_log ORDER BY id DESC LIMIT ?').all(limit);
+}
+const logKinds = () => db.prepare('SELECT kind, COUNT(*) n FROM live_log GROUP BY kind ORDER BY n DESC').all();
 
 const SLUG = 'paddle-europe-canoe-polo-club-championships-2026';
 const UA = 'canoepolo.eu live scores (volunteer site, used with the ECC organisers permission)';
@@ -137,10 +154,12 @@ async function fetchPage(url) {
   try {
     const r = await fetch(url, { headers: { 'User-Agent': UA, Accept: 'text/html' }, signal: AbortSignal.timeout(8000) });
     if (!r.ok) throw new Error('HTTP ' + r.status);
+    if (failStreak > 0) logChange('', 'Organiser site', 'The organiser\'s site is answering again');
     failStreak = 0;
     return r.text();
   } catch (e) {
     failStreak++;
+    if (failStreak === 1 || failStreak === 2) logChange('', 'Organiser site', `The organiser's site did not answer properly (${String(e.message).slice(0, 80)}). Waiting ${failStreak * 10} minutes before asking again`);
     pausedUntil = Date.now() + Math.min(failStreak, 2) * 10 * 60 * 1000;
     throw e;
   }
@@ -162,12 +181,29 @@ function due(m, now) {
   return !finished.has(m.code) && now >= m.start - 10 * 60 * 1000 && now <= m.start + 4 * 60 * 60 * 1000;
 }
 
+function gameLabel(code) {
+  const sch = schedules.forSlug(SLUG);
+  let r = code;
+  if (sch && !sch.hidden) sch.days.forEach((d) => d.slots.forEach((sl) => sl.matches.forEach((m) => { if (m.code === code) r = `${code} ${m.home} v ${m.away}`; })));
+  return r;
+}
+
 // Reads a page and remembers both the live score (if any) and the game details
 function ingest(m, html) {
   const p = parse(html);
   const t = textOf(html);
   const tm = /TIME\s+(\d{1,2}:\d{2})/i.exec(t), fm = /FIELD\s+(\S+)/i.exec(t);
-  meta.set(m.code, { time: tm ? tm[1].padStart(5, '0') : '', field: fm ? fm[1] : '', detail: parseDetail(html), org: parseTeams(html), at: Date.now() });
+  const prevMeta = meta.get(m.code), prevState = state.get(m.code);
+  const newMeta = { time: tm ? tm[1].padStart(5, '0') : '', field: fm ? fm[1] : '', detail: parseDetail(html), org: parseTeams(html), at: Date.now() };
+  // time and pitch: compared with the last read, or with our timetable the first time
+  const wasTime = prevMeta ? prevMeta.time : m.time.padStart(5, '0'), wasField = prevMeta ? prevMeta.field : String(m.pitch);
+  if (newMeta.time && wasTime && newMeta.time !== wasTime) logChange(m.code, 'Time moved', `${gameLabel(m.code)}: organiser time ${wasTime} to ${newMeta.time}${prevMeta ? '' : ' (our timetable said ' + m.time + ')'}`);
+  if (newMeta.field && wasField && newMeta.field !== wasField) logChange(m.code, 'Pitch moved', `${gameLabel(m.code)}: organiser pitch ${wasField} to ${newMeta.field}${prevMeta ? '' : ' (our timetable said ' + m.pitch + ')'}`);
+  // officials
+  const offs = (x) => x && x.officials ? [x.officials.referee1, x.officials.referee2, x.officials.scorer, x.officials.timekeeper].map((v) => v || '-').join(' / ') : '';
+  const o1 = offs(newMeta.detail), o0 = prevMeta ? offs(prevMeta.detail) : '';
+  if (o1 && o1 !== o0 && /[A-Za-z]/.test(o1.replace(/C\.o\./g, ''))) logChange(m.code, 'Officials', `${gameLabel(m.code)}: referees / scorer / timekeeper now ${o1}${o0 ? ' (was ' + o0 + ')' : ''}`);
+  meta.set(m.code, newMeta);
   schedules.setOverrides(changes());
   if (m.ph) {
     // Teams are only filled in when the organiser's page names two clubs AND each club fits the placeholder in our timetable
@@ -182,10 +218,23 @@ function ingest(m, html) {
       const pick = (o, ph) => { const c = names.filter((n) => sameClub(o, n) && fits(sch, division, ph, n)); return c.length === 1 ? c[0] : null; };
       const tt = [pick(org[0], orig[0]), pick(org[1], orig[1])];
       if (tt[0] && tt[1] && tt[0] === tt[1]) tt[0] = tt[1] = null;
-      if (tt[0] || tt[1]) { teamsFor[m.code] = tt; schedules.setTeamOverrides(teamsFor); } // either side can be known before the other
+      if (tt[0] || tt[1]) {
+        const before = teamsFor[m.code] || [];
+        if (before[0] !== tt[0] || before[1] !== tt[1]) logChange(m.code, 'Teams filled in', `${m.code}: organiser page names ${tt[0] || '(not yet)'} v ${tt[1] || '(not yet)'}${before.length ? ' (was ' + (before[0] || '-') + ' v ' + (before[1] || '-') + ')' : ''}`);
+        teamsFor[m.code] = tt; schedules.setTeamOverrides(teamsFor);
+      } // either side can be known before the other
     }
   }
   if (p.result) {
+    const r = p.result, pr = prevState;
+    const sc = (x) => `${x.score[0]}-${x.score[1]}`;
+    if (!pr) logChange(m.code, r.status === 'FT' ? 'Full time' : 'Game started', `${gameLabel(m.code)}: ${sc(r)}${r.status === 'FT' ? ' full time' : ' live'}`);
+    else if (r.status === 'FT' && pr.status !== 'FT') logChange(m.code, 'Full time', `${gameLabel(m.code)}: ${sc(r)} full time`);
+    else if (sc(r) !== sc(pr)) logChange(m.code, pr.status === 'FT' ? 'Result corrected' : 'Score', `${gameLabel(m.code)}: ${sc(pr)} to ${sc(r)}${r.status === 'FT' ? ' (full time)' : ''}`);
+    const oldCards = pr && pr.cards ? pr.cards.length : 0;
+    (r.cards || []).slice(oldCards).forEach((c) => logChange(m.code, 'Card', `${gameLabel(m.code)}: ${c.card} card, ${c.player}, minute ${c.minute}`));
+    const bad = (x) => (x && x.goals ? x.goals.filter((g) => g.u).length : 0);
+    if (bad(r) && !bad(pr)) logChange(m.code, 'Goal list mismatch', `${gameLabel(m.code)}: the organiser's goal list does not add up to the score for one side, so those scorers are not counted`);
     state.set(m.code, { ...p.result, at: Date.now() });
     if (p.result.status === 'FT') { finished.add(m.code); if (!ftAt.has(m.code)) ftAt.set(m.code, { t: Date.now(), n: 0 }); }
   }
@@ -296,6 +345,7 @@ function readAll() {
   if (verifying && !verifying.done) return verifying;
   const list = matchList().filter((m) => !meta.has(m.code) || Date.now() - meta.get(m.code).at > 5 * 60 * 1000);
   verifying = { total: list.length, n: 0, failed: 0, done: false, startedAt: Date.now() };
+  logChange('', 'Full read', `Reading all games from the organiser's pages (${list.length} games)`);
   (async () => {
     for (const m of list) {
       try { ingest(m, await fetchPage(m.url)); } catch (e) { verifying.failed++; }
@@ -303,6 +353,7 @@ function readAll() {
       await new Promise((r) => setTimeout(r, 700));
     }
     verifying.done = true;
+    logChange('', 'Full read', `Full read finished: ${verifying.n} read, ${verifying.failed} failed`);
   })();
   return verifying;
 }
@@ -409,4 +460,4 @@ function detail(code) {
   return m ? { ...m.detail, time: m.time, field: m.field } : null;
 }
 
-module.exports = { health, paused, readAll, readAllStatus, verify, parseTeams, ingest, start, snapshot, detail, changes, standings, playerStats, meta, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };
+module.exports = { readLog, logKinds, logChange, health, paused, readAll, readAllStatus, verify, parseTeams, ingest, start, snapshot, detail, changes, standings, playerStats, meta, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };
