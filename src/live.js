@@ -22,11 +22,11 @@ function sourceFor(code, kind) {
   if (sch && !sch.hidden) sch.days.forEach((d) => d.slots.forEach((sl) => sl.matches.forEach((m) => { if (m.code === code && m.liveId) n = m.liveId; })));
   return 'Organiser match page' + (n ? ' N° ' + n : '') + ' (live reader)';
 }
-function logChange(code, kind, detail) {
+function logChange(code, kind, detail, extra) {
   try {
     detail = String(detail).slice(0, 400);
     if (code && (lastLog.get(code, kind) || {}).detail === detail) return; // the same thing seen again after a restart
-    insLog.run(Date.now(), code || '', kind, detail, compFor(code), sourceFor(code, kind));
+    insLog.run(Date.now(), code || '', kind, detail, (extra && extra.comp) || compFor(code), (extra && extra.source) || sourceFor(code, kind));
   } catch (e) { /* the log must never break the reader */ }
 }
 function readLog(limit, kind) {

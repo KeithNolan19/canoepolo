@@ -368,6 +368,7 @@ app.get('/rules', (req, res) => res.render('rules', { title: 'Canoe polo rules',
 
 // ---------- Public JSON API (for apps, club sites, etc.) ----------
 const live = require('./live');
+const kayakers = require('./kayakers');
 app.use((req, res, next) => { const m = require('./sms'); res.locals.smsOpen = m.available() && !m.full(); next(); }); // shows the text-updates buttons only when switched on
 // "Support your club" for the ECC: pick a country, then see its teams, games, live scores, scorers and duties
 const ECC_SLUG = 'paddle-europe-canoe-polo-club-championships-2026';
@@ -636,7 +637,7 @@ app.get('/admin/kayakers-check', requireAdmin, async (req, res) => {
   const path = String(req.query.path || '/View/20pylkwier26');
   if (!/^\/[A-Za-z0-9_\-\/.?=&%]{0,200}$/.test(path) || path.startsWith('//')) return res.type('text/plain').send('Path must start with / and use plain characters.');
   try {
-    const r = await fetch('https://cpt.kayakers.nl' + path, { headers: { 'User-Agent': 'canoepolo.eu (volunteer site, used with the Kayakers.nl maintainer\'s permission; keith.nolan19@outlook.com)', Accept: '*/*' }, signal: AbortSignal.timeout(10000) });
+    const r = await fetch('https://cpt.kayakers.nl' + path, { headers: { 'User-Agent': 'canoepolo.eu (volunteer site; reads Kayakers.nl with the maintainer\'s permission; https://canoepolo.eu)', Accept: '*/*' }, signal: AbortSignal.timeout(10000) });
     const body = await r.text();
     const type = r.headers.get('content-type') || '';
     let out = `GET ${path}\nstatus ${r.status}, ${type}, ${body.length} characters\n\n`;
@@ -655,6 +656,10 @@ app.get('/admin/kayakers-check', requireAdmin, async (req, res) => {
     res.type('text/plain').send(out);
   } catch (e) { res.type('text/plain').send(`Could not read it: ${e.message}`); }
 });
+// Other tournaments on today, read from Kayakers.nl (with the maintainer's permission)
+app.get('/other-events', (req, res) => res.render('other-events', { title: 'Other tournaments today', events: kayakers.view(), on: kayakers.enabled() }));
+app.get('/admin/kayakers', requireAdmin, (req, res) => res.render('admin/kayakers', { title: 'Kayakers.nl', h: kayakers.health(), msg: String(req.query.msg || '').slice(0, 120) }));
+app.post('/admin/kayakers/toggle', requireAdmin, checkCsrf, (req, res) => { kayakers.setEnabled(req.body.on === '1'); res.redirect('/admin/kayakers?msg=' + encodeURIComponent(req.body.on === '1' ? 'Switched on' : 'Switched off')); });
 // Admin check of the live-score reader: /admin/live-check?id=1 shows what the server reads from the official match page
 app.get('/admin/live-check', requireAdmin, async (req, res) => {
   const id = Number(req.query.id) || 1;
@@ -801,6 +806,6 @@ app.use((err, req, res, next) => {
 });
 
 if (require.main === module) {
-  app.listen(PORT, () => { console.log(`canoepolo.eu running on ${BASE_URL} (port ${PORT})`); live.start(); sms.startTimer(); sms.cleanup(); });
+  app.listen(PORT, () => { console.log(`canoepolo.eu running on ${BASE_URL} (port ${PORT})`); live.start(); kayakers.start(); sms.startTimer(); sms.cleanup(); });
 }
 module.exports = app;

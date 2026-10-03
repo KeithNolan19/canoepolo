@@ -1,0 +1,25 @@
+<%- include('../partials/header') %>
+
+<%- include('tabs', { tab: 'kayakers' }) %>
+
+<div class="admin-head">
+  <h1>Kayakers.nl reader</h1>
+</div>
+<% if (msg) { %><p class="notice"><%= msg %></p><% } %>
+<p class="small-note">Reads other tournaments that are on today from Kayakers.nl, with the maintainer's permission. Only games are kept (teams, times, pitches, scores). Every change is added to <a href="/admin/live-log">Live changes</a> with the tournament and the source. The public page is <a href="/other-events">/other-events</a>.</p>
+
+<form method="post" action="/admin/kayakers/toggle" class="quiz-join">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <input type="hidden" name="on" value="<%= h.on ? '0' : '1' %>">
+  <p><strong>Status: <%= h.on ? 'ON' : 'OFF' %></strong> <button type="submit" class="btn small<%= h.on ? '' : ' primary' %>"><%= h.on ? 'Switch off' : 'Switch on' %></button></p>
+</form>
+
+<ul>
+  <li>Games stored: <%= h.games %>. Reads done since the last restart: <%= h.reads %>.</li>
+  <li>Last good answer from Kayakers.nl: <%= h.lastOk ? new Date(h.lastOk).toLocaleString('en-GB', { timeZone: 'Europe/Dublin' }) : 'none yet' %>.</li>
+  <li><% if (h.fail) { %>Their site is not answering properly (<%= h.lastError %>). Paused until <%= new Date(h.pausedUntil).toLocaleTimeString('en-GB', { timeZone: 'Europe/Dublin' }) %>.<% } else { %>No problems.<% } %></li>
+  <li>Tournaments being followed now: <%= h.events.length ? h.events.map(function (e) { return e.name + ' (' + e.when + ')'; }).join('; ') : 'none yet. The list is read about 20 seconds after the site starts, then every 6 hours.' %></li>
+</ul>
+<p class="small-note">Today's tournaments are read every 3 minutes, yesterday's every 30 minutes, with a pause between requests. To switch off for good, set KAYAKERS=off on the server.</p>
+
+<%- include('../partials/footer') %>

@@ -969,3 +969,13 @@ h1, h2, h3, .event-name, .event-where, .event-extra { overflow-wrap: anywhere; }
   .tb-actions { margin-left: 0; }
   .tb-actions .btn { flex: 1; min-height: 44px; white-space: nowrap; padding-left: 8px; padding-right: 8px; }
 }
+
+/* Other tournaments today (from Kayakers.nl) */
+.oe-event { margin: 0 0 28px; }
+.oe-games { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.oe-game { display: grid; grid-template-columns: 74px 1fr auto; gap: 12px; align-items: center; padding: 10px 14px; background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); }
+.oe-game small { display: block; font-size: .78rem; color: var(--muted); font-weight: 400; }
+.oe-when { font-weight: 700; }
+.oe-teams em { font-style: normal; color: var(--muted); margin: 0 4px; }
+.oe-score { font-weight: 800; font-size: 1.15rem; text-align: right; white-space: nowrap; }
+@media (max-width: 480px) { .oe-game { grid-template-columns: 58px 1fr auto; gap: 8px; padding: 10px; } }
