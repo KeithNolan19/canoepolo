@@ -202,6 +202,7 @@ const SCHEDULES = {
       {
         date: '2026-10-04',
         label: 'Sunday 4 October',
+        liveFirstId: 129, // checked against the organiser's Sunday list: N° 129 Rovigo v Zürich W (07:30 pitch 1, F46), 130 Pt Ouilly v Kingston (pitch 2, F47), 131 Avranches W v Ichnusa (pitch 3, F48). Later numbers follow timetable order and are checked by /admin/live-verify
         pdf: '/docs/milan-ecc-2026-schedule-update-1-oct.pdf',
         matches: [
           ["07:30", "08:05", 1, "F46", "5th in Group D", "6th in Group D", "Places 5-6, 1st leg"],
