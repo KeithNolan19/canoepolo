@@ -15,11 +15,33 @@ CREATE TABLE IF NOT EXISTS stats_exits (day TEXT NOT NULL, path TEXT NOT NULL, n
 CREATE TABLE IF NOT EXISTS stats_visits (day TEXT NOT NULL, bucket TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, pages INTEGER NOT NULL DEFAULT 0, secs INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, bucket));
 CREATE TABLE IF NOT EXISTS stats_downloads (day TEXT NOT NULL, kind TEXT NOT NULL, name TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, kind, name));
 CREATE TABLE IF NOT EXISTS stats_events (day TEXT NOT NULL, event TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, event));
+CREATE TABLE IF NOT EXISTS stats_dims (day TEXT NOT NULL, dim TEXT NOT NULL, val TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, dim, val));
+CREATE TABLE IF NOT EXISTS stats_perf (day TEXT NOT NULL, path TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, ms INTEGER NOT NULL DEFAULT 0, max_ms INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, path));
 CREATE TABLE IF NOT EXISTS stats_clicks (day TEXT NOT NULL, target TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, target));
 `);
 
 const BOT = /bot|crawl|spider|slurp|curl|wget|python|java|go-http|headless|preview|monitor|uptime|facebookexternalhit|lighthouse/i;
 const MAX_PER_DAY = 1500; // safety cap on distinct paths / targets per day
+
+
+// Coarse, anonymous categories worked out from request headers. The raw browser string itself is never saved.
+const upDim = db.prepare(`INSERT INTO stats_dims (day, dim, val, n) VALUES (?, ?, ?, 1) ON CONFLICT(day, dim, val) DO UPDATE SET n = n + 1`);
+const cntDim = db.prepare('SELECT COUNT(*) c FROM stats_dims WHERE day = ? AND dim = ?');
+const hasDim = db.prepare('SELECT 1 FROM stats_dims WHERE day = ? AND dim = ? AND val = ?');
+const upPerf = db.prepare(`INSERT INTO stats_perf (day, path, n, ms, max_ms) VALUES (?, ?, 1, ?, ?) ON CONFLICT(day, path) DO UPDATE SET n = n + 1, ms = ms + excluded.ms, max_ms = MAX(max_ms, excluded.max_ms)`);
+const cntPerf = db.prepare('SELECT COUNT(*) c FROM stats_perf WHERE day = ?');
+function dim(day, d, v, cap) {
+  v = String(v || '').slice(0, 80);
+  if (!v) return;
+  if (cap && !hasDim.get(day, d, v) && cntDim.get(day, d).c >= cap) return;
+  upDim.run(day, d, v);
+}
+const deviceOf = (ua) => (/iPad|Tablet|Android(?!.*Mobile)/i.test(ua) ? 'Tablet' : /Mobi|iPhone|iPod|Android/i.test(ua) ? 'Phone' : 'Computer');
+const browserOf = (ua) => (/FBAN|FBAV/.test(ua) ? 'Facebook app' : /Instagram/.test(ua) ? 'Instagram app' : /Edg\//.test(ua) ? 'Edge' : /OPR\/|Opera/.test(ua) ? 'Opera' : /SamsungBrowser/.test(ua) ? 'Samsung Internet' : /Firefox\/|FxiOS/.test(ua) ? 'Firefox' : /Chrome\/|CriOS/.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : 'Other');
+const osOf = (ua) => (/iPhone|iPad|iPod/.test(ua) ? 'iOS' : /Android/.test(ua) ? 'Android' : /Windows/.test(ua) ? 'Windows' : /Mac OS X|Macintosh/.test(ua) ? 'macOS' : /CrOS/.test(ua) ? 'ChromeOS' : /Linux/.test(ua) ? 'Linux' : 'Other');
+const hourFmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Rome', hour: '2-digit', hourCycle: 'h23' });
+const sourceOf = (ref) => (ref === 'Direct / unknown' ? 'Direct or unknown' : /(^|\.)(google|bing|duckduckgo|yahoo|ecosia|qwant|brave|startpage|yandex)\./i.test(ref) ? 'Search engine' : /(facebook|fb|instagram|whatsapp|t\.co|twitter|x\.com|linkedin|reddit|tiktok|youtube|youtu\.be|telegram|threads)/i.test(ref) ? 'Social or messaging' : 'Other website');
+const BLOCKED_TOOL = /(GPTBot|ChatGPT|ClaudeBot|Claude-Web|anthropic|CCBot|PerplexityBot|Bytespider|Amazonbot|Google-Extended|meta-externalagent|Applebot-Extended|curl|wget|python|scrapy|httpx|axios|node-fetch|go-http|java|okhttp|libwww|HeadlessChrome|Playwright|Puppeteer|Selenium)/i;
 
 let curDay = '';
 let salt = '';
@@ -88,7 +110,8 @@ function downloadOf(req) {
 const upDownload = db.prepare(`INSERT INTO stats_downloads (day, kind, name, n) VALUES (?, ?, ?, 1) ON CONFLICT(day, kind, name) DO UPDATE SET n = n + 1`);
 const cntDownloads = db.prepare('SELECT COUNT(*) c FROM stats_downloads WHERE day = ?');
 const upEvent = db.prepare(`INSERT INTO stats_events (day, event, n) VALUES (?, ?, 1) ON CONFLICT(day, event) DO UPDATE SET n = n + 1`);
-const EVENTS = /^(quiz-q([1-9]|10)|quiz-done|sched-team)$/;
+const EVENTS = /^(quiz-q([1-9]|10)|quiz-done|sched-team|tx-(play|share|png|undo|flip|addstep)|tx-(preset|def|atk):[a-z0-9]{2,12}|game-open:[FM]\d{1,3}|sched-filter:[a-z]{1,10}|vp:[a-z0-9-]{2,10}|sms-form-start|sms-search|stat-team:[A-Za-z0-9\u00C0-\u024F' .\-]{2,30})$/;
+const cntEvents = db.prepare('SELECT COUNT(*) c FROM stats_events WHERE day = ?');
 
 const upDay = db.prepare(`INSERT INTO stats_days (day, views, visitors) VALUES (?, 1, ?) ON CONFLICT(day) DO UPDATE SET views = views + 1, visitors = visitors + excluded.visitors`);
 const upPage = db.prepare(`INSERT INTO stats_pages (day, path, n) VALUES (?, ?, 1) ON CONFLICT(day, path) DO UPDATE SET n = n + 1`);
@@ -114,8 +137,21 @@ function refHost(req) {
 
 function middleware(req, res, next) {
   if (req.method !== 'GET' || req.path.startsWith('/admin') || req.path.startsWith('/_')) return next();
+  const t0 = process.hrtime.bigint();
   res.on('finish', () => {
     try {
+      const ms = Number((process.hrtime.bigint() - t0) / 1000000n);
+      const ua1 = req.get('user-agent') || '';
+      const isHtml = /text\/html/.test(req.get('accept') || '') || String(res.get('content-type') || '').includes('text/html');
+      if (res.statusCode === 403 && !req.path.startsWith('/api')) { // the scraper block: count what kind of tool was turned away (the tool's own name only)
+        const m = BLOCKED_TOOL.exec(ua1);
+        dim(roll(), 'blocked', m ? m[1] : (ua1 ? 'Other tool' : 'No browser name'), 60);
+        return;
+      }
+      if (isHtml && !optedOut(req) && ua1 && !BOT.test(ua1)) {
+        if (res.statusCode === 404) { dim(roll(), 'notfound', req.path.slice(0, 100), 150); return; }
+        if (res.statusCode >= 500) { dim(roll(), 'error', req.path.slice(0, 100), 100); return; }
+      }
       const dl = downloadOf(req);
       const ok = res.statusCode === 200 || (res.statusCode === 206 && /^bytes=0-/.test(req.get('range') || ''));
       if (dl) {
@@ -145,6 +181,20 @@ function middleware(req, res, next) {
         if (cntPages.get(day).c < MAX_PER_DAY) upPage.run(day, p);
         const ref = refHost(req);
         if (ref) upRef.run(day, ref);
+        if (cntPerf.get(day).c < MAX_PER_DAY) upPerf.run(day, p, ms, ms);
+        // Everything below is a coarse category only; the browser string itself is not kept
+        dim(day, 'hour', hourFmt.format(new Date()), 24);
+        if (fresh) {
+          dim(day, 'device', deviceOf(ua), 5);
+          dim(day, 'browser', browserOf(ua), 12);
+          dim(day, 'os', osOf(ua), 10);
+          const lang = String(req.get('accept-language') || '').split(',')[0].trim().toLowerCase().slice(0, 8);
+          if (lang) dim(day, 'lang', lang, 60);
+          dim(day, 'source', sourceOf(ref || 'Direct / unknown'), 6);
+          const u = req.query || {};
+          const camp = [u.utm_source, u.utm_medium, u.utm_campaign].filter((x) => typeof x === 'string' && x).map((x) => x.slice(0, 30).replace(/[^\w .\-]/g, '')).join(' / ');
+          if (camp) dim(day, 'campaign', camp, 40);
+        }
       })();
     } catch (e) { /* statistics must never break the site */ }
   });
@@ -161,7 +211,7 @@ function clickHandler(req, res) {
     let t = String(req.body.t || '').slice(0, 300);
     if (t.startsWith('event:')) {
       const ev = t.slice(6);
-      if (EVENTS.test(ev)) upEvent.run(roll(), ev);
+      if (EVENTS.test(ev)) { const d = roll(); if (cntEvents.get(d).c < 600) upEvent.run(d, ev); }
       return;
     }
     let target;
@@ -202,7 +252,25 @@ function flow(one) {
   const funnel = [];
   for (let i = 1; i <= 10; i += 1) funnel.push({ label: `Question ${i}`, n: ev.get('quiz-q' + i) || 0 });
   funnel.push({ label: 'Finished', n: ev.get('quiz-done') || 0 });
-  return { pageFlow, visitStats, downloads, downloadKinds, downloadTotal: downloadKinds.reduce((a, x) => a + x.n, 0), funnel, schedTeam: ev.get('sched-team') || 0 };
+  const dimsOf = (d, lim) => one(`SELECT val, SUM(n) n FROM stats_dims WHERE day >= ? AND dim = '${d}' GROUP BY val ORDER BY n DESC LIMIT ${lim || 15}`);
+  const hours = Array.from({ length: 24 }, (_, h) => String(h).padStart(2, '0'));
+  const hr = new Map(one(`SELECT val, SUM(n) n FROM stats_dims WHERE day >= ? AND dim = 'hour' GROUP BY val`).map((r) => [r.val, r.n]));
+  const dims = {
+    device: dimsOf('device'), browser: dimsOf('browser'), os: dimsOf('os'), lang: dimsOf('lang', 15), source: dimsOf('source'), campaign: dimsOf('campaign', 15),
+    notfound: dimsOf('notfound', 20), error: dimsOf('error', 20), blocked: dimsOf('blocked', 20),
+    hours: hours.map((h) => ({ val: h, n: hr.get(h) || 0 })),
+  };
+  const perf = one('SELECT path, SUM(n) n, SUM(ms) ms, MAX(max_ms) max_ms FROM stats_perf WHERE day >= ? GROUP BY path HAVING SUM(n) >= 3 ORDER BY (SUM(ms) * 1.0 / SUM(n)) DESC LIMIT 12').map((r) => ({ path: r.path, n: r.n, avg: Math.round(r.ms / r.n), max: r.max_ms }));
+  const evAll = one('SELECT event, SUM(n) n FROM stats_events WHERE day >= ? GROUP BY event ORDER BY n DESC');
+  const evPre = (pre) => evAll.filter((e) => e.event.startsWith(pre)).map((e) => ({ label: e.event.slice(pre.length), n: e.n }));
+  const events = {
+    gameOpens: evPre('game-open:').slice(0, 20), filters: evPre('sched-filter:'), viewports: evPre('vp:'), teams: evPre('stat-team:').slice(0, 20),
+    txPresets: evPre('tx-preset:'), txDef: evPre('tx-def:'), txAtk: evPre('tx-atk:'),
+    tx: ['play', 'share', 'png', 'undo', 'flip', 'addstep'].map((k) => ({ label: k, n: (evAll.find((e) => e.event === 'tx-' + k) || {}).n || 0 })),
+    smsStart: (evAll.find((e) => e.event === 'sms-form-start') || {}).n || 0, smsSearch: (evAll.find((e) => e.event === 'sms-search') || {}).n || 0,
+  };
+  const eccPages = one("SELECT path, SUM(n) n FROM stats_pages WHERE day >= ? AND (path LIKE '/tournaments/paddle-europe%' OR path LIKE '/ecc/%') GROUP BY path ORDER BY n DESC LIMIT 30");
+  return { dims, perf, events, eccPages, pageFlow, visitStats, downloads, downloadKinds, downloadTotal: downloadKinds.reduce((a, x) => a + x.n, 0), funnel, schedTeam: ev.get('sched-team') || 0 };
 }
 
 const FIRST_DAY = '2026-09-30'; // nothing was recorded before this day
@@ -232,7 +300,7 @@ function report(days) {
 
 function purge() {
   const cutoff = new Date(Date.now() - 400 * 86400000).toISOString().slice(0, 10);
-  for (const t of ['stats_days', 'stats_countries', 'stats_pages', 'stats_refs', 'stats_clicks', 'stats_entries', 'stats_exits', 'stats_visits', 'stats_downloads', 'stats_events']) db.prepare(`DELETE FROM ${t} WHERE day < ?`).run(cutoff);
+  for (const t of ['stats_days', 'stats_countries', 'stats_pages', 'stats_refs', 'stats_clicks', 'stats_entries', 'stats_exits', 'stats_visits', 'stats_downloads', 'stats_events', 'stats_dims', 'stats_perf']) db.prepare(`DELETE FROM ${t} WHERE day < ?`).run(cutoff);
 }
 purge();
 setInterval(purge, 24 * 3600 * 1000).unref();

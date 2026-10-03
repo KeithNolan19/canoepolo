@@ -49,13 +49,14 @@
     }
 
     // choosing a team clears the free-text search, and the other way round
-    field('team').addEventListener('change', () => { if (get('team')) { field('q').value = ''; if (window.cpEvent) window.cpEvent('sched-team'); } });
+    field('team').addEventListener('change', () => { if (get('team')) { field('q').value = ''; if (window.cpEvent) { window.cpEvent('sched-team'); window.cpEvent('stat-team:' + get('team').split('|')[0]); } } });
+    box.querySelectorAll('[data-f]').forEach((f) => f.addEventListener('change', () => { if (window.cpEvent && /^[a-z]{1,10}$/.test(f.dataset.f)) window.cpEvent('sched-filter:' + f.dataset.f); }));
     field('q').addEventListener('input', () => { if (get('q')) field('team').value = ''; });
     // team names in the groups list jump to that team's matches
     document.querySelectorAll('a[data-team]').forEach((a) => {
       a.addEventListener('click', (e) => {
         e.preventDefault();
-        if (window.cpEvent) window.cpEvent('sched-team');
+        if (window.cpEvent) { window.cpEvent('sched-team'); window.cpEvent('stat-team:' + a.dataset.team.split('|')[0]); }
         field('team').value = a.dataset.team;
         field('q').value = '';
         apply();
@@ -185,6 +186,7 @@
 
   function open(li) {
     const d = li.dataset, home = d.home, away = d.away;
+    if (window.cpEvent && /^[FM]\d{1,3}$/.test(d.code || '')) window.cpEvent('game-open:' + d.code);
     dlg.textContent = '';
     const x = el('button', 'gm-x', '\u00d7'); x.type = 'button'; x.setAttribute('data-gm-close', ''); x.setAttribute('aria-label', 'Close');
     const h = el('h2', '', home + ' v ' + away); h.id = 'gm-title';

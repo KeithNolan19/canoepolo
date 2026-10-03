@@ -65,6 +65,7 @@ const flagImg = (c) => { c = String(c || '').toLowerCase(); return FLAGS.has(c) 
 // Keeping scrapers and AI crawlers out. Real browsers, search engines (Google, Bing and similar) and link previews (WhatsApp, Facebook, X, Telegram, Slack) are let in.
 // This stops simple tools and well-behaved bots. It can not stop a determined person: anything a browser can show can be copied by hand.
 const SCRAPER_UA = /(python-requests|python-urllib|aiohttp|httpx|urllib|libwww|curl\/|wget|scrapy|go-http-client|okhttp|java\/|apache-httpclient|node-fetch|undici|axios|got \(|headlesschrome|phantomjs|puppeteer|playwright|selenium|httrack|webcopier|site(sucker|snagger)|offline ?explorer|gptbot|chatgpt|oai-searchbot|claudebot|claude-web|claude-user|claude-searchbot|anthropic|ccbot|perplexity|bytespider|bytedance|amazonbot|applebot-extended|meta-external|facebookbot|cohere|diffbot|imagesift|omgili|youbot|semrush|ahrefs|mj12bot|dotbot|petalbot|dataforseo|blexbot|serpstat|barkrowler|seekport|scrapingbot|zyte|apify|crawl4ai|firecrawl|bright ?data|brightdata|timpibot|ai2bot|kangaroo|webzio|webz\.io|exabot|megaindex|screaming frog)/i;
+app.use(stats.middleware); // before the scraper block and the static files, so turned-away tools and downloads of documents are counted
 app.use((req, res, next) => {
   res.set('X-Robots-Tag', 'noai, noimageai');
   if (req.path === '/health' || req.path === '/robots.txt') return next();
@@ -73,7 +74,6 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.urlencoded({ extended: true, limit: '100kb' }));
-app.use(stats.middleware); // before the static files so downloads of documents are counted
 // Caching: CSS and JS are linked with ?v=<start time>, so they can be kept for a year (a new deploy changes the link).
 // Fonts never change. Pictures are kept a month. Documents are checked hourly because they can be replaced.
 app.use(express.static(path.join(__dirname, '..', 'public'), {
@@ -659,7 +659,9 @@ app.get('/admin/stats', requireAdmin, (req, res) => {
   const days = [7, 30, 90, 365].includes(Number(req.query.days)) ? Number(req.query.days) : 30;
   const r = stats.report(days);
   const names = new Intl.DisplayNames(['en'], { type: 'region' });
-  res.render('admin/stats', { title: 'Statistics', days, r, regionName: (c) => { try { return names.of(c) || c; } catch (e) { return c; } }, max: Math.max(1, ...r.series.map((d) => d.views)) });
+  let smsAgg = null; try { const sm = require('./sms'); if (sm.available()) { const x = sm.summary(); smsAgg = { numbers: x.numbers, stopped: x.stopped, follows: x.follows, sentToday: x.sentToday, perTeam: x.perTeam }; } } catch (e) { /* not set up */ }
+  const eccPages = r.eccPages;
+  res.render('admin/stats', { title: 'Statistics', days, r, smsAgg, eccPages, liveHealth: live.health(), regionName: (c) => { try { return names.of(c) || c; } catch (e) { return c; } }, max: Math.max(1, ...r.series.map((d) => d.views)) });
 });
 
 app.get('/admin/leaderboard', requireAdmin, (req, res) => {

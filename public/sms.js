@@ -17,6 +17,9 @@
     });
     if (none) none.hidden = shown > 0;
   }
-  box.addEventListener('input', filter);
+  var searched = false;
+  box.addEventListener('input', function () { if (!searched && window.cpEvent) { searched = true; window.cpEvent('sms-search'); } filter(); });
+  var started = false;
+  document.addEventListener('change', function (e) { if (!started && window.cpEvent && e.target && e.target.closest && e.target.closest('.sms-form')) { started = true; window.cpEvent('sms-form-start'); } });
   filter();
 })();

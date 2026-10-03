@@ -82,4 +82,153 @@
   </div>
 </div>
 
+<%
+  const tbl = (rows, key, empty) => rows.length ? rows : [];
+  const maxOf = (rows, k) => Math.max(1, ...rows.map((x) => x[k || 'n']));
+%>
+<h2>Who is visiting: devices and browsers</h2>
+<p class="small-note">Anonymous categories only, counted once per visitor per day. The raw browser details are never saved.</p>
+<div class="stat-cols">
+  <div>
+    <h3>Device</h3>
+    <table class="stat-table">
+      <% r.dims.device.forEach(function (x) { %><tr><td><%= x.val %></td><td class="stat-bar"><progress max="<%= maxOf(r.dims.device) %>" value="<%= x.n %>"></progress></td><td class="num"><%= x.n %></td></tr><% }) %>
+      <% if (!r.dims.device.length) { %><tr><td class="muted">No data yet.</td></tr><% } %>
+    </table>
+    <h3>Browser</h3>
+    <table class="stat-table">
+      <% r.dims.browser.forEach(function (x) { %><tr><td><%= x.val %></td><td class="stat-bar"><progress max="<%= maxOf(r.dims.browser) %>" value="<%= x.n %>"></progress></td><td class="num"><%= x.n %></td></tr><% }) %>
+      <% if (!r.dims.browser.length) { %><tr><td class="muted">No data yet.</td></tr><% } %>
+    </table>
+    <h3>Operating system</h3>
+    <table class="stat-table">
+      <% r.dims.os.forEach(function (x) { %><tr><td><%= x.val %></td><td class="stat-bar"><progress max="<%= maxOf(r.dims.os) %>" value="<%= x.n %>"></progress></td><td class="num"><%= x.n %></td></tr><% }) %>
+      <% if (!r.dims.os.length) { %><tr><td class="muted">No data yet.</td></tr><% } %>
+    </table>
+    <h3>Screen width (page loads)</h3>
+    <table class="stat-table">
+      <% r.events.viewports.forEach(function (x) { %><tr><td><%= x.label %></td><td class="num"><%= x.n %></td></tr><% }) %>
+      <% if (!r.events.viewports.length) { %><tr><td class="muted">No data yet.</td></tr><% } %>
+    </table>
+  </div>
+  <div>
+    <h3>Language setting</h3>
+    <table class="stat-table">
+      <% r.dims.lang.forEach(function (x) { %><tr><td><%= x.val %></td><td class="num"><%= x.n %></td></tr><% }) %>
+      <% if (!r.dims.lang.length) { %><tr><td class="muted">No data yet.</td></tr><% } %>
+    </table>
+    <h3>How they found us</h3>
+    <table class="stat-table">
+      <% r.dims.source.forEach(function (x) { %><tr><td><%= x.val %></td><td class="stat-bar"><progress max="<%= maxOf(r.dims.source) %>" value="<%= x.n %>"></progress></td><td class="num"><%= x.n %></td></tr><% }) %>
+      <% if (!r.dims.source.length) { %><tr><td class="muted">No data yet.</td></tr><% } %>
+    </table>
+    <h3>Campaign tags (utm links)</h3>
+    <table class="stat-table">
+      <% r.dims.campaign.forEach(function (x) { %><tr><td class="wrap-any"><%= x.val %></td><td class="num"><%= x.n %></td></tr><% }) %>
+      <% if (!r.dims.campaign.length) { %><tr><td class="muted">None yet. Add ?utm_source=poster to a link to see where people came from.</td></tr><% } %>
+    </table>
+  </div>
+</div>
+
+<h2>When people visit (Milan time)</h2>
+<table class="stat-table stat-hours">
+  <% r.dims.hours.forEach(function (x) { %><tr><td class="stat-day"><%= x.val %>:00</td><td class="stat-bar"><progress max="<%= maxOf(r.dims.hours) %>" value="<%= x.n %>"></progress></td><td class="num"><%= x.n %></td></tr><% }) %>
+</table>
+
+<h2>ECC 2026</h2>
+<div class="stat-cols">
+  <div>
+    <h3>ECC pages viewed</h3>
+    <table class="stat-table">
+      <% eccPages.forEach(function (x) { %><tr><td class="wrap-any"><a href="<%= x.path %>"><%= x.path.replace('/tournaments/paddle-europe-canoe-polo-club-championships-2026', 'ECC') %></a></td><td class="num"><%= x.n %></td></tr><% }) %>
+      <% if (!eccPages.length) { %><tr><td class="muted">No data yet.</td></tr><% } %>
+    </table>
+    <h3>Game pop-ups opened</h3>
+    <table class="stat-table">
+      <% r.events.gameOpens.forEach(function (x) { %><tr><td><%= x.label %></td><td class="num"><%= x.n %></td></tr><% }) %>
+      <% if (!r.events.gameOpens.length) { %><tr><td class="muted">No data yet.</td></tr><% } %>
+    </table>
+    <h3>Schedule filters used</h3>
+    <table class="stat-table">
+      <% r.events.filters.forEach(function (x) { %><tr><td><%= x.label %></td><td class="num"><%= x.n %></td></tr><% }) %>
+      <% if (!r.events.filters.length) { %><tr><td class="muted">No data yet.</td></tr><% } %>
+    </table>
+  </div>
+  <div>
+    <h3>Most looked-up teams</h3>
+    <table class="stat-table">
+      <% r.events.teams.forEach(function (x) { %><tr><td><%= x.label %></td><td class="num"><%= x.n %></td></tr><% }) %>
+      <% if (!r.events.teams.length) { %><tr><td class="muted">No data yet.</td></tr><% } %>
+    </table>
+    <h3>Text updates</h3>
+    <table class="stat-table">
+      <tr><td>Sign-up form started</td><td class="num"><%= r.events.smsStart %></td></tr>
+      <tr><td>Team search used</td><td class="num"><%= r.events.smsSearch %></td></tr>
+      <% if (smsAgg) { %>
+      <tr><td>Confirmed numbers now</td><td class="num"><%= smsAgg.numbers %></td></tr>
+      <tr><td>Stopped</td><td class="num"><%= smsAgg.stopped %></td></tr>
+      <tr><td>Teams followed (total)</td><td class="num"><%= smsAgg.follows %></td></tr>
+      <tr><td>Texts sent today</td><td class="num"><%= smsAgg.sentToday %></td></tr>
+      <% smsAgg.perTeam.forEach(function (t) { %><tr><td class="muted">Following <%= t.team %> (<%= t.division %>)</td><td class="num"><%= t.n %></td></tr><% }) %>
+      <% } else { %><tr><td class="muted">Text updates are not switched on.</td></tr><% } %>
+    </table>
+    <h3>Live score reader</h3>
+    <table class="stat-table">
+      <tr><td>Games read from the organiser</td><td class="num"><%= liveHealth.gamesRead %></td></tr>
+      <tr><td>Games with a score</td><td class="num"><%= liveHealth.withScores %></td></tr>
+      <tr><td>Finished games</td><td class="num"><%= liveHealth.finished %></td></tr>
+      <tr><td>Last read</td><td class="num"><%= liveHealth.lastReadAt ? new Date(liveHealth.lastReadAt).toLocaleTimeString('en-GB', { timeZone: 'Europe/Rome' }) + ' (Milan)' : 'not yet' %></td></tr>
+      <tr><td>Paused because their site failed</td><td class="num"><%= liveHealth.paused ? 'YES, back at ' + new Date(liveHealth.pausedUntil).toLocaleTimeString('en-GB', { timeZone: 'Europe/Rome' }) : 'no' %></td></tr>
+    </table>
+  </div>
+</div>
+
+<h2>Tactics board use</h2>
+<div class="stat-cols">
+  <div>
+    <h3>Actions</h3>
+    <table class="stat-table">
+      <% r.events.tx.forEach(function (x) { %><tr><td><%= {play:'Play pressed',share:'Share link copied',png:'Image downloaded',undo:'Undo',flip:'Swap ends',addstep:'Step added'}[x.label] %></td><td class="num"><%= x.n %></td></tr><% }) %>
+    </table>
+  </div>
+  <div>
+    <h3>Presets, defences and attacks picked</h3>
+    <table class="stat-table">
+      <% r.events.txPresets.forEach(function (x) { %><tr><td>Preset: <%= x.label %></td><td class="num"><%= x.n %></td></tr><% }) %>
+      <% r.events.txDef.forEach(function (x) { %><tr><td>Defence: <%= x.label %></td><td class="num"><%= x.n %></td></tr><% }) %>
+      <% r.events.txAtk.forEach(function (x) { %><tr><td>Attack: <%= x.label %></td><td class="num"><%= x.n %></td></tr><% }) %>
+      <% if (!r.events.txPresets.length && !r.events.txDef.length && !r.events.txAtk.length) { %><tr><td class="muted">No data yet.</td></tr><% } %>
+    </table>
+  </div>
+</div>
+
+<h2>Site health</h2>
+<div class="stat-cols">
+  <div>
+    <h3>Slowest pages (average ms to build)</h3>
+    <table class="stat-table">
+      <% r.perf.forEach(function (x) { %><tr><td class="wrap-any"><%= x.path %></td><td class="num"><%= x.avg %> ms</td><td class="num muted">max <%= x.max %></td></tr><% }) %>
+      <% if (!r.perf.length) { %><tr><td class="muted">No data yet.</td></tr><% } %>
+    </table>
+    <h3>Broken links (page not found)</h3>
+    <table class="stat-table">
+      <% r.dims.notfound.forEach(function (x) { %><tr><td class="wrap-any"><%= x.val %></td><td class="num"><%= x.n %></td></tr><% }) %>
+      <% if (!r.dims.notfound.length) { %><tr><td class="muted">None.</td></tr><% } %>
+    </table>
+  </div>
+  <div>
+    <h3>Server errors</h3>
+    <table class="stat-table">
+      <% r.dims.error.forEach(function (x) { %><tr><td class="wrap-any"><%= x.val %></td><td class="num"><%= x.n %></td></tr><% }) %>
+      <% if (!r.dims.error.length) { %><tr><td class="muted">None.</td></tr><% } %>
+    </table>
+    <h3>Copying tools turned away</h3>
+    <table class="stat-table">
+      <% r.dims.blocked.forEach(function (x) { %><tr><td><%= x.val %></td><td class="num"><%= x.n %></td></tr><% }) %>
+      <% if (!r.dims.blocked.length) { %><tr><td class="muted">None yet.</td></tr><% } %>
+    </table>
+    <p class="small-note">Build time is how long our server took, not how long a page takes on a phone.</p>
+  </div>
+</div>
+
 <%- include('../partials/footer') %>

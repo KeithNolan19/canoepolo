@@ -201,6 +201,7 @@
   let undoStack = [];
   let playing = false;
 
+const ev = (n) => { if (window.cpEvent) window.cpEvent(n); };
   const $ = (id) => document.getElementById(id);
   const statusEl = $('tb-status');
   const say = (msg) => { statusEl.textContent = msg; clearTimeout(say.t); say.t = setTimeout(() => { statusEl.textContent = ''; }, 3500); };
@@ -509,7 +510,7 @@
     selected = null;
     commit();
   }
-  $('tb-undo').addEventListener('click', undo);
+  $('tb-undo').addEventListener('click', () => { ev('tx-undo'); undo(); });
 
   $('tb-clear').addEventListener('click', () => {
     if (!S().arrows.length) return;
@@ -517,6 +518,7 @@
   });
 
   $('tb-flip').addEventListener('click', () => {
+    ev('tx-flip');
     snapshot();
     state.steps.forEach((st) => {
       IDS.forEach((id) => { const p = st.pos[id]; p[0] = W - p[0]; p[1] = H - p[1]; p[2] += 180; });
@@ -539,6 +541,7 @@
     const p = PRESETS[presetSel.value];
     presetSel.value = '';
     if (!p) return;
+    ev('tx-preset:' + Object.keys(PRESETS).find((k) => PRESETS[k] === p));
     snapshot();
     state = { steps: clone(p.steps), cur: 0 };
     selected = null;
@@ -563,18 +566,19 @@
   $('tb-defence').addEventListener('change', (evt) => {
     const k = evt.target.value; evt.target.value = '';
     if (!k) return;
-    snapshot(); applyDefence(teamSel.value, k); selected = null; commit();
+    ev('tx-def:' + k); snapshot(); applyDefence(teamSel.value, k); selected = null; commit();
     say(`${TEAMS[teamSel.value]}: ${DEFENCES[k].name}. Drag any boat to fine-tune.`);
   });
   $('tb-attack').addEventListener('change', (evt) => {
     const k = evt.target.value; evt.target.value = '';
     if (!k) return;
-    snapshot(); applyAttack(teamSel.value, k); selected = null; commit();
+    ev('tx-atk:' + k); snapshot(); applyAttack(teamSel.value, k); selected = null; commit();
     say(`${TEAMS[teamSel.value]}: ${ATTACKS[k].name}. Drag any boat to fine-tune.`);
   });
 
   // ---------- Steps ----------
   $('tb-addstep').addEventListener('click', () => {
+    ev('tx-addstep');
     if (state.steps.length >= 30) { say('That\'s the maximum of 30 steps.'); return; }
     snapshot();
     const next = clone(S());
@@ -602,6 +606,7 @@
 
   function play() {
     if (playing) { playing = false; return; }
+    ev('tx-play');
     if (state.steps.length < 2) { say('Add a second step first, then press Play.'); return; }
     playing = true; selected = null;
     $('tb-play').textContent = '■ Stop';
@@ -629,6 +634,7 @@
 
   // ---------- Share + image ----------
   $('tb-copy').addEventListener('click', async () => {
+    ev('tx-share');
     const url = `${location.origin}${location.pathname}#play=${b64(JSON.stringify(pack()))}`;
     window.history.replaceState(null, '', url);
     try { await navigator.clipboard.writeText(url); say('Link copied. Paste it into a message to your team.'); }
@@ -636,6 +642,7 @@
   });
 
   $('tb-png').addEventListener('click', () => {
+    ev('tx-png');
     const keepSel = selected; selected = null; render();
     const clone2 = svg.cloneNode(true);
     selected = keepSel; render();

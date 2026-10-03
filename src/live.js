@@ -390,6 +390,13 @@ function start() {
   tick().catch(() => {});
 }
 
+// For the admin statistics page: is the reader healthy?
+function health() {
+  let last = 0;
+  meta.forEach((v) => { if (v.at > last) last = v.at; });
+  return { gamesRead: meta.size, finished: finished.size, withScores: state.size, paused: paused(), failStreak, lastReadAt: last || null, pausedUntil: paused() ? pausedUntil : null };
+}
+
 function snapshot() {
   const o = {};
   state.forEach((v, k) => { o[k] = { s: `${v.score[0]} - ${v.score[1]}`, st: v.status, ks: v.ks, g: v.goals || undefined, c: v.cards || undefined }; });
@@ -402,4 +409,4 @@ function detail(code) {
   return m ? { ...m.detail, time: m.time, field: m.field } : null;
 }
 
-module.exports = { paused, readAll, readAllStatus, verify, parseTeams, ingest, start, snapshot, detail, changes, standings, playerStats, meta, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };
+module.exports = { health, paused, readAll, readAllStatus, verify, parseTeams, ingest, start, snapshot, detail, changes, standings, playerStats, meta, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };

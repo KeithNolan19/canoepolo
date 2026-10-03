@@ -151,3 +151,13 @@ window.cpEvent = function (name) {
     });
   });
 })();
+
+// Screen width class, once per browser tab session (anonymous count, see /admin/stats)
+(function () {
+  try {
+    if (sessionStorage.getItem('cp-vp')) return;
+    sessionStorage.setItem('cp-vp', '1');
+    var w = window.innerWidth;
+    window.cpEvent('vp:' + (w < 480 ? 'phone' : w < 768 ? 'bigphone' : w < 1200 ? 'tablet' : 'desktop'));
+  } catch (err) { /* ignore */ }
+})();
