@@ -9,6 +9,7 @@ const TZ_OFFSET = '+02:00'; // Milan in October (CEST)
 const POLL_MS = 45 * 1000;
 const state = new Map(); // code -> { score:[a,b], status:'LIVE'|'FT', at:ms }
 const finished = new Set();
+const ftAt = new Map(); // code -> when we first saw full time, and how many re-reads since (to pick up the organiser's corrections or a page that was incomplete)
 const meta = new Map(); // code -> what the official page says about the game itself (time, field, officials), even before it starts
 let timer = null;
 
@@ -175,7 +176,7 @@ function ingest(m, html) {
   }
   if (p.result) {
     state.set(m.code, { ...p.result, at: Date.now() });
-    if (p.result.status === 'FT') finished.add(m.code);
+    if (p.result.status === 'FT') { finished.add(m.code); if (!ftAt.has(m.code)) ftAt.set(m.code, { t: Date.now(), n: 0 }); }
   }
 }
 
@@ -196,6 +197,14 @@ async function sweep() {
   sweeping = true;
   try {
     for (const m of matchList()) {
+      // Finished games are read again twice (30 minutes and 3 hours after we first saw full time): the organisers sometimes correct a report, or the page was incomplete
+      const rec = ftAt.get(m.code);
+      if (rec && rec.n < 2 && now - rec.t > (rec.n === 0 ? 30 : 180) * 60 * 1000) {
+        rec.n++;
+        try { ingest(m, await fetchPage(m.url)); } catch (e) { /* try again next time */ }
+        await new Promise((r) => setTimeout(r, 700));
+        continue;
+      }
       if (finished.has(m.code) || (m.start > now + 3 * 60 * 60 * 1000 && !(m.ph && m.start < now + 9 * 60 * 60 * 1000))) continue; // only games that are due within 3 hours or already past: kind to the organiser's site
       try { ingest(m, await fetchPage(m.url)); } catch (e) { /* try again next time */ }
       await new Promise((r) => setTimeout(r, 700));
