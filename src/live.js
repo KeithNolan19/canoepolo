@@ -279,6 +279,24 @@ function playerStats() {
   return res;
 }
 
+// Admin: read every game that has an organiser link once, gently (about 0.7 s apart), so the whole timetable can be compared in one go
+let verifying = null;
+function readAll() {
+  if (verifying && !verifying.done) return verifying;
+  const list = matchList().filter((m) => !meta.has(m.code) || Date.now() - meta.get(m.code).at > 5 * 60 * 1000);
+  verifying = { total: list.length, n: 0, failed: 0, done: false, startedAt: Date.now() };
+  (async () => {
+    for (const m of list) {
+      try { ingest(m, await fetchPage(m.url)); } catch (e) { verifying.failed++; }
+      verifying.n++;
+      await new Promise((r) => setTimeout(r, 700));
+    }
+    verifying.done = true;
+  })();
+  return verifying;
+}
+const readAllStatus = () => verifying;
+
 // Compares everything the server has read from the organiser's pages with our timetable: time, pitch, home and away team, and whether a score is shown
 function verify() {
   const sch = schedules.forSlug(SLUG, { raw: true });
@@ -339,4 +357,4 @@ function detail(code) {
   return m ? { ...m.detail, time: m.time, field: m.field } : null;
 }
 
-module.exports = { verify, parseTeams, ingest, start, snapshot, detail, changes, standings, playerStats, meta, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };
+module.exports = { readAll, readAllStatus, verify, parseTeams, ingest, start, snapshot, detail, changes, standings, playerStats, meta, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };
