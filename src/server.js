@@ -652,8 +652,8 @@ app.get('/admin/live-verify', requireAdmin, (req, res) => {
   if (req.query.fetch === '1') live.readAll();
   const rd = live.readAllStatus();
   const prog = rd ? (rd.done ? `Full read finished: ${rd.n} games read, ${rd.failed} could not be read.\n` : `Full read in progress: ${rd.n} of ${rd.total} games read. Refresh this page in a minute or two.\n`) : 'To read every game once, open /admin/live-verify?fetch=1 (takes about two minutes).\n';
-  const { lines, stats } = live.verify();
-  res.type('text/plain').send(prog + `Games with an organiser link: ${stats.listed}\nRead so far: ${stats.read} (not read yet: ${stats.notRead})\nMatching our timetable: ${stats.ok}\nDifferent: ${stats.bad}\n\n` + (lines.length ? lines.join('\n') : 'No differences in the games read so far.') + '\n\nGames not read yet are checked automatically when they are due. Placeholder knockout games are checked for time and pitch only.');
+  const { lines, stats, po, unmatched, map } = live.verify();
+  res.type('text/plain').send(prog + `Games with an organiser link: ${stats.listed}\nRead so far: ${stats.read} (not read yet: ${stats.notRead})\nMatching our timetable: ${stats.ok}\nDifferent: ${stats.bad}\n\n` + (lines.length ? lines.join('\n') : 'No differences in the games read so far.') + '\n\nPLAY-OFF GAMES (organiser page v what we show):\n' + (po.length ? po.join('\n') : 'none read yet') + '\n\nPROBLEMS WITH PLAY-OFF NAMES:\n' + (unmatched.length ? unmatched.join('\n') : 'none') + '\n\nCLUB NAME CHECK (organiser spelling -> our club):\n' + (map.length ? map.join('\n') : 'no names read yet') + '\n\nGames not read yet are checked automatically when they are due. Placeholder knockout games are checked for time and pitch only.');
 });
 app.get('/admin/stats', requireAdmin, (req, res) => {
   const days = [7, 30, 90, 365].includes(Number(req.query.days)) ? Number(req.query.days) : 30;

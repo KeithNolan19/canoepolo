@@ -294,7 +294,7 @@ function forSlug(slug, opts = {}) {
         const t = teamOv[code] || [];
         // each side is filled in on its own, as soon as the organisers' page names a club for it
         const h2 = t[0] && isPlaceholder(home) ? t[0] : home, a2 = t[1] && isPlaceholder(away) ? t[1] : away;
-        slot.matches.push({ pitch, code, home: h2, away: a2, group, division: code[0] === 'F' ? 'Women' : 'Men', resolved: (h2 !== home || a2 !== away) ? true : undefined, ph: isPlaceholder(h2) || isPlaceholder(a2) });
+        slot.matches.push({ pitch, code, home: h2, away: a2, homeOrig: home, awayOrig: away, group, division: code[0] === 'F' ? 'Women' : 'Men', resolved: (h2 !== home || a2 !== away) ? true : undefined, ph: isPlaceholder(h2) || isPlaceholder(a2) });
       });
       slots.sort((a, b) => a.start.localeCompare(b.start));
       slots.forEach((x) => x.matches.sort((a, b) => a.pitch - b.pitch));

@@ -59,7 +59,7 @@ function sameClub(org, ours) {
 // The placeholder wording our timetable has for a game, and whether a club is a sensible fit for it
 function originalOf(sch, code) {
   let r = null;
-  sch.days.forEach((d) => d.slots.forEach((sl) => sl.matches.forEach((m) => { if (m.code === code) r = [m.home, m.away]; })));
+  sch.days.forEach((d) => d.slots.forEach((sl) => sl.matches.forEach((m) => { if (m.code === code) r = [m.homeOrig || m.home, m.awayOrig || m.away]; })));
   return r;
 }
 function teamsOf(sch, code) {
@@ -318,7 +318,35 @@ function verify() {
     } else if (!v.org) bad.push('could not read the team names from the organiser page');
     if (bad.length) { stats.bad++; lines.push(`${m.code} (organiser N° ${m.liveId}, ${d.date} ${sl.start} pitch ${m.pitch}): ${bad.join('; ')}`); } else stats.ok++;
   })));
-  return { lines, stats };
+  // Play-off games: what the organiser's page names for each side, and what we show
+  const po = [], unmatched = [], seen = new Map();
+  const orgPh = /\bRound\b|\b(Winner|Loser)\b|^\W*-?\W*$/i;
+  const ours = (div) => (sch.teams || []).filter((x) => x.division === div).map((x) => x.name);
+  sch.days.forEach((d) => d.slots.forEach((sl) => sl.matches.forEach((m) => {
+    if (!m.live) return;
+    const v = meta.get(m.code);
+    const div = m.division;
+    if (v && v.org) v.org.forEach((o) => {
+      if (orgPh.test(o)) return;
+      if (!seen.has(o + '|' + div)) seen.set(o + '|' + div, { o, div, c: ours(div).filter((n) => sameClub(o, n)) });
+    });
+    if (m.group.length === 1) return;
+    const side = (i) => (i ? m.away : m.home);
+    const orig = (i) => (i ? m.awayOrig : m.homeOrig);
+    const org = v && v.org;
+    const bits = [0, 1].map((i) => {
+      const o = org ? org[i] : null;
+      if (!org) return `side ${i ? 'B' : 'A'}: page not read yet`;
+      if (orgPh.test(o)) return `${o} (organiser has not named the club yet)${side(i) !== orig(i) ? ' BUT we show ' + side(i) : ''}`;
+      if (side(i) !== orig(i)) return `${o} = ${side(i)}`;
+      unmatched.push(`${m.code} (N° ${m.liveId}): organiser names "${o}" for "${orig(i)}" but we could not match it to a club that fits`);
+      return `${o} = NOT MATCHED`;
+    });
+    po.push(`${m.code} (N° ${m.liveId}, ${d.date.slice(8)}/10 ${sl.start}, pitch ${m.pitch}, ${m.group}): ${bits.join(' | ')}`);
+  })));
+  const names = [...seen.values()].sort((a, b) => a.o.localeCompare(b.o));
+  const map = names.map((x) => `"${x.o}" (${x.div}) -> ${x.c.length === 1 ? x.c[0] : x.c.length ? 'AMBIGUOUS: ' + x.c.join(' / ') : 'NO MATCH IN OUR LIST'}`);
+  return { lines, stats, po, unmatched, map };
 }
 
 // Games where the official page disagrees with our timetable
