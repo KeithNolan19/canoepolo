@@ -645,6 +645,11 @@ app.get('/admin/kayakers-check', requireAdmin, async (req, res) => {
       out += 'scripts: ' + JSON.stringify(uniq([...body.matchAll(/<script[^>]+src="([^"]+)"/gi)].map((m) => m[1]))) + '\n';
       out += 'links: ' + JSON.stringify(uniq([...body.matchAll(/<a[^>]+href="([^"#]+)"/gi)].map((m) => m[1]))) + '\n';
       out += 'data addresses mentioned: ' + JSON.stringify(uniq([...body.matchAll(/["'(]((?:https?:\/\/cpt\.kayakers\.nl)?\/(?:api|Api|hub|signalr)[A-Za-z0-9_\-\/.?=&{}$]*)/g)].map((m) => m[1]))) + '\n\n';
+      if (req.query.raw) {
+        const t0 = body.search(/<table/i);
+        const seg = body.slice(t0 < 0 ? 0 : t0).replace(/\s+/g, ' ').replace(/mailto:[^"']*|tel:[^"']*/gi, '[removed]');
+        return res.type('text/plain').send(out + 'raw html from the first table (personal details removed):\n' + seg.slice(0, 9000));
+      }
       out += 'page text:\n' + body.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').slice(0, 3500);
     } else out += body.slice(0, 6000);
     res.type('text/plain').send(out);
