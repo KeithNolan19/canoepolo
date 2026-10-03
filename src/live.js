@@ -381,6 +381,12 @@ function start() {
   const sw = setInterval(() => { sweep().catch(() => {}); }, 10 * 60 * 1000);
   sw.unref();
   setTimeout(() => { sweep().catch(() => {}); }, 5 * 60 * 1000).unref(); // not straight after a restart, so a deploy does not hit the organisers' site
+  // The whole timetable is read automatically too: once 10 minutes after each start and then every 90 minutes during the tournament (skipped while the organisers' site is failing)
+  const inWindow = () => Date.now() >= Date.parse('2026-10-02T05:00:00+02:00') && Date.now() <= Date.parse('2026-10-05T00:00:00+02:00');
+  const full = () => { if (inWindow() && !paused()) readAll(); };
+  setTimeout(full, 10 * 60 * 1000).unref();
+  const fi = setInterval(full, 90 * 60 * 1000);
+  fi.unref();
   tick().catch(() => {});
 }
 
