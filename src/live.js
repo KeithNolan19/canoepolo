@@ -100,7 +100,15 @@ function teamsOf(sch, code) {
 }
 function fits(sch, division, placeholder, team) {
   let g = /\d(?:st|nd|rd|th) in Group ([A-Z])/.exec(placeholder);
-  if (g) { const list = ((sch.groupsTable || {})[division] || {})[g[1]]; return !!list && list.includes(team); }
+  if (g) {
+    const groups = (sch.groupsTable || {})[division] || {};
+    const list = groups[g[1]];
+    if (list) return list.includes(team);
+    // The women's second-round pools (D, E, F) are made of clubs from the first-round groups, so we have no list for them.
+    // Any club of that division can be named there; the organiser's page decides which one, and the spelling must still match exactly one club.
+    if (/[DEF]/.test(g[1]) && division === 'Women') return Object.values(groups).some((l) => l.includes(team));
+    return false;
+  }
   g = /(Winner|Loser) of (\w+)/.exec(placeholder);
   if (g) {
     const pair = teamsOf(sch, g[2]);
