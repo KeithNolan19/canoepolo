@@ -649,7 +649,7 @@ app.get('/admin/live-changes', requireAdmin, (req, res) => {
 });
 // Admin: compare every game the server has read from the organiser's pages with our timetable
 app.get('/admin/live-verify', requireAdmin, (req, res) => {
-  if (req.query.fetch === '1') live.readAll();
+  if (req.query.fetch === '1' && !live.paused()) live.readAll();
   const rd = live.readAllStatus();
   const prog = rd ? (rd.done ? `Full read finished: ${rd.n} games read, ${rd.failed} could not be read.\n` : `Full read in progress: ${rd.n} of ${rd.total} games read. Refresh this page in a minute or two.\n`) : 'To read every game once, open /admin/live-verify?fetch=1 (takes about two minutes).\n';
   const { lines, stats, po, unmatched, map } = live.verify();

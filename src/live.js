@@ -129,10 +129,21 @@ function parse(html) {
   return { debug: t.slice(0, 400), events: evs, result: { detail: parseDetail(html), ks: ts ? ts[2].padStart(5, '0') : undefined, score, status: done ? 'FT' : 'LIVE', goals: goals.length ? goals : null, cards: evs.cards.length ? evs.cards : null } };
 }
 
+// If the organisers' site fails (error, slow or no answer) we stop asking for 10 minutes, and 20 minutes if it fails again straight after
+let pausedUntil = 0, failStreak = 0;
+const paused = () => Date.now() < pausedUntil;
 async function fetchPage(url) {
-  const r = await fetch(url, { headers: { 'User-Agent': UA, Accept: 'text/html' }, signal: AbortSignal.timeout(8000) });
-  if (!r.ok) throw new Error('HTTP ' + r.status);
-  return r.text();
+  if (paused()) throw new Error('paused: the organisers\' site is not answering, waiting before asking again');
+  try {
+    const r = await fetch(url, { headers: { 'User-Agent': UA, Accept: 'text/html' }, signal: AbortSignal.timeout(8000) });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    failStreak = 0;
+    return r.text();
+  } catch (e) {
+    failStreak++;
+    pausedUntil = Date.now() + Math.min(failStreak, 2) * 10 * 60 * 1000;
+    throw e;
+  }
 }
 
 function matchList() {
@@ -369,12 +380,7 @@ function start() {
   timer.unref();
   const sw = setInterval(() => { sweep().catch(() => {}); }, 10 * 60 * 1000);
   sw.unref();
-  setTimeout(() => { sweep().catch(() => {}); }, 20000).unref();
-  // During the tournament the whole timetable is also read once shortly after each start and then hourly, so the admin check is always filled in
-  const inWindow = () => Date.now() >= Date.parse('2026-10-02T05:00:00+02:00') && Date.now() <= Date.parse('2026-10-05T00:00:00+02:00');
-  setTimeout(() => { if (inWindow()) readAll(); }, 90 * 1000).unref();
-  const full = setInterval(() => { if (inWindow()) readAll(); }, 60 * 60 * 1000);
-  full.unref();
+  setTimeout(() => { sweep().catch(() => {}); }, 5 * 60 * 1000).unref(); // not straight after a restart, so a deploy does not hit the organisers' site
   tick().catch(() => {});
 }
 
@@ -390,4 +396,4 @@ function detail(code) {
   return m ? { ...m.detail, time: m.time, field: m.field } : null;
 }
 
-module.exports = { readAll, readAllStatus, verify, parseTeams, ingest, start, snapshot, detail, changes, standings, playerStats, meta, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };
+module.exports = { paused, readAll, readAllStatus, verify, parseTeams, ingest, start, snapshot, detail, changes, standings, playerStats, meta, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };
