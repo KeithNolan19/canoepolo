@@ -39,23 +39,21 @@ function parseEvents(html) {
   return { goals, cards };
 }
 
-// The two teams named at the top of an official match page, found by looking for the known club names there (longest names first so
-// "Praha B" is not read as "Praha"). Only used for knockout games whose teams are still placeholders in our timetable.
-function parseTeams(html, names) {
-  const head = textOf(html).slice(0, 700).toLowerCase();
-  const found = [];
-  const taken = [];
-  [...names].sort((a, b) => b.length - a.length).forEach((n) => {
-    let i = head.indexOf(n.toLowerCase());
-    while (i !== -1 && taken.some(([a, b]) => i < b && i + n.length > a)) i = head.indexOf(n.toLowerCase(), i + 1);
-    if (i === -1) return;
-    taken.push([i, i + n.length]);
-    found.push({ n, i });
-  });
-  found.sort((a, b) => a.i - b.i);
-  return found.length === 2 ? [found[0].n, found[1].n] : null;
+// The two team names in the header of an official match page. The real header repeats the line:
+// "... Guardialinee2 C.o. K. Branik 2 - 8 Corbeil K. Branik 2 - 8 Corbeil Game (...)". The organiser's spelling can differ from ours.
+function parseTeams(html) {
+  const t = textOf(html);
+  const m = /Guardialinee\s*2\s+\S+\s+(.+?)\s+\d*\*?\s*[-\u2013]\s*\d*\*?\s+(.+?)\s+\1\s+\d*\*?\s*[-\u2013]/i.exec(t);
+  if (!m) return null;
+  const h = m[1].trim(), a = m[2].trim();
+  return h && a && h !== a ? [h, a] : null;
 }
-
+const tokens = (n) => String(n).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').split(/[^a-z0-9]+/).filter(Boolean);
+// Our clubs the organiser's spelling could mean: every word of one name appears in the other ("K. Branik" and "Branik", "Corbeil" and "Corbeil-Essenos")
+function sameClub(org, ours) {
+  const o = tokens(org), u = tokens(ours);
+  return o.length && u.length && (o.every((x) => u.includes(x)) || u.every((x) => o.includes(x)));
+}
 // The placeholder wording our timetable has for a game, and whether a club is a sensible fit for it
 function originalOf(sch, code) {
   let r = null;
@@ -164,10 +162,13 @@ function ingest(m, html) {
     const sch = schedules.forSlug(SLUG, { raw: true });
     const division = m.code[0] === 'F' ? 'Women' : 'Men';
     const names = (sch.teams || []).filter((x) => x.division === division).map((x) => x.name);
-    const tt = parseTeams(html, names);
+    const org = parseTeams(html);
     const orig = originalOf(sch, m.code);
-    if (tt && tt[0] !== tt[1] && orig && fits(sch, division, orig[0], tt[0]) && fits(sch, division, orig[1], tt[1])) {
-      teamsFor[m.code] = tt; schedules.setTeamOverrides(teamsFor);
+    if (org && orig) {
+      // each side must match exactly one of our clubs that also fits the placeholder (right group, or the real winner or loser)
+      const pick = (o, ph) => { const c = names.filter((n) => sameClub(o, n) && fits(sch, division, ph, n)); return c.length === 1 ? c[0] : null; };
+      const tt = [pick(org[0], orig[0]), pick(org[1], orig[1])];
+      if (tt[0] && tt[1] && tt[0] !== tt[1]) { teamsFor[m.code] = tt; schedules.setTeamOverrides(teamsFor); }
     }
   }
   if (p.result) {
