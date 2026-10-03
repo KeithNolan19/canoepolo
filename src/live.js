@@ -170,6 +170,45 @@ function standings() {
   return out;
 }
 
+// Top scorers and most cards per division, from finished and live games. Goals from a side whose list does not match its score (u:1) are left out.
+function playerStats() {
+  const sch = schedules.forSlug(SLUG, { raw: true });
+  const out = {};
+  if (!sch || sch.hidden) return out;
+  const bucket = (div) => (out[div] = out[div] || { scorers: new Map(), cards: new Map() });
+  sch.days.forEach((d) => d.slots.forEach((sl) => sl.matches.forEach((m) => {
+    const v = state.get(m.code);
+    if (!v || !m.division) return;
+    const b = bucket(m.division);
+    const add = (map, item, team, key) => {
+      const name = String(item.player || '').trim();
+      if (!name) return null;
+      const club = team === 1 ? m.home : m.away;
+      const k = name.toLowerCase() + '|' + club;
+      if (!map.has(k)) map.set(k, { player: name, team: club, cc: (sch.countries || {})[club] || '', goals: 0, green: 0, yellow: 0, red: 0, games: new Set() });
+      const r = map.get(k); r.games.add(m.code); if (key) r[key]++;
+      return r;
+    };
+    (v.goals || []).forEach((g) => { if (!g.u) add(b.scorers, g, g.team, 'goals'); });
+    (v.cards || []).forEach((c) => add(b.cards, c, c.team, c.card));
+  })));
+  const top = (map, score, n) => {
+    const rows = [...map.values()].map((r) => ({ ...r, games: r.games.size, total: r.green + r.yellow + r.red }));
+    rows.sort((a, b) => score(b) - score(a) || a.player.localeCompare(b.player));
+    if (!rows.length) return [];
+    const cut = rows.length > n ? score(rows[n - 1]) : -1;
+    return rows.filter((r, i) => i < n || score(r) === cut).filter((r) => score(r) > 0).slice(0, n + 5);
+  };
+  const res = {};
+  Object.entries(out).forEach(([div, b]) => {
+    res[div] = {
+      scorers: top(b.scorers, (r) => r.goals, 5),
+      cards: top(b.cards, (r) => r.total * 1000 + r.red * 100 + r.yellow, 5),
+    };
+  });
+  return res;
+}
+
 // Games where the official page disagrees with our timetable
 function changes() {
   const out = {};
@@ -206,4 +245,4 @@ function detail(code) {
   return m ? { ...m.detail, time: m.time, field: m.field } : null;
 }
 
-module.exports = { start, snapshot, detail, changes, standings, meta, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };
+module.exports = { start, snapshot, detail, changes, standings, playerStats, meta, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };

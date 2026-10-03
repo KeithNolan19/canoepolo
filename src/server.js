@@ -483,6 +483,7 @@ app.post('/admin/sms/send', requireAdmin, checkCsrf, async (req, res) => {
 app.get('/api/live-game/:code', (req, res) => { res.set('Cache-Control', 'public, max-age=15'); res.json(live.detail(String(req.params.code).toUpperCase().slice(0, 6)) || {}); });
 app.get('/api/live-changes', (req, res) => { res.set('Cache-Control', 'public, max-age=30'); res.json(live.changes()); });
 app.get('/api/standings', (req, res) => { res.set('Cache-Control', 'public, max-age=20'); res.json(live.standings()); });
+app.get('/api/player-stats', (req, res) => { res.set('Cache-Control', 'public, max-age=30'); res.json(live.playerStats()); });
 app.get('/api/live-scores', (req, res) => { res.set('Cache-Control', 'public, max-age=20'); res.json(live.snapshot()); });
 app.get(['/api/tournaments', '/api/tournaments/:slug'], (req, res) => res.status(404).type('text/plain').send('Not found\n')); // the public data feed is closed
 app.get('/api/tournaments-closed', (req, res) => {

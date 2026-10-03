@@ -275,3 +275,45 @@
   setInterval(load, 30000);
   document.addEventListener('visibilitychange', load);
 })();
+
+// Top scorers and most cards per division
+(function () {
+  const box = document.querySelector('[data-playerstats]');
+  if (!box || !window.fetch) return;
+  const mk = (tag, text, cls) => { const n = document.createElement(tag); if (text !== undefined) n.textContent = text; if (cls) n.className = cls; return n; };
+  function table(heads, rows) {
+    const t = mk('table', undefined, 'st-table');
+    const h = mk('tr'); heads.forEach((x) => h.append(mk('th', x[0], x[1]))); t.append(h);
+    rows.forEach((cells, i) => {
+      const tr = mk('tr');
+      cells.forEach((c, j) => {
+        const td = mk('td', typeof c === 'object' ? '' : String(c), heads[j][1]);
+        if (typeof c === 'object') { if (c.cc) { const img = document.createElement('img'); img.src = '/flags/' + c.cc.toLowerCase() + '.svg'; img.alt = ''; img.width = 18; img.height = 12; td.append(img, ' '); } td.append(document.createTextNode(c.text)); }
+        tr.append(td);
+      });
+      t.append(tr);
+    });
+    return t;
+  }
+  function load() {
+    if (document.hidden) return;
+    fetch('/api/player-stats').then((r) => r.json()).then((d) => {
+      const divs = ['Men', 'Women'].filter((x) => d[x] && (d[x].scorers.length || d[x].cards.length));
+      if (!divs.length) return;
+      box.textContent = '';
+      divs.forEach((div) => {
+        const wrap = mk('div', undefined, 'pstats-div');
+        wrap.append(mk('h4', div, 'groups-div'));
+        const cols = mk('div', undefined, 'pstats-cols');
+        const a = mk('div'); a.append(mk('h5', 'Top scorers'));
+        a.append(d[div].scorers.length ? table([['Player'], ['Team'], ['Goals', 'num']], d[div].scorers.map((r) => [r.player, { text: r.team, cc: r.cc }, r.goals])) : mk('p', 'No goals yet.', 'small-note'));
+        const b = mk('div'); b.append(mk('h5', 'Most cards'));
+        b.append(d[div].cards.length ? table([['Player'], ['Team'], ['G', 'num'], ['Y', 'num'], ['R', 'num'], ['Total', 'num']], d[div].cards.map((r) => [r.player, { text: r.team, cc: r.cc }, r.green, r.yellow, r.red, r.total])) : mk('p', 'No cards yet.', 'small-note'));
+        cols.append(a, b); wrap.append(cols); box.append(wrap);
+      });
+    }).catch(() => {});
+  }
+  load();
+  setInterval(load, 45000);
+  document.addEventListener('visibilitychange', load);
+})();

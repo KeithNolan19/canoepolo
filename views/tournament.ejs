@@ -68,6 +68,9 @@
     <% ['Men', 'Women'].forEach(dv => { const gt = schedule.groupsTable[dv]; if (!gt) return; Object.keys(gt).forEach(g => { %>
     <details class="gt"><summary><%= dv %>, Group <%= g %></summary><div data-standings="<%= dv %>|<%= g %>"></div></details>
     <% }) }) %>
+    <h3 class="groups-title" id="stats">Top scorers and cards</h3>
+    <p class="small-note">Worked out from the organiser's match reports as games finish. Goals are only counted when a team's goal list matches its score. Cards are ranked by total, then red, then yellow.</p>
+    <div data-playerstats class="pstats"><p class="small-note">Stats appear once games have been played.</p></div>
     <% } %>
     <% if (schedule.format) { const f = schedule.format; %>
     <div class="format-box" id="format">

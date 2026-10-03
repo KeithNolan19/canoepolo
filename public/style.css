@@ -948,3 +948,8 @@ h1, h2, h3, .event-name, .event-where, .event-extra { overflow-wrap: anywhere; }
 .sms-cta { margin: 10px 0; }
 .sms-form .sms-team[hidden] { display: none; }
 .sms-form input[type="search"] { font: inherit; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); width: 100%; margin: 4px 0 8px; }
+
+.pstats-cols { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.pstats h5 { margin: 8px 0 6px; font-size: 1rem; }
+.pstats .st-table td:first-child, .pstats .st-table th:first-child { text-align: left; }
+.pstats-div { margin-bottom: 18px; overflow-x: auto; }
