@@ -30,23 +30,6 @@
       <% if (t.registration_deadline) { %><tr><th scope="row">Registration closes</th><td><%= fmtDate(t.registration_deadline) %><% if (t.registration_deadline < today) { %> <span class="flag-label cancelled">Closed</span><% } %></td></tr><% } %>
     </table>
 
-    <% if (schedule && schedule.support) { %><div class="notice green"><strong>Support your club</strong><br>Pick your country to see its clubs, games, results and scorers.<br><a class="btn primary" href="/tournaments/<%= t.slug %>/support">Support your club</a></div><% } %>
-    <% if (schedule && schedule.notice) { %><div class="notice" role="note"><strong>Note:</strong> <%= schedule.notice %></div><% } %>
-
-    <% if (t.documents.length && !placings) { %>
-    <h2 class="sub-head">Documents</h2>
-    <ul class="doc-list">
-      <% t.documents.forEach(d => { %><li><% const pdf = /\.pdf$/i.test(d.url); %><a class="doc-link" href="<%= d.url %>"<%- pdf ? ' target="_blank" rel="noopener"' : '' %>><span class="doc-icon" aria-hidden="true"><%= pdf ? 'PDF' : 'MAP' %></span><span><%= d.label %></span></a></li><% }) %>
-    </ul>
-    <% } %>
-
-    <% if (schedule && schedule.hidden) { %>
-    <h2 class="sub-head" id="schedule">Timetable</h2>
-    <div class="notice green sched-headline"><strong>Timetable coming soon.</strong></div>
-    <% } else if (schedule) { %>
-    <h2 class="sub-head" id="schedule">Schedule</h2>
-    <% if (schedule.headline) { %><div class="notice green sched-headline"><strong><%= schedule.headline %></strong></div><% } %>
-    <p class="small-note"><%= schedule.note %></p>
     <% if (placings) { %>
     <h3 class="groups-title" id="placings">Final placings</h3>
     <% if (placings.note) { %><p class="small-note"><%= placings.note %></p><% } %>
@@ -62,7 +45,25 @@
     </ol>
     <% }) %>
     <% } %>
+    <% if (schedule && schedule.support) { %><div class="notice green"><strong>Support your club</strong><br>Pick your country to see its clubs, games, results and scorers.<br><a class="btn primary" href="/tournaments/<%= t.slug %>/support">Support your club</a></div><% } %>
+    <% if (schedule && schedule.notice && !placings) { %><div class="notice" role="note"><strong>Note:</strong> <%= schedule.notice %></div><% } %>
+
+    <% if (t.documents.length && !placings) { %>
+    <h2 class="sub-head">Documents</h2>
+    <ul class="doc-list">
+      <% t.documents.forEach(d => { %><li><% const pdf = /\.pdf$/i.test(d.url); %><a class="doc-link" href="<%= d.url %>"<%- pdf ? ' target="_blank" rel="noopener"' : '' %>><span class="doc-icon" aria-hidden="true"><%= pdf ? 'PDF' : 'MAP' %></span><span><%= d.label %></span></a></li><% }) %>
+    </ul>
+    <% } %>
+
+    <% if (schedule && schedule.hidden) { %>
+    <h2 class="sub-head" id="schedule">Timetable</h2>
+    <div class="notice green sched-headline"><strong>Timetable coming soon.</strong></div>
+    <% } else if (schedule) { %>
+    <h2 class="sub-head" id="schedule"><%= placings ? "Games and results" : "Schedule" %></h2>
+    <% if (schedule.headline && !placings) { %><div class="notice green sched-headline"><strong><%= schedule.headline %></strong></div><% } %>
+    <% if (!placings) { %><p class="small-note"><%= schedule.note %></p><% } %>
     <% if (schedule.groupsTable) { %>
+    <% if (!placings) { %>
     <h3 class="groups-title" id="groups">Groups</h3>
     <% ['Men', 'Women'].forEach(dv => { const gt = schedule.groupsTable[dv]; if (!gt) return; %>
     <h4 class="groups-div"><%= dv %></h4>
@@ -78,6 +79,7 @@
     </div>
     <% }) %>
     <p class="small-note">Click a team to see their matches.<% if (schedule.groupsPdf) { %> <a href="<%= schedule.groupsPdf %>" target="_blank" rel="noopener">Official groups PDF</a><% } %></p>
+    <% } %>
     <h3 class="groups-title" id="tables">Group tables</h3>
     <p class="small-note">Worked out from finished games: 3 points for a win, 1 for a draw, then goal difference, then goals scored. This is a guide only. The organiser's own ranking is the official one.</p>
     <% ['Men', 'Women'].forEach(dv => { const gt = schedule.groupsTable[dv]; if (!gt) return; Object.keys(gt).forEach(g => { %>
@@ -87,7 +89,7 @@
     <p class="small-note">Worked out from the organiser's match reports as games finish. Goals are only counted when a team's goal list matches its score. Cards are ranked by total, then red, then yellow.</p>
     <div data-playerstats class="pstats"><p class="small-note">Stats appear once games have been played.</p></div>
     <% } %>
-    <% if (schedule.format) { const f = schedule.format; %>
+    <% if (schedule.format && !placings) { const f = schedule.format; %>
     <div class="format-box" id="format">
       <h3>How the groups work</h3>
       <p><%= f.intro %></p>
@@ -109,6 +111,7 @@
       <p class="format-ask"><strong>Ties and carry-over:</strong> <%= f.ask %></p>
     </div>
     <% } %>
+    <% if (placings) { %><details class="gt allgames" open><summary>All games and scores</summary><% } %>
     <div data-sched>
       <div class="sched-filters" hidden>
         <label class="sf-team"><span>Team</span>
@@ -155,9 +158,10 @@
       </section>
       <% }) %>
     </div>
+    <% if (placings) { %></details><% } %>
     <% } %>
 
-    <% if (t.teams.length) { const entered = t.teams.filter(x => x.country); const open = t.teams.length - entered.length; %>
+    <% if (t.teams.length && !placings) { const entered = t.teams.filter(x => x.country); const open = t.teams.length - entered.length; %>
     <h2 class="sub-head">Teams entered</h2>
     <p class="small-note"><%= entered.length %> team<%= entered.length === 1 ? '' : 's' %> entered so far<% if (open) { %>, <%= open %> place<%= open === 1 ? '' : 's' %> to be confirmed<% } %>.</p>
     <ol class="team-list">

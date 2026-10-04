@@ -37,6 +37,12 @@ const STARTERS = [
 if (!db.prepare("SELECT 1 FROM videos WHERE youtube_id = 'QaBpYWyEjlQ'").get() && !db.prepare("SELECT 1 FROM videos WHERE game_code = 'M108'").get()) {
   db.prepare("INSERT INTO videos (youtube_id, title, event, category, video_date, featured, game_code) VALUES ('QaBpYWyEjlQ', 'Men''s final: Málaga v Odysseus', 'European Club Championships 2026, Milan', 'games', '2026-10-04', 0, 'M108')").run();
 }
+// Made the main highlight once, at the site owner's request (4 October 2026); later changes in the admin panel are respected
+db.exec('CREATE TABLE IF NOT EXISTS app_flags (key TEXT PRIMARY KEY)');
+if (!db.prepare("SELECT 1 FROM app_flags WHERE key = 'ecc-final-featured'").get()) {
+  const v = db.prepare("SELECT id FROM videos WHERE youtube_id = 'QaBpYWyEjlQ'").get();
+  if (v) db.transaction(() => { db.prepare('UPDATE videos SET featured = 0').run(); db.prepare('UPDATE videos SET featured = 1 WHERE id = ?').run(v.id); db.prepare("INSERT INTO app_flags (key) VALUES ('ecc-final-featured')").run(); })();
+}
 if (db.prepare('SELECT COUNT(*) AS n FROM videos').get().n === 0) {
   const ins = db.prepare('INSERT INTO videos (youtube_id, title, event, category, video_date, featured) VALUES (@youtube_id, @title, @event, @category, @video_date, @featured)');
   db.transaction(() => STARTERS.forEach((v) => ins.run(v)))();
