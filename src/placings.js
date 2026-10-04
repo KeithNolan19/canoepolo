@@ -26,8 +26,8 @@ const DATA = {
     ['19', 'KS Powiśle', g(162, 'KS Powiśle 5-4 Dispersus'), 'Club name as the organiser writes it'],
     ['20', 'Dispersus', g(162, 'KS Powiśle 5-4 Dispersus')],
     ['21', 'Gent', 'Group E, N° 151 and 163: both games won, 6 points, goal difference +10', 'Written "GEKKO" by the organiser'],
-    ['22-23', 'Linkopig', 'Group E, N° 136 and 149: 3 points, goal difference +4'],
-    ['22-23', 'Praha', 'Group E, N° 136 and 151: 3 points, goal difference 0'],
+    ['22', 'Linkopig', 'Group E, N° 136 and 149: level with Praha on 3 points; goal difference +4 against 0'],
+    ['23', 'Praha', 'Group E, N° 136 and 151: level with Linköping on 3 points; goal difference 0 against +4'],
     ['24', 'Branik', 'Group E, N° 135 and 149: 1 point, goal difference -5'],
     ['25', 'Setubal', 'Group E, N° 135 and 163: 1 point, goal difference -9'],
   ],
@@ -45,10 +45,10 @@ const DATA = {
     ['11', 'Thurgauer', 'Two games, Thurgau W won both: N° 150 (4-1) and N° 164 (6-3)'],
     ['12', 'Mullingar', 'Two games, Thurgau W won both: N° 150 (4-1) and N° 164 (6-3)'],
     ['13', 'Praha', 'Group F, N° 132, 144 and 154: all three teams finished on 3 points; Praha has the best goal difference (+4)'],
-    ['14-15', 'Neptun', 'Group F: level with Deventer on 3 points and goal difference (-2). Neptun scored more goals (7 to 5); Deventer won the game between them (3-0)'],
-    ['14-15', 'Deventer', 'Group F: level with Neptun on 3 points and goal difference (-2). Deventer won the game between them (3-0); Neptun scored more goals (7 to 5)'],
+    ['14-15', 'Neptun', 'Group F: level with Deventer on 3 points and on goal difference (-2), so goal difference does not separate them. Neptun scored more goals (7 to 5); Deventer won the game between them (3-0)'],
+    ['14-15', 'Deventer', 'Group F: level with Neptun on 3 points and on goal difference (-2), so goal difference does not separate them. Deventer won the game between them (3-0); Neptun scored more goals (7 to 5)'],
   ],
 };
-const NOTE = 'Worked out from the organiser\'s games list. Each place comes from the game or games shown. Where two places are shown (for example 22-23), the clubs finished level on points and the order depends on the tie-break rule, which the organiser has not published to us. Their own final ranking is the official one.';
+const NOTE = 'Worked out from the organiser\'s games list. Each place comes from the game or games shown. When clubs finish level on points, goal difference decides. Where two places are shown (14-15), the clubs are still level after that and the order needs a further tie-break rule, so we have not picked. The organiser\'s own final ranking is the official one.';
 function forSlug(slug) { return slug === ECC ? { data: DATA, note: NOTE } : null; }
 module.exports = { forSlug, DATA };
