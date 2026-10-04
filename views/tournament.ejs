@@ -47,6 +47,21 @@
     <h2 class="sub-head" id="schedule">Schedule</h2>
     <% if (schedule.headline) { %><div class="notice green sched-headline"><strong><%= schedule.headline %></strong></div><% } %>
     <p class="small-note"><%= schedule.note %></p>
+    <% if (placings) { %>
+    <h3 class="groups-title" id="placings">Final placings</h3>
+    <p class="small-note"><%= placings.note %></p>
+    <% ['Men', 'Women'].forEach(dv => { %>
+    <h4 class="groups-div"><%= dv %></h4>
+    <ol class="placings <%= dv === 'Women' ? 'is-women' : '' %>">
+      <% placings.data[dv].forEach(r => { %>
+      <li class="pl-row">
+        <span class="pl-place"><%= r[0] %></span>
+        <span class="pl-team"><strong><% if (schedule.countries[r[1]]) { %><span class="tflag" aria-hidden="true"><%- flagImg(schedule.countries[r[1]]) %></span> <% } %><%= r[1] %></strong><small><%= r[2] %><% if (r[3]) { %> &middot; <%= r[3] %><% } %></small></span>
+      </li>
+      <% }) %>
+    </ol>
+    <% }) %>
+    <% } %>
     <% if (schedule.groupsTable) { %>
     <h3 class="groups-title" id="groups">Groups</h3>
     <% ['Men', 'Women'].forEach(dv => { const gt = schedule.groupsTable[dv]; if (!gt) return; %>

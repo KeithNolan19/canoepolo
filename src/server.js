@@ -287,7 +287,7 @@ app.get('/tournaments/map', (req, res) => {
 app.get('/tournaments/:slug', (req, res) => {
   const t = T.getBySlug(req.params.slug, { includeDrafts: !!req.session.admin });
   if (!t) return res.status(404).render('404', { title: 'Not found' });
-  res.render('tournament', { title: t.name, t, schedule: require('./schedules').forSlug(t.slug) });
+  res.render('tournament', { title: t.name, t, schedule: require('./schedules').forSlug(t.slug), placings: require('./placings').forSlug(t.slug) });
 });
 
 const exportLimiter = rateLimit({ windowMs: 60 * 1000, limit: 20, standardHeaders: false, legacyHeaders: false });
