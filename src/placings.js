@@ -49,7 +49,7 @@ const DATA = {
     ['15', 'Neptun', 'Group F: level with Deventer on 3 points and on goal difference (-2); Deventer won the game between them, N° 144 (3-0)'],
   ],
 };
-const NOTE = 'Worked out from the organiser\'s games list. Each place comes from the game or games shown. When clubs finish level on points, goal difference decides; if they are still level, the game between them decides (Neptun and Deventer). The organiser\'s own final ranking is the official one.';
+const NOTE = 'Worked out from the organiser\'s results. Clubs level on points are separated by goal difference, then by the game between them. The organiser\'s own final ranking is the official one.';
 // How a club is written on this page (the lookup key above stays our own name, for the flag)
 const DISPLAY = { Iper: 'Ieper', Gent: 'Gekko', Chiavari: 'Chiavari Pro Scogli' };
 function forSlug(slug) { return slug === ECC ? { data: DATA, note: NOTE, display: DISPLAY } : null; }
