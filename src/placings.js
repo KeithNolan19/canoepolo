@@ -8,7 +8,7 @@ const DATA = {
     ['1', 'Odysseus', g(168, 'final, Málaga 3-4 Odysseus')],
     ['2', 'Malaga', g(168, 'final, Málaga 3-4 Odysseus')],
     ['3', 'Avranches', g(166, 'Pro Scogli 2-8 Avranches')],
-    ['4', 'Chiavari', g(166, 'Pro Scogli 2-8 Avranches'), 'Written "Pro Scogli" by the organiser'],
+    ['4', 'Chiavari', g(166, 'Pro Scogli 2-8 Avranches')],
     ['5', 'Napoli', g(157, 'KSVH Berlin 3-4 CC Napoli')],
     ['6', 'KSVH Berlin', g(157, 'KSVH Berlin 3-4 CC Napoli')],
     ['7', 'Corbeil-Essenos', g(158, 'Corbeil 6-3 Ulster')],
@@ -25,7 +25,7 @@ const DATA = {
     ['18', 'Kilkenny', g(161, 'Deventer 11-1 Kilkenny')],
     ['19', 'KS Powiśle', g(162, 'KS Powiśle 5-4 Dispersus'), 'Club name as the organiser writes it'],
     ['20', 'Dispersus', g(162, 'KS Powiśle 5-4 Dispersus')],
-    ['21', 'Gent', 'Group E, N° 151 and 163: both games won, 6 points, goal difference +10', 'Written "GEKKO" by the organiser'],
+    ['21', 'Gent', 'Group E, N° 151 and 163: both games won, 6 points, goal difference +10'],
     ['22', 'Linkopig', 'Group E, N° 136 and 149: level with Praha on 3 points; goal difference +4 against 0'],
     ['23', 'Praha', 'Group E, N° 136 and 151: level with Linköping on 3 points; goal difference 0 against +4'],
     ['24', 'Branik', 'Group E, N° 135 and 149: 1 point, goal difference -5'],
@@ -45,10 +45,12 @@ const DATA = {
     ['11', 'Thurgauer', 'Two games, Thurgau W won both: N° 150 (4-1) and N° 164 (6-3)'],
     ['12', 'Mullingar', 'Two games, Thurgau W won both: N° 150 (4-1) and N° 164 (6-3)'],
     ['13', 'Praha', 'Group F, N° 132, 144 and 154: all three teams finished on 3 points; Praha has the best goal difference (+4)'],
-    ['14-15', 'Neptun', 'Group F: level with Deventer on 3 points and on goal difference (-2), so goal difference does not separate them. Neptun scored more goals (7 to 5); Deventer won the game between them (3-0)'],
-    ['14-15', 'Deventer', 'Group F: level with Neptun on 3 points and on goal difference (-2), so goal difference does not separate them. Deventer won the game between them (3-0); Neptun scored more goals (7 to 5)'],
+    ['14', 'Deventer', 'Group F: level with Neptun on 3 points and on goal difference (-2); Deventer won the game between them, N° 144 (3-0)'],
+    ['15', 'Neptun', 'Group F: level with Deventer on 3 points and on goal difference (-2); Deventer won the game between them, N° 144 (3-0)'],
   ],
 };
-const NOTE = 'Worked out from the organiser\'s games list. Each place comes from the game or games shown. When clubs finish level on points, goal difference decides. Where two places are shown (14-15), the clubs are still level after that and the order needs a further tie-break rule, so we have not picked. The organiser\'s own final ranking is the official one.';
-function forSlug(slug) { return slug === ECC ? { data: DATA, note: NOTE } : null; }
+const NOTE = 'Worked out from the organiser\'s games list. Each place comes from the game or games shown. When clubs finish level on points, goal difference decides; if they are still level, the game between them decides (Neptun and Deventer). The organiser\'s own final ranking is the official one.';
+// How a club is written on this page (the lookup key above stays our own name, for the flag)
+const DISPLAY = { Iper: 'Ieper', Gent: 'Gekko', Chiavari: 'Chiavari Pro Scogli' };
+function forSlug(slug) { return slug === ECC ? { data: DATA, note: NOTE, display: DISPLAY } : null; }
 module.exports = { forSlug, DATA };

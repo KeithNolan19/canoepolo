@@ -56,7 +56,7 @@
       <% placings.data[dv].forEach(r => { %>
       <li class="pl-row">
         <span class="pl-place"><%= r[0] %></span>
-        <span class="pl-team"><strong><% if (schedule.countries[r[1]]) { %><span class="tflag" aria-hidden="true"><%- flagImg(schedule.countries[r[1]]) %></span> <% } %><%= r[1] %></strong><small><%= r[2] %><% if (r[3]) { %> &middot; <%= r[3] %><% } %></small></span>
+        <span class="pl-team"><strong><% if (schedule.countries[r[1]]) { %><span class="tflag" aria-hidden="true"><%- flagImg(schedule.countries[r[1]]) %></span> <% } %><%= (placings.display || {})[r[1]] || r[1] %></strong><small><%= r[2] %><% if (r[3]) { %> &middot; <%= r[3] %><% } %></small></span>
       </li>
       <% }) %>
     </ol>
