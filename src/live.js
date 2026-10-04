@@ -47,6 +47,27 @@ const meta = new Map(); // code -> what the official page says about the game it
 let timer = null;
 // When the event is over the site stops reading the organiser's pages for good. Everything read is kept in this file and loaded at every start.
 const FINAL_FILE = path.join(process.env.DATA_DIR || path.join(__dirname, '..', 'data'), 'ecc-final.json');
+const SNAP_FILE = FINAL_FILE.replace('ecc-final.json', 'ecc-live-snapshot.json');
+let snapTimer = null;
+// Until the event is saved for good, keep a copy of what was read so a restart (a new version of the site going live) does not blank the scores
+function saveSnap() {
+  if (frozen || snapTimer) return;
+  snapTimer = setTimeout(() => {
+    snapTimer = null;
+    try { fs.writeFileSync(SNAP_FILE, JSON.stringify({ savedAt: new Date().toISOString(), state: Object.fromEntries(state), meta: Object.fromEntries(meta), finished: [...finished], teamsFor })); } catch (e) { /* not fatal */ }
+  }, 15000);
+  snapTimer.unref();
+}
+function loadSnap() {
+  try {
+    const j = JSON.parse(fs.readFileSync(SNAP_FILE, 'utf8'));
+    Object.entries(j.state || {}).forEach(([k, v]) => state.set(k, v));
+    Object.entries(j.meta || {}).forEach(([k, v]) => meta.set(k, v));
+    (j.finished || []).forEach((k) => finished.add(k));
+    Object.assign(teamsFor, j.teamsFor || {});
+    schedules.setTeamOverrides(teamsFor); schedules.setOverrides(changes());
+  } catch (e) { /* no snapshot yet */ }
+}
 let frozen = false;
 const isFrozen = () => frozen;
 function loadFinal() {
@@ -289,6 +310,7 @@ function ingest(m, html) {
   const o1 = offs(newMeta.detail), o0 = prevMeta ? offs(prevMeta.detail) : '';
   if (o1 && o1 !== o0 && /[A-Za-z]/.test(o1.replace(/C\.o\./g, ''))) logChange(m.code, 'Officials', `${gameLabel(m.code)}: referees / scorer / timekeeper now ${o1}${o0 ? ' (was ' + o0 + ')' : ''}`);
   meta.set(m.code, newMeta);
+  saveSnap();
   schedules.setOverrides(changes());
   if (m.ph) {
     // Teams are only filled in when the organiser's page names two clubs AND each club fits the placeholder in our timetable
@@ -321,6 +343,7 @@ function ingest(m, html) {
     const bad = (x) => (x && x.goals ? x.goals.filter((g) => g.u).length : 0);
     if (bad(r) && !bad(pr)) logChange(m.code, 'Goal list mismatch', `${gameLabel(m.code)}: the organiser's goal list does not add up to the score for one side, so those scorers are not counted`);
     state.set(m.code, { ...p.result, at: Date.now() });
+    saveSnap();
     if (p.result.status === 'FT') { finished.add(m.code); if (!ftAt.has(m.code)) ftAt.set(m.code, { t: Date.now(), n: 0 }); }
   }
 }
@@ -441,7 +464,9 @@ function readAll() {
   logChange('', 'Full read', `Reading all games from the organiser's pages (${list.length} games)`);
   (async () => {
     for (const m of list) {
-      try { ingest(m, await fetchPage(m.url)); } catch (e) { verifying.failed++; }
+      let ok = false;
+      for (let a = 0; a < 3 && !ok; a++) { try { ingest(m, await fetchPage(m.url)); ok = true; } catch (e) { await new Promise((r) => setTimeout(r, 1500)); } }
+      if (!ok) verifying.failed++;
       verifying.n++;
       await new Promise((r) => setTimeout(r, 700));
     }
@@ -521,6 +546,7 @@ function changes() {
 
 function start() {
   if (loadFinal()) return;
+  loadSnap();
   if (timer || process.env.LIVE_SCORES === 'off') return;
   timer = setInterval(() => { tick().catch(() => {}); }, POLL_MS);
   timer.unref();
@@ -530,7 +556,7 @@ function start() {
   // The whole timetable is read automatically too: once 10 minutes after each start and then every 90 minutes during the tournament (skipped while the organisers' site is failing)
   const inWindow = () => Date.now() >= Date.parse('2026-10-02T05:00:00+02:00') && Date.now() <= Date.parse('2026-10-05T00:00:00+02:00');
   const full = () => { if (!frozen && inWindow() && !paused()) readAll(); };
-  setTimeout(full, 10 * 60 * 1000).unref();
+  setTimeout(full, 60 * 1000).unref();
   const fi = setInterval(full, 90 * 60 * 1000);
   fi.unref();
   tick().catch(() => {});
