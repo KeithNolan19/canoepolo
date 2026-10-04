@@ -35,6 +35,7 @@ if (!ADMIN_PASSWORD) console.warn('WARNING: no ADMIN_PASSWORD set - using "chang
 const ASSET_V = Date.now().toString(36);
 
 const app = express();
+app.use((req, res, next) => { try { res.locals.kayakersOn = kayakers.enabled(); } catch (e) { res.locals.kayakersOn = false; } next(); });
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '..', 'views'));
 app.set('trust proxy', 1); // we sit behind Caddy
@@ -807,6 +808,6 @@ app.use((err, req, res, next) => {
 });
 
 if (require.main === module) {
-  app.listen(PORT, () => { console.log(`canoepolo.eu running on ${BASE_URL} (port ${PORT})`); live.start(); kayakers.start(); sms.startTimer(); sms.cleanup(); });
+  app.listen(PORT, () => { console.log(`canoepolo.eu running on ${BASE_URL} (port ${PORT})`); live.start(); if (live.isFrozen()) kayakers.setEnabled(false); else kayakers.start(); sms.startTimer(); sms.cleanup(); });
 }
 module.exports = app;

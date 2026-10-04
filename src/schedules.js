@@ -254,6 +254,8 @@ const SCHEDULES = {
 // Turn the compact lists into objects, grouped by time slot
 // The organisers' own system is always right: live.js reports games whose time or pitch differs from this timetable and they are moved here
 let overrides = {};
+let frozen = false;
+function setFrozen(v) { frozen = !!v; } // event over: no links to the organiser's live pages
 function setOverrides(o) { overrides = o || {}; }
 // Team names the organisers' match pages show for knockout games that are still placeholders in our timetable ("1st in Group A", "Winner of M69")
 let teamOv = {};
@@ -304,7 +306,7 @@ function forSlug(slug, opts = {}) {
       slots.sort((a, b) => a.start.localeCompare(b.start));
       slots.forEach((x) => x.matches.sort((a, b) => a.pitch - b.pitch));
       const all = slots.flatMap((x) => x.matches);
-      if (d.liveFirstId && s.liveMatchBase) all.forEach((m, i) => { m.liveId = d.liveFirstId + i; m.live = s.liveMatchBase + m.liveId; });
+      if (d.liveFirstId && s.liveMatchBase) all.forEach((m, i) => { m.liveId = d.liveFirstId + i; if (!frozen || opts.raw) m.live = s.liveMatchBase + m.liveId; });
       let outSlots = slots, outAll = all;
       if (!opts.raw && all.some((m) => overrides[m.code])) {
         // move games to where the organisers' system says they are (ids stay as they were)
@@ -330,4 +332,4 @@ function forSlug(slug, opts = {}) {
   };
 }
 
-module.exports = { forSlug, setOverrides, setTeamOverrides };
+module.exports = { forSlug, setFrozen, setOverrides, setTeamOverrides };

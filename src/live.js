@@ -1,6 +1,8 @@
 // Live scores for the ECC 2026 matches, read from the organisers' official match pages (with their permission).
 // Polite by design: nothing is fetched before a match is due, finished matches are never fetched again,
 // and visitors only ever read our in-memory copy, so traffic to their site does not grow with our visitors.
+const fs = require('fs');
+const path = require('path');
 const schedules = require('./schedules');
 const db = require('./db');
 
@@ -43,6 +45,36 @@ const finished = new Set();
 const ftAt = new Map(); // code -> when we first saw full time, and how many re-reads since (to pick up the organiser's corrections or a page that was incomplete)
 const meta = new Map(); // code -> what the official page says about the game itself (time, field, officials), even before it starts
 let timer = null;
+// When the event is over the site stops reading the organiser's pages for good. Everything read is kept in this file and loaded at every start.
+const FINAL_FILE = path.join(process.env.DATA_DIR || path.join(__dirname, '..', 'data'), 'ecc-final.json');
+let frozen = false;
+const isFrozen = () => frozen;
+function loadFinal() {
+  try {
+    const j = JSON.parse(fs.readFileSync(FINAL_FILE, 'utf8'));
+    Object.entries(j.state || {}).forEach(([k, v]) => state.set(k, v));
+    Object.entries(j.meta || {}).forEach(([k, v]) => meta.set(k, v));
+    (j.finished || []).forEach((k) => finished.add(k));
+    Object.assign(teamsFor, j.teamsFor || {});
+    schedules.setTeamOverrides(teamsFor);
+    schedules.setOverrides(changes());
+    frozen = true; schedules.setFrozen(true);
+    return true;
+  } catch (e) { return false; }
+}
+// After a complete, clean read of every game, once the last game of the event is over: save everything and stop reading for good
+function maybeFreeze() {
+  if (frozen || !verifying || !verifying.done || verifying.failed) return;
+  if (Date.now() < Date.parse('2026-10-04T19:00:00+02:00')) return;
+  const list = matchList();
+  if (!list.length || list.some((m) => !meta.has(m.code))) return;
+  if ([...state.values()].some((v) => v.status === 'LIVE')) return;
+  const o = { savedAt: new Date().toISOString(), state: Object.fromEntries(state), meta: Object.fromEntries(meta), finished: [...finished], teamsFor };
+  fs.writeFileSync(FINAL_FILE + '.tmp', JSON.stringify(o)); fs.renameSync(FINAL_FILE + '.tmp', FINAL_FILE);
+  frozen = true; schedules.setFrozen(true);
+  if (timer) { clearInterval(timer); timer = null; }
+  logChange('', 'Event over', `Final results saved (${state.size} results, ${meta.size} games). The site no longer reads the organiser's pages.`);
+}
 
 function textOf(html) {
   return html
@@ -294,6 +326,7 @@ function ingest(m, html) {
 }
 
 async function tick() {
+  if (frozen) return;
   const now = Date.now();
   const todo = matchList().filter((m) => due(m, now));
   for (const m of todo) {
@@ -306,6 +339,7 @@ async function tick() {
 let sweeping = false;
 const farRead = new Map(); // code -> when a game that is still waiting for its teams was last read ahead of time
 async function sweep() {
+  if (frozen) return;
   const now = Date.now();
   if (sweeping || now < Date.parse('2026-10-02T05:00:00+02:00') || now > Date.parse('2026-10-05T00:00:00+02:00')) return;
   sweeping = true;
@@ -412,6 +446,7 @@ function readAll() {
       await new Promise((r) => setTimeout(r, 700));
     }
     verifying.done = true;
+    try { maybeFreeze(); } catch (e) { logChange('', 'Event over', 'Could not save the final results: ' + e.message); }
     logChange('', 'Full read', `Full read finished: ${verifying.n} read, ${verifying.failed} failed`);
   })();
   return verifying;
@@ -485,6 +520,7 @@ function changes() {
 }
 
 function start() {
+  if (loadFinal()) return;
   if (timer || process.env.LIVE_SCORES === 'off') return;
   timer = setInterval(() => { tick().catch(() => {}); }, POLL_MS);
   timer.unref();
@@ -493,7 +529,7 @@ function start() {
   setTimeout(() => { sweep().catch(() => {}); }, 5 * 60 * 1000).unref(); // not straight after a restart, so a deploy does not hit the organisers' site
   // The whole timetable is read automatically too: once 10 minutes after each start and then every 90 minutes during the tournament (skipped while the organisers' site is failing)
   const inWindow = () => Date.now() >= Date.parse('2026-10-02T05:00:00+02:00') && Date.now() <= Date.parse('2026-10-05T00:00:00+02:00');
-  const full = () => { if (inWindow() && !paused()) readAll(); };
+  const full = () => { if (!frozen && inWindow() && !paused()) readAll(); };
   setTimeout(full, 10 * 60 * 1000).unref();
   const fi = setInterval(full, 90 * 60 * 1000);
   fi.unref();
@@ -520,4 +556,4 @@ function detail(code) {
 }
 
 const matchByCode = (id) => matchList().find((m) => String(m.url).endsWith('id=' + Number(id))) || null; // by the organiser's N°
-module.exports = { matchByCode, explain, readLog, logKinds, logChange, health, paused, readAll, readAllStatus, verify, parseTeams, ingest, start, snapshot, detail, changes, standings, playerStats, meta, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };
+module.exports = { isFrozen, matchByCode, explain, readLog, logKinds, logChange, health, paused, readAll, readAllStatus, verify, parseTeams, ingest, start, snapshot, detail, changes, standings, playerStats, meta, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };
