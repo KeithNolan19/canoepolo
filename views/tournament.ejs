@@ -55,7 +55,7 @@
     <ol class="placings <%= dv === 'Women' ? 'is-women' : '' %>">
       <% placings.data[dv].forEach(r => { %>
       <li class="pl-row">
-        <span class="pl-place"><%= r[0] %></span>
+        <span class="pl-place"><% var medal = { 1: ['🥇', 'Gold'], 2: ['🥈', 'Silver'], 3: ['🥉', 'Bronze'] }[r[0]]; if (medal) { %><span class="pl-medal" role="img" aria-label="<%= medal[1] %> medal"><%= medal[0] %></span><% } %><span class="pl-num"><%= r[0] %></span></span>
         <span class="pl-team"><strong><% var fl = schedule.countries[r[1]] || (placings.flags || {})[r[1]]; if (fl) { %><span class="tflag" aria-hidden="true"><%- flagImg(fl) %></span> <% } %><%= (placings.display || {})[r[1]] || r[1] %></strong></span>
       </li>
       <% }) %>

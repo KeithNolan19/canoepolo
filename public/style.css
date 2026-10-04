@@ -987,3 +987,10 @@ h1, h2, h3, .event-name, .event-where, .event-extra { overflow-wrap: anywhere; }
 .pl-place { font-weight: 800; font-size: 1.2rem; text-align: center; }
 .pl-team small { display: block; font-size: .78rem; color: var(--muted); font-weight: 400; }
 .pl-row:nth-child(-n+3) .pl-place { color: var(--deep); }
+
+.pl-place { display: flex; flex-direction: column; align-items: center; line-height: 1.1; }
+.pl-medal { font-size: 1.5rem; }
+.pl-medal + .pl-num { font-size: .72rem; color: var(--muted); font-weight: 600; }
+.pl-row:nth-child(1) { background: linear-gradient(90deg, rgba(255,200,40,.22), var(--card) 60%); }
+.pl-row:nth-child(2) { background: linear-gradient(90deg, rgba(170,180,195,.25), var(--card) 60%); }
+.pl-row:nth-child(3) { background: linear-gradient(90deg, rgba(205,127,50,.2), var(--card) 60%); }
