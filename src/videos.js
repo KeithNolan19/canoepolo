@@ -21,6 +21,9 @@ db.exec(`
   );
 `);
 
+// A video can belong to one game of a tournament (the organiser's game code, e.g. M108): the game's pop-up then shows a Watch link
+try { db.exec('ALTER TABLE videos ADD COLUMN game_code TEXT'); } catch (e) { /* column already there */ }
+
 // Starter videos, added once when the table is empty. All from the Planet Canoe / ICF YouTube channels.
 const STARTERS = [
   { youtube_id: 'W3UzcJLjoxE', title: 'Day 1 highlights', event: '2026 Canoe Polo World Championships, Duisburg', category: 'highlights', video_date: '2026-09-15', featured: 1 },
@@ -30,6 +33,10 @@ const STARTERS = [
   { youtube_id: 'lGsUoXpiof4', title: 'Women\'s final: New Zealand v Italy', event: '2024 ICF Canoe Polo World Championships, Deqing', category: 'games', video_date: '2024-10-20', featured: 0 },
   { youtube_id: 'GPRiNzGr50Y', title: 'How to: Canoe Polo', event: 'ICF educational series', category: 'learn', video_date: '2026-01-15', featured: 0 },
 ];
+// ECC 2026 men's final (sent by the site owner 4 October 2026), added once; edit or remove it in the admin panel
+if (!db.prepare("SELECT 1 FROM videos WHERE youtube_id = 'QaBpYWyEjlQ'").get() && !db.prepare("SELECT 1 FROM videos WHERE game_code = 'M108'").get()) {
+  db.prepare("INSERT INTO videos (youtube_id, title, event, category, video_date, featured, game_code) VALUES ('QaBpYWyEjlQ', 'Men''s final: Málaga v Odysseus', 'European Club Championships 2026, Milan', 'games', '2026-10-04', 0, 'M108')").run();
+}
 if (db.prepare('SELECT COUNT(*) AS n FROM videos').get().n === 0) {
   const ins = db.prepare('INSERT INTO videos (youtube_id, title, event, category, video_date, featured) VALUES (@youtube_id, @title, @event, @category, @video_date, @featured)');
   db.transaction(() => STARTERS.forEach((v) => ins.run(v)))();
@@ -66,6 +73,7 @@ function validate(body) {
     category: CATEGORIES[body.category] ? body.category : 'highlights',
     video_date: /^\d{4}-\d{2}-\d{2}$/.test(body.video_date || '') ? body.video_date : new Date().toISOString().slice(0, 10),
     featured: body.featured ? 1 : 0,
+    game_code: /^[FM]\d{1,3}$/i.test(String(body.game_code || '').trim()) ? String(body.game_code).trim().toUpperCase() : '',
   };
   const errors = [];
   if (!data.youtube_id) errors.push('Paste a YouTube link (for example https://www.youtube.com/watch?v=…).');
@@ -76,13 +84,14 @@ function validate(body) {
 function save(id, data) {
   const run = db.transaction(() => {
     if (data.featured) db.prepare('UPDATE videos SET featured = 0').run();
-    const fields = { youtube_id: data.youtube_id, title: data.title, event: data.event, category: data.category, video_date: data.video_date, featured: data.featured };
-    if (id) db.prepare('UPDATE videos SET youtube_id=@youtube_id, title=@title, event=@event, category=@category, video_date=@video_date, featured=@featured WHERE id=@id').run({ ...fields, id });
-    else id = db.prepare('INSERT INTO videos (youtube_id, title, event, category, video_date, featured) VALUES (@youtube_id, @title, @event, @category, @video_date, @featured)').run(fields).lastInsertRowid;
+    const fields = { youtube_id: data.youtube_id, title: data.title, event: data.event, category: data.category, video_date: data.video_date, featured: data.featured, game_code: data.game_code || null };
+    if (id) db.prepare('UPDATE videos SET youtube_id=@youtube_id, title=@title, event=@event, category=@category, video_date=@video_date, featured=@featured, game_code=@game_code WHERE id=@id').run({ ...fields, id });
+    else id = db.prepare('INSERT INTO videos (youtube_id, title, event, category, video_date, featured, game_code) VALUES (@youtube_id, @title, @event, @category, @video_date, @featured, @game_code)').run(fields).lastInsertRowid;
   });
   run();
   return getById(id);
 }
+function forGame(code) { const r = db.prepare('SELECT youtube_id, title FROM videos WHERE game_code = ? ORDER BY id DESC LIMIT 1').get(String(code || '').toUpperCase()); return r ? { id: r.youtube_id, title: r.title } : null; }
 function remove(id) { db.prepare('DELETE FROM videos WHERE id = ?').run(id); }
 
 // Places to watch more. Edit freely.
@@ -93,4 +102,4 @@ const CHANNELS = [
   { name: 'Canoe polo World Championships', url: 'https://paddleworldwide.com/competitions/2026-canoe-polo-world-championships-2438/media', text: 'Official results, news and media from the ICF (now Paddle Worldwide).' },
 ];
 
-module.exports = { CATEGORIES, CHANNELS, parseYouTubeId, all, byCategory, getById, validate, save, remove };
+module.exports = { CATEGORIES, CHANNELS, parseYouTubeId, all, byCategory, getById, validate, save, remove, forGame };

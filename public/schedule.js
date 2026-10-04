@@ -197,6 +197,7 @@
     if (d.live) { const a = el('a', 'btn small', 'Official match page'); a.href = d.live; a.target = '_blank'; a.rel = 'noopener'; dlg.append(a); }
     dlg.showModal();
     fetch('/api/live-game/' + encodeURIComponent(d.code)).then((r) => r.json()).then((g) => {
+      if (g && g.video && /^[A-Za-z0-9_-]{11}$/.test(g.video.id)) { const w = el('a', 'btn small primary', 'Watch this game'); w.href = 'https://www.youtube.com/watch?v=' + g.video.id; w.target = '_blank'; w.rel = 'noopener'; dlg.insertBefore(w, body); }
       if (!g || (!g.s && !g.officials)) { score.textContent = 'Not started yet'; return; }
       if (!g.s) { score.textContent = 'Not started yet'; const o0 = g.officials || {}; const l0 = [['Referee', o0.referee1], ['Referee 2', o0.referee2], ['Scorer', o0.scorer], ['Timekeeper', o0.timekeeper]].filter((x3) => x3[1] && x3[1] !== '-'); if (g.time || g.field) body.append(el('p', 'gm-note', 'Official site: ' + [g.time, g.field ? 'pitch ' + g.field : ''].filter(Boolean).join(', '))); if (l0.length) { body.append(el('h3', '', 'Officials')); body.append(el('p', '', l0.map((x3) => x3[0] + ': ' + x3[1]).join(' \u00b7 '))); } return; }
       score.textContent = home + ' ' + g.s + ' ' + away;

@@ -490,7 +490,7 @@ app.post('/admin/sms/send', requireAdmin, checkCsrf, async (req, res) => {
   const r = await sms.broadcast(team, text);
   res.redirect('/admin/sms?msg=' + encodeURIComponent(`Sent to ${r.ok} of ${r.total} numbers${r.failed ? ` (${r.failed} failed)` : ''}.`));
 });
-app.get('/api/live-game/:code', (req, res) => { res.set('Cache-Control', 'public, max-age=15'); res.json(live.detail(String(req.params.code).toUpperCase().slice(0, 6)) || {}); });
+app.get('/api/live-game/:code', (req, res) => { res.set('Cache-Control', 'public, max-age=15'); const c = String(req.params.code).toUpperCase().slice(0, 6); res.json({ ...(live.detail(c) || {}), video: V.forGame(c) || undefined }); });
 app.get('/api/live-changes', (req, res) => { res.set('Cache-Control', 'public, max-age=30'); res.json(live.changes()); });
 app.get('/api/standings', (req, res) => { res.set('Cache-Control', 'public, max-age=20'); res.json(live.standings()); });
 app.get('/api/player-stats', (req, res) => { res.set('Cache-Control', 'public, max-age=30'); res.json(live.playerStats()); });

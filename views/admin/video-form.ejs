@@ -22,6 +22,10 @@
     <label class="full">Event (optional)
       <input name="event" maxlength="140" value="<%= v.event || '' %>" placeholder="e.g. 2026 Canoe Polo World Championships, Duisburg">
     </label>
+    <label>Game code (optional)
+      <input name="game_code" maxlength="5" value="<%= v.game_code || '' %>" placeholder="e.g. M108 or F60">
+      <span class="small-note">If this video is one game from the ECC timetable, enter its code (M for men, F for women, as shown on the schedule). A "Watch this game" link then appears in that game's pop-up.</span>
+    </label>
     <label>Section
       <select name="category">
         <% Object.entries(CATEGORIES).forEach(([k, label]) => { %>
