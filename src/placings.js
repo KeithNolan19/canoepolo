@@ -44,9 +44,9 @@ const DATA = {
     ['10', 'Ichnusa', g(153, 'Kingston 4-2 Ichnusa')],
     ['11', 'Thurgauer', 'Two games, Thurgau W won both: N° 150 (4-1) and N° 164 (6-3)'],
     ['12', 'Mullingar', 'Two games, Thurgau W won both: N° 150 (4-1) and N° 164 (6-3)'],
-    ['13', 'Praha', 'Group F, N° 132, 144 and 154: all three teams finished on 3 points; Praha has the best goal difference (+4)'],
-    ['14', 'Deventer', 'Group F: level with Neptun on 3 points and on goal difference (-2); Deventer won the game between them, N° 144 (3-0)'],
-    ['15', 'Neptun', 'Group F: level with Deventer on 3 points and on goal difference (-2); Deventer won the game between them, N° 144 (3-0)'],
+    ['13', 'Neptun', 'Group F (double round robin, Saturday and Sunday games): Neptun 9 points, Praha 6, Deventer 3, from the organiser\'s Round FF table'],
+    ['14', 'Praha', 'Group F: 6 points from 4 games, from the organiser\'s Round FF table'],
+    ['15', 'Deventer', 'Group F: 3 points from 4 games, from the organiser\'s Round FF table'],
   ],
 };
 const NOTE = 'Worked out from the organiser\'s results. Clubs level on points are separated by goal difference, then by the game between them. The organiser\'s own final ranking is the official one.';
