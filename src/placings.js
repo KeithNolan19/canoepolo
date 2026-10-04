@@ -49,7 +49,7 @@ const DATA = {
     ['15', 'Deventer', 'Group F: 3 points from 4 games, from the organiser\'s Round FF table'],
   ],
 };
-const NOTE = 'Worked out from the organiser\'s results. Clubs level on points are separated by goal difference, then by the game between them. The organiser\'s own final ranking is the official one.';
+const NOTE = '';
 // How a club is written on this page (the lookup key above stays our own name, for the flag)
 const DISPLAY = { Iper: 'Ieper', Gent: 'Gekko', Chiavari: 'Chiavari Pro Scogli' };
 // Flags for the two clubs the organiser names differently from our list: Lokomotiv = Lokomotiv Skovshoved (Denmark, in our gazebo list), KS Powiśle = Warsaw (Poland)

@@ -33,7 +33,7 @@
     <% if (schedule && schedule.support) { %><div class="notice green"><strong>Support your club</strong><br>Pick your country to see its clubs, games, live scores and scorers.<br><a class="btn primary" href="/tournaments/<%= t.slug %>/support">Support your club</a></div><% } %>
     <% if (schedule && schedule.notice) { %><div class="notice" role="note"><strong>Note:</strong> <%= schedule.notice %></div><% } %>
 
-    <% if (t.documents.length) { %>
+    <% if (t.documents.length && !placings) { %>
     <h2 class="sub-head">Documents</h2>
     <ul class="doc-list">
       <% t.documents.forEach(d => { %><li><% const pdf = /\.pdf$/i.test(d.url); %><a class="doc-link" href="<%= d.url %>"<%- pdf ? ' target="_blank" rel="noopener"' : '' %>><span class="doc-icon" aria-hidden="true"><%= pdf ? 'PDF' : 'MAP' %></span><span><%= d.label %></span></a></li><% }) %>
@@ -49,7 +49,7 @@
     <p class="small-note"><%= schedule.note %></p>
     <% if (placings) { %>
     <h3 class="groups-title" id="placings">Final placings</h3>
-    <p class="small-note"><%= placings.note %></p>
+    <% if (placings.note) { %><p class="small-note"><%= placings.note %></p><% } %>
     <% ['Men', 'Women'].forEach(dv => { %>
     <h4 class="groups-div"><%= dv %></h4>
     <ol class="placings <%= dv === 'Women' ? 'is-women' : '' %>">
