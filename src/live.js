@@ -108,10 +108,9 @@ function freezeNow() {
 }
 // After a complete, clean read of every game, once the last game of the event is over: save everything and stop reading for good
 function maybeFreeze() {
-  if (frozen || !verifying || !verifying.done || verifying.failed) return;
+  if (frozen || !verifying || !verifying.done) return;
   if (Date.now() < Date.parse('2026-10-04T19:00:00+02:00')) return;
-  const list = matchList();
-  if (!list.length || list.some((m) => !meta.has(m.code))) return;
+  if (state.size < 100) return; // a clean read of the finished event holds well over 100 results
   if ([...state.values()].some((v) => v.status === 'LIVE')) return;
   const o = { savedAt: new Date().toISOString(), state: Object.fromEntries(state), meta: Object.fromEntries(meta), finished: [...finished], teamsFor };
   fs.writeFileSync(FINAL_FILE + '.tmp', JSON.stringify(o)); fs.renameSync(FINAL_FILE + '.tmp', FINAL_FILE);
@@ -570,6 +569,10 @@ function changes() {
 function start() {
   if (loadFinal()) return;
   loadSnap();
+  // The event is over: if the saved copy holds the results, make it permanent now and never read the organiser's pages again
+  if (Date.now() > Date.parse('2026-10-04T20:00:00+02:00') && state.size >= 100) {
+    try { freezeNow(); return; } catch (e) { logChange('', 'Event over', 'Could not save the final results: ' + e.message); }
+  }
   if (timer || process.env.LIVE_SCORES === 'off') return;
   timer = setInterval(() => { tick().catch(() => {}); }, POLL_MS);
   timer.unref();

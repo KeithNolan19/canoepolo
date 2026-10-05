@@ -8,7 +8,7 @@
 <% if (msg) { %><div class="notice green"><%= msg %></div><% } %>
 <div class="panel">
   <p><strong>Live feed: <%= frozen ? 'OFF. The final results are saved and the site no longer reads the organiser\'s pages.' : 'still on.' %></strong> Results held now: <%= health.withScores %> of <%= health.gamesRead %> games read.</p>
-  <% if (!frozen) { %><form method="post" action="/admin/live-freeze"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn primary" type="submit">Save all results and turn the live feed off</button></form><% } %>
+  <% if (!frozen) { %><p class="small-note">The site saves the results and switches the live feed off by itself once a full read of the event has finished.</p><% } %>
 </div>
 <p class="small-note">Every change the site has made from the organiser's pages: scores, full times, corrections, moved times and pitches, teams filled in, referees, cards, mismatched goal lists and outages. Each entry says which competition it is for and where the information came from (older entries show a default). Newest first, times in Dublin time. The latest 500 are shown. This log is kept after a restart.</p>
 
