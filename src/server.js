@@ -411,7 +411,7 @@ app.get(`/tournaments/${ECC_SLUG}/support/:cc`, (req, res, next) => {
       const mine = home ? a : b, theirs = home ? b : a;
       if (sc.st === 'FT') { t.p++; t.gf += mine; t.ga += theirs; if (mine > theirs) t.w++; else if (mine < theirs) t.l++; else t.d++; }
     }
-    t.games.push({ day: d.label, start: sl.start, pitch: m.pitch, code: m.code, opp: home ? m.away : m.home, oppFlag: sch.countries[home ? m.away : m.home] || '', group: m.group, stage: m.group.length === 1 ? `Group ${m.group}` : m.group, live: m.live || '', away: !home });
+    t.games.push({ day: d.label, start: sl.start, pitch: m.pitch, code: m.code, opp: home ? m.away : m.home, oppFlag: sch.countries[home ? m.away : m.home] || '', group: m.group, stage: m.group.length === 1 ? `Group ${m.group}` : m.group, live: m.live || '', hasScore: !!m.liveId, away: !home });
   };
   sch.days.forEach((d) => d.slots.forEach((sl) => sl.matches.forEach((m) => {
     [m.home, m.away].forEach((name) => {

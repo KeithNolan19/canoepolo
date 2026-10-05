@@ -77,6 +77,18 @@ function loadFinal() {
     Object.entries(j.meta || {}).forEach(([k, v]) => meta.set(k, v));
     (j.finished || []).forEach((k) => finished.add(k));
     Object.assign(teamsFor, j.teamsFor || {});
+    // The event is over, so the organiser's own page names the clubs: fill any play-off game still showing a placeholder, when exactly one of our clubs matches each name
+    try {
+      const sch = schedules.forSlug(SLUG, { raw: true });
+      matchList().forEach((m) => {
+        const v = meta.get(m.code);
+        if (!m.ph || !v || !v.org) return;
+        const names = (sch.teams || []).filter((x) => x.division === (m.code[0] === 'F' ? 'Women' : 'Men')).map((x) => x.name);
+        const one = (o) => { const c = names.filter((n) => sameClub(o, n)); return c.length === 1 ? c[0] : null; };
+        const tt = [one(v.org[0]), one(v.org[1])];
+        if (tt[0] && tt[1] && tt[0] !== tt[1]) teamsFor[m.code] = tt;
+      });
+    } catch (e) { /* keep what was saved */ }
     schedules.setTeamOverrides(teamsFor);
     schedules.setOverrides(changes());
     frozen = true; schedules.setFrozen(true);
