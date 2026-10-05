@@ -48,6 +48,7 @@ function decorate(t) {
     documents: parseDocs(t.documents),
     teams: parseTeams(t.teams),
     featured: !!t.featured,
+    date_tbc: !!t.date_tbc,
     divisions: t.divisions ? t.divisions.split(',').filter(Boolean) : [],
     country_name: COUNTRIES[t.country] || t.country,
   };
@@ -151,6 +152,7 @@ function validate(input) {
     contact_email: s('contact_email') || null,
     status: s('status') || 'published',
     featured: input.featured ? 1 : 0,
+    date_tbc: input.date_tbc ? 1 : 0,
     lat: num(input.lat),
     lng: num(input.lng),
   };
@@ -193,10 +195,10 @@ function create(data) {
   const slug = uniqueSlug(slugify(data.name.includes(year) ? data.name : `${data.name}-${year}`));
   const info = db.prepare(`
     INSERT INTO tournaments (slug, name, start_date, end_date, city, country, venue, level, divisions, description,
-      website_url, registration_url, source_url, documents, teams, registration_deadline, entry_fee, contact_name, contact_email, status, featured, lat, lng)
+      website_url, registration_url, source_url, documents, teams, registration_deadline, entry_fee, contact_name, contact_email, status, featured, lat, lng, date_tbc)
     VALUES (@slug, @name, @start_date, @end_date, @city, @country, @venue, @level, @divisions, @description,
-      @website_url, @registration_url, @source_url, @documents, @teams, @registration_deadline, @entry_fee, @contact_name, @contact_email, @status, @featured, @lat, @lng)
-  `).run({ lat: null, lng: null, teams: null, ...data, slug });
+      @website_url, @registration_url, @source_url, @documents, @teams, @registration_deadline, @entry_fee, @contact_name, @contact_email, @status, @featured, @lat, @lng, @date_tbc)
+  `).run({ lat: null, lng: null, teams: null, date_tbc: 0, ...data, slug });
   return getById(info.lastInsertRowid);
 }
 
@@ -205,10 +207,10 @@ function update(id, data) {
     UPDATE tournaments SET name=@name, start_date=@start_date, end_date=@end_date, city=@city, country=@country,
       venue=@venue, level=@level, divisions=@divisions, description=@description, website_url=@website_url,
       registration_url=@registration_url, source_url=@source_url, documents=@documents, teams=@teams, registration_deadline=@registration_deadline, entry_fee=@entry_fee,
-      contact_name=@contact_name, contact_email=@contact_email, status=@status, featured=@featured, lat=@lat, lng=@lng,
+      contact_name=@contact_name, contact_email=@contact_email, status=@status, featured=@featured, lat=@lat, lng=@lng, date_tbc=@date_tbc,
       updated_at=datetime('now')
     WHERE id=@id
-  `).run({ lat: null, lng: null, teams: null, ...data, id });
+  `).run({ lat: null, lng: null, teams: null, date_tbc: 0, ...data, id });
   return getById(id);
 }
 

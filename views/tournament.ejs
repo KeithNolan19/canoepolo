@@ -7,7 +7,7 @@
     <p class="event-level"><%= t.level %></p>
     <h1><%= t.name %></h1>
     <p class="event-meta">
-      <span><%= fmtRange(t.start_date, t.end_date) %></span>
+      <span><%= fmtRange(t.start_date, t.end_date, t.date_tbc) %></span>
       <span><%- flagImg(t.country) %> <%= [t.venue, t.city, t.country_name].filter(Boolean).join(', ') %></span>
     </p>
   </div>
@@ -20,7 +20,7 @@
 
     <h2 class="sub-head">Tournament details</h2>
     <table class="info-table">
-      <tr><th scope="row">Dates</th><td><%= fmtRange(t.start_date, t.end_date) %></td></tr>
+      <tr><th scope="row">Dates</th><td><%= fmtRange(t.start_date, t.end_date, t.date_tbc) %><% if (t.date_tbc) { %> <span class="small-note">Dates not confirmed yet. Shown on the same weekend as the last event.</span><% } %></td></tr>
       <% if (t.venue) { %><tr><th scope="row">Venue</th><td><%= t.venue %></td></tr><% } %>
       <tr><th scope="row">Location</th><td><%- flagImg(t.country) %> <%= t.city %>, <%= t.country_name %></td></tr>
       <tr><th scope="row">Level</th><td><%= t.level %></td></tr>
@@ -184,7 +184,7 @@
       <h2>Take part</h2>
       <% if (t.registration_url && t.status !== 'cancelled' && !isPast) { %><a class="btn primary block-btn" href="<%= t.registration_url %>" target="_blank" rel="noopener">Register a team</a><% } %>
       <% if (t.website_url) { %><a class="btn outline block-btn" href="<%= t.website_url %>" target="_blank" rel="noopener">Official website</a><% } %>
-      <% if (!isPast) { %><a class="btn outline block-btn" href="/tournaments/<%= t.slug %>/calendar.ics">Add to calendar</a><% } %>
+      <% if (!isPast && !t.date_tbc) { %><a class="btn outline block-btn" href="/tournaments/<%= t.slug %>/calendar.ics">Add to calendar</a><% } %>
     </div>
     <% if (t.contact_name || t.contact_email) { %>
     <div class="side-block">

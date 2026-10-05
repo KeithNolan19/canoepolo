@@ -41,6 +41,7 @@ db.exec(`
 // Columns added after launch (safe to run every start)
 const cols = db.prepare('PRAGMA table_info(tournaments)').all().map((c) => c.name);
 if (!cols.includes('source_url')) db.exec('ALTER TABLE tournaments ADD COLUMN source_url TEXT');
+if (!cols.includes('date_tbc')) db.exec('ALTER TABLE tournaments ADD COLUMN date_tbc INTEGER NOT NULL DEFAULT 0'); // 1 = dates are expected, not confirmed
 if (!cols.includes('lat')) db.exec('ALTER TABLE tournaments ADD COLUMN lat REAL'); // optional exact map position
 if (!cols.includes('lng')) db.exec('ALTER TABLE tournaments ADD COLUMN lng REAL');
 if (!cols.includes('teams')) db.exec('ALTER TABLE tournaments ADD COLUMN teams TEXT'); // JSON list of {name, country}

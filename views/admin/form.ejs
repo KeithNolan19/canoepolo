@@ -30,6 +30,7 @@
         <option value="cancelled" <%= v('status') === 'cancelled' ? 'selected' : '' %>>Cancelled (shown as cancelled)</option>
       </select>
     </label>
+    <label class="check full"><input type="checkbox" name="date_tbc" value="1" <%= t.date_tbc ? 'checked' : '' %>> Dates to be confirmed (shows "TBC" and keeps it out of calendar downloads)</label>
     <label class="check full"><input type="checkbox" name="featured" value="1" <%= t.featured ? 'checked' : '' %>> Featured (pinned to top of the list)</label>
   </fieldset>
 

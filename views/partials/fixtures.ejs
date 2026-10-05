@@ -12,13 +12,13 @@
   <li class="event <%= t.status === 'cancelled' ? 'is-cancelled' : '' %> <%= t.featured ? 'is-featured' : '' %>">
     <a href="/tournaments/<%= t.slug %>">
       <span class="event-date" aria-hidden="true">
-        <span class="event-days"><%= days %></span>
+        <span class="event-days"><%= t.date_tbc ? "TBC" : days %></span>
         <span class="event-mon"><%= mon(t.start_date) %><%= sameMonth ? '' : '-' + mon(t.end_date) %></span>
       </span>
       <span class="event-body">
         <span class="event-name"><%= t.name %><% if (t.status === 'cancelled') { %> <span class="tag tag-red">Cancelled</span><% } %><% if (t.featured) { %> <span class="tag tag-ball">Featured</span><% } %></span>
         <span class="event-where"><%- flagImg(t.country) %> <%= t.city %>, <%= t.country_name %></span>
-        <span class="event-extra"><span class="visually-hidden"><%= fmtRange(t.start_date, t.end_date) %>. </span><%= t.level %><% if (t.divisions.length) { %>: <%= t.divisions.join(', ') %><% } %></span>
+        <span class="event-extra"><span class="visually-hidden"><%= fmtRange(t.start_date, t.end_date, t.date_tbc) %>. </span><%= t.level %><% if (t.divisions.length) { %>: <%= t.divisions.join(', ') %><% } %></span>
       </span>
       <svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </a>

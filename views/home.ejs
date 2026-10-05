@@ -22,7 +22,7 @@
       <a class="hero-next" href="/tournaments/<%= n.slug %>">
         <span class="hero-next-label">Next tournament</span>
         <span class="hero-next-name"><%= n.name %></span>
-        <span class="hero-next-meta"><%= fmtRange(n.start_date, n.end_date) %>, <%- flagImg(n.country) %> <%= n.city %></span>
+        <span class="hero-next-meta"><%= fmtRange(n.start_date, n.end_date, n.date_tbc) %>, <%- flagImg(n.country) %> <%= n.city %></span>
       </a>
       <% } %>
     </div>

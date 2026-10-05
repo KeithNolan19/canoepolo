@@ -61,7 +61,7 @@
       <% }) %>
       <% w.segs.forEach(sg => { const t = sg.t; %>
         <a class="cal-ev gc<%= sg.col + 1 %> gs<%= sg.span %> gr<%= Math.min(sg.lane + 2, 13) %> k-<%= sg.kind %> <%= sg.cutL ? 'cut-l' : '' %> <%= sg.cutR ? 'cut-r' : '' %> <%= t.status === 'cancelled' ? 'is-cancelled' : '' %>"
-           href="/tournaments/<%= t.slug %>" title="<%= t.name %> - <%= t.city %>, <%= t.country_name %> (<%= fmtRange(t.start_date, t.end_date) %>)"><%- flagImg(t.country) %> <%= t.name %></a>
+           href="/tournaments/<%= t.slug %>" title="<%= t.name %> - <%= t.city %>, <%= t.country_name %> (<%= fmtRange(t.start_date, t.end_date, t.date_tbc) %>)"><%- flagImg(t.country) %> <%= t.name %></a>
       <% }) %>
     </div>
     <% }) %>

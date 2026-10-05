@@ -145,7 +145,8 @@ function fmtDate(ymd, opts = { day: 'numeric', month: 'short', year: 'numeric' }
   if (!ymd) return '';
   return new Date(ymd + 'T12:00:00Z').toLocaleDateString('en-GB', { ...opts, timeZone: 'UTC' });
 }
-function fmtRange(a, b) {
+function fmtRange(a, b, tbc) {
+  if (tbc) return fmtRange(a, b) + ' (TBC)';
   if (!b || a === b) return fmtDate(a);
   const [ya, ma] = a.split('-');
   const [yb, mb] = b.split('-');
@@ -309,12 +310,13 @@ app.get('/tournaments/:slug/schedule.xlsx', exportLimiter, scheduleExport('xlsx'
 app.get('/tournaments/:slug/calendar.ics', (req, res) => {
   const t = T.getBySlug(req.params.slug);
   if (!t) return res.status(404).send('Not found');
+  if (t.date_tbc) return res.status(404).send('The dates are not confirmed yet.');
   res.type('text/calendar').attachment(`${t.slug}.ics`).send(buildCalendar([t], BASE_URL));
 });
 
 // Subscribe-able calendar with all upcoming tournaments
 app.get('/calendar.ics', (req, res) => {
-  res.type('text/calendar').send(buildCalendar(T.listPublic({ when: 'upcoming', limit: 500 }), BASE_URL));
+  res.type('text/calendar').send(buildCalendar(T.listPublic({ when: 'upcoming', limit: 500 }).filter((x) => !x.date_tbc), BASE_URL));
 });
 
 app.get('/about', (req, res) => res.render('about', { title: 'About' }));

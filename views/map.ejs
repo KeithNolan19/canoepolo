@@ -51,7 +51,7 @@
         <h3><%- flagImg(p.country) %> <%= p.label %></h3>
         <ul class="map-items">
           <% p.items.forEach(t => { %>
-          <li><a href="/tournaments/<%= t.slug %>"><%= t.name %></a><span><%= fmtRange(t.start_date, t.end_date) %></span></li>
+          <li><a href="/tournaments/<%= t.slug %>"><%= t.name %></a><span><%= fmtRange(t.start_date, t.end_date, t.date_tbc) %></span></li>
           <% }) %>
         </ul>
       </section>

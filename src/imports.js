@@ -6,6 +6,19 @@ const T = require('./tournaments');
 
 const BATCHES = [
   {
+    id: 'ireland-2027-tbc-2026-10-05',
+    tournaments: [
+      { name: 'Irish Open 2027', start_date: '2027-08-21', end_date: '2027-08-22', city: 'To be confirmed', country: 'IE', level: 'International', divisions: ['Men', 'Women'], date_tbc: 1,
+        description: 'Dates and venue to be confirmed. Shown on the same weekend as the 2026 Irish Open (22 and 23 August 2026).' },
+      { name: 'Galway Open 2027', start_date: '2027-06-12', end_date: '2027-06-13', city: 'Galway', country: 'IE', level: 'Club / Friendly', divisions: ['Men', 'Women'], date_tbc: 1,
+        description: 'Dates to be confirmed. Shown on the same weekend as the 2026 Galway Open (13 and 14 June 2026).' },
+      { name: 'Cork Open 2027', start_date: '2027-09-11', end_date: '2027-09-12', city: 'Cork', country: 'IE', level: 'Club / Friendly', divisions: ['Men', 'Women'], date_tbc: 1,
+        description: 'Dates to be confirmed. Shown on the same weekend as the 2026 Cork Open (12 and 13 September 2026).' },
+      { name: 'Irish Club Championships 2027', start_date: '2027-07-10', end_date: '2027-07-11', city: 'To be confirmed', country: 'IE', level: 'National Championships', divisions: ['Men', 'Women'], date_tbc: 1,
+        description: 'Dates and venue to be confirmed. Shown on the same weekend as the 2026 Irish Club Championships (11 and 12 July 2026).' },
+    ],
+  },
+  {
     id: '2027-worldwide-2026-10-01',
     tournaments: [
       {
