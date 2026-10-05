@@ -95,6 +95,17 @@ function loadFinal() {
     return true;
   } catch (e) { return false; }
 }
+// Admin button: save what is held now and stop reading for good (refuses when nothing has been read)
+function freezeNow() {
+  if (frozen) return { ok: true, already: true, results: state.size, games: meta.size };
+  if (!state.size) return { ok: false, why: 'No results are held in memory, so nothing was saved. Run /admin/live-verify?fetch=1 first and wait for the full read to finish.' };
+  const o = { savedAt: new Date().toISOString(), state: Object.fromEntries(state), meta: Object.fromEntries(meta), finished: [...finished], teamsFor };
+  fs.writeFileSync(FINAL_FILE + '.tmp', JSON.stringify(o)); fs.renameSync(FINAL_FILE + '.tmp', FINAL_FILE);
+  frozen = true; schedules.setFrozen(true);
+  if (timer) { clearInterval(timer); timer = null; }
+  logChange('', 'Event over', `Final results saved by the admin button (${state.size} results, ${meta.size} games). The site no longer reads the organiser's pages.`);
+  return { ok: true, results: state.size, games: meta.size };
+}
 // After a complete, clean read of every game, once the last game of the event is over: save everything and stop reading for good
 function maybeFreeze() {
   if (frozen || !verifying || !verifying.done || verifying.failed) return;
@@ -594,4 +605,4 @@ function detail(code) {
 }
 
 const matchByCode = (id) => matchList().find((m) => String(m.url).endsWith('id=' + Number(id))) || null; // by the organiser's N°
-module.exports = { isFrozen, matchByCode, explain, readLog, logKinds, logChange, health, paused, readAll, readAllStatus, verify, parseTeams, ingest, start, snapshot, detail, changes, standings, playerStats, meta, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };
+module.exports = { freezeNow, isFrozen, matchByCode, explain, readLog, logKinds, logChange, health, paused, readAll, readAllStatus, verify, parseTeams, ingest, start, snapshot, detail, changes, standings, playerStats, meta, parse, parseEvents, parseDetail, fetchPage, textOf, _state: state };
