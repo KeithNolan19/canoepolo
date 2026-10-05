@@ -808,6 +808,10 @@ app.use((err, req, res, next) => {
 });
 
 if (require.main === module) {
-  app.listen(PORT, () => { console.log(`canoepolo.eu running on ${BASE_URL} (port ${PORT})`); live.start(); if (live.isFrozen()) kayakers.setEnabled(false); else kayakers.start(); sms.startTimer(); sms.cleanup(); });
+  app.listen(PORT, () => { console.log(`canoepolo.eu running on ${BASE_URL} (port ${PORT})`); live.start(); try { // Kayakers.nl stays on after the ECC is saved (an earlier version switched it off): switch it back on once
+    const db = require('./db'); db.exec('CREATE TABLE IF NOT EXISTS app_flags (key TEXT PRIMARY KEY)');
+    if (!db.prepare("SELECT 1 FROM app_flags WHERE key = 'kayakers-back-on'").get()) { kayakers.setEnabled(true); db.prepare("INSERT INTO app_flags (key) VALUES ('kayakers-back-on')").run(); }
+  } catch (e) { /* ignore */ }
+  kayakers.start(); sms.startTimer(); sms.cleanup(); });
 }
 module.exports = app;
