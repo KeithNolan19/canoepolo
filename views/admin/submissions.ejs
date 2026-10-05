@@ -1,0 +1,39 @@
+<%- include('../partials/header') %>
+
+<%- include('tabs', { tab: 'submissions' }) %>
+
+<div class="admin-head">
+  <h1>Submissions</h1>
+  <div class="actions"><a class="btn" href="/organisers/submit">Open the organiser form</a></div>
+</div>
+
+<% if (msg) { %><div class="notice green"><%= msg %></div><% } %>
+<p class="small-note">Send organisers the link <strong>/organisers/submit</strong>. Nothing goes on the site until you approve it here. After approval you can still edit it under Tournaments. Contact details are removed 30 days after a decision.</p>
+
+<h2>Waiting for approval (<%= pending.length %>)</h2>
+<% if (!pending.length) { %><div class="empty"><p>Nothing waiting.</p></div><% } %>
+<% pending.forEach(r => { const d = r.d; %>
+<div class="panel">
+  <h3><%= d.name %></h3>
+  <p><strong><%= fmtRange(d.start_date, d.end_date) %></strong> &middot; <%= d.city %>, <%= COUNTRIES[d.country] || d.country %><% if (d.venue) { %> &middot; <%= d.venue %><% } %></p>
+  <p>Level: <%= d.level %> &middot; Divisions: <%= d.divisions || 'none ticked' %><% if (d.entry_fee) { %> &middot; Fee: <%= d.entry_fee %><% } %></p>
+  <% if (d.website_url) { %><p>Website: <a href="<%= d.website_url %>" target="_blank" rel="noopener nofollow"><%= d.website_url %></a></p><% } %>
+  <% if (d.registration_url) { %><p>Registration: <a href="<%= d.registration_url %>" target="_blank" rel="noopener nofollow"><%= d.registration_url %></a></p><% } %>
+  <% if (d.registration_deadline) { %><p>Registration closes: <%= fmtDate(d.registration_deadline) %></p><% } %>
+  <% if (d.description) { %><p style="white-space:pre-wrap"><%= d.description %></p><% } %>
+  <p class="small-note">From <%= r.submitter_name %> (<a href="mailto:<%= r.submitter_email %>"><%= r.submitter_email %></a>), <%= r.created_at %> UTC. <%= r.email_public ? 'They agreed to show their name and email on the page.' : 'Their contact details will NOT be shown on the page.' %></p>
+  <form method="post" action="/admin/submissions/<%= r.id %>/approve" style="display:inline"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn primary" type="submit">Approve and publish</button></form>
+  <form method="post" action="/admin/submissions/<%= r.id %>/reject" style="display:inline"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn" type="submit">Reject</button></form>
+</div>
+<% }) %>
+
+<% if (approved.length) { %>
+<h2>Recently approved</h2>
+<ul><% approved.forEach(r => { %><li><%= r.d.name %> (<%= r.decided_at %> UTC)</li><% }) %></ul>
+<% } %>
+<% if (rejected.length) { %>
+<h2>Recently rejected</h2>
+<ul><% rejected.forEach(r => { %><li><%= r.d.name %> (<%= r.decided_at %> UTC)</li><% }) %></ul>
+<% } %>
+
+<%- include('../partials/footer') %>

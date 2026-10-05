@@ -1,0 +1,79 @@
+<%- include('partials/header', { fullWidth: true }) %>
+
+<div class="page-banner">
+  <div class="wrap">
+    <p class="crumbs"><a href="/">Home</a> / <a href="/tournaments">Tournaments</a> / Add your tournament</p>
+    <h1>Add your tournament</h1>
+  </div>
+</div>
+
+<div class="wrap narrow-page">
+<% const v = (k) => (values && typeof values[k] === 'string' ? values[k] : ''); %>
+<% if (done) { %>
+  <div class="notice green" role="status"><strong>Thank you. We have your tournament.</strong><br>We check every entry before it goes on the site, usually within a few days. We may email you with a question.</div>
+  <p><a class="btn primary" href="/tournaments">See upcoming tournaments</a></p>
+<% } else { %>
+  <p class="lead">Running a canoe polo tournament? Tell us about it and we will list it on canoepolo.eu for players everywhere.</p>
+
+  <div class="notice" role="note">
+    <strong>Run your event on Kayakers.nl.</strong> It is free to use for entries, schedules, live scoring and event management. canoepolo.eu lists your event and can show your live games and results here. Ask us if you would like text (SMS) updates for your players.
+    <br><a href="https://www.kayakers.nl/Account/Register" target="_blank" rel="noopener">Create your tournament on Kayakers.nl</a>
+  </div>
+
+  <% if (errors.length) { %><div class="notice red" role="alert"><strong>Please fix:</strong><ul><% errors.forEach(e => { %><li><%= e %></li><% }) %></ul></div><% } %>
+
+  <form method="post" action="/organisers/submit" class="quiz-join sms-form" autocomplete="on">
+    <input type="hidden" name="started" value="<%= started %>">
+    <div style="position:absolute;left:-9999px" aria-hidden="true"><label>Leave this empty <input type="text" name="company" tabindex="-1" autocomplete="off"></label></div>
+
+    <fieldset>
+      <legend>The tournament</legend>
+      <label>Name <input name="name" required maxlength="150" value="<%= v('name') %>" placeholder="e.g. Galway Open 2027"></label>
+      <label>Start date <input type="date" name="start_date" required value="<%= v('start_date') %>"></label>
+      <label>End date <input type="date" name="end_date" value="<%= v('end_date') %>"></label>
+      <label>Town or city <input name="city" required maxlength="60" value="<%= v('city') %>"></label>
+      <label>Country
+        <select name="country" required>
+          <option value="">Choose…</option>
+          <% Object.entries(COUNTRIES).sort((a,b) => a[1].localeCompare(b[1])).forEach(([code, name]) => { %><option value="<%= code %>" <%= v('country') === code ? 'selected' : '' %>><%= name %></option><% }) %>
+        </select>
+      </label>
+      <label>Venue (optional) <input name="venue" maxlength="120" value="<%= v('venue') %>"></label>
+      <label>Level
+        <select name="level">
+          <% LEVELS.forEach(l => { %><option <%= (v('level') || 'Club / Friendly') === l ? 'selected' : '' %>><%= l %></option><% }) %>
+        </select>
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Divisions</legend>
+      <% const picked = [].concat((values && values.divisions) || []); %>
+      <% DIVISIONS.forEach(d => { %><label class="check"><input type="checkbox" name="divisions" value="<%= d %>" <%= picked.includes(d) ? 'checked' : '' %>> <%= d %></label><% }) %>
+    </fieldset>
+
+    <fieldset>
+      <legend>Links and entry</legend>
+      <label>Tournament page (Kayakers.nl or your own site) <input type="url" name="website_url" value="<%= v('website_url') %>" placeholder="https://"></label>
+      <label>Registration link <input type="url" name="registration_url" value="<%= v('registration_url') %>" placeholder="https://"></label>
+      <label>Registration closes (optional) <input type="date" name="registration_deadline" value="<%= v('registration_deadline') %>"></label>
+      <label>Entry fee (optional) <input name="entry_fee" maxlength="60" value="<%= v('entry_fee') %>" placeholder="e.g. 150 euro per team"></label>
+      <label>About the tournament (optional, plain text) <textarea name="description" rows="5" maxlength="3000"><%= v('description') %></textarea></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>About you</legend>
+      <label>Your name <input name="submitter_name" required maxlength="100" value="<%= v('submitter_name') %>" autocomplete="name"></label>
+      <label>Your email <input type="email" name="submitter_email" required maxlength="150" value="<%= v('submitter_email') %>" autocomplete="email"></label>
+      <label class="check"><input type="checkbox" name="email_public" value="1" <%= values && values.email_public ? 'checked' : '' %>> Show my name and email on the tournament page (optional)</label>
+      <p class="small-note">We use your email only to reach you about this listing, and remove it 30 days after we decide on it. It is not shown unless you tick the box above.</p>
+      <label class="check"><input type="checkbox" name="consent" value="1" required <%= values && values.consent ? 'checked' : '' %>> I am an organiser of this tournament, or have their permission, and I agree that these details will be published on canoepolo.eu.</label>
+    </fieldset>
+
+    <p><button class="btn primary big" type="submit">Send for approval</button></p>
+    <p class="small-note">canoepolo.eu is a volunteer-run listing. We do not run, insure or take responsibility for tournaments listed here.</p>
+  </form>
+<% } %>
+</div>
+
+<%- include('partials/footer') %>

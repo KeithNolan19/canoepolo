@@ -359,6 +359,19 @@ app.post('/referee/quiz/score', scoreLimiter, express.json({ limit: '2kb' }), (r
 });
 app.get('/referee/leaderboard', (req, res) => res.render('leaderboard', { title: 'Referee quiz leaderboard', rows: LB.top(50) }));
 app.get('/referee/quiz', (req, res) => res.render('referee-quiz', { title: 'Referee quiz', board: LB.top(10) }));
+// ---------- Organisers: submit a tournament (goes to the admin for approval) ----------
+const SUB = require('./submissions');
+const subLimit = rateLimit({ windowMs: 60 * 60 * 1000, limit: 5, standardHeaders: false, legacyHeaders: false, handler: tooMany });
+const subPage = (res, extra) => res.render('organiser-submit', { title: 'Add your tournament', metaDescription: 'Organisers: add your canoe polo tournament to canoepolo.eu. We check every entry before it goes live.', errors: [], values: {}, done: false, started: Date.now(), ...extra });
+app.get('/organisers/submit', (req, res) => subPage(res, {}));
+app.post('/organisers/submit', subLimit, (req, res) => {
+  const b = req.body || {};
+  const tooFast = Date.now() - Number(b.started || 0) < 4000; // a person takes longer than 4 seconds to fill this in
+  if (b.company || tooFast) return subPage(res, { done: true }); // bots get the same thank-you and nothing is saved
+  const r = SUB.submit(b);
+  if (!r.ok) return res.status(400).render('organiser-submit', { title: 'Add your tournament', errors: r.errors, values: b, done: false, started: Date.now() });
+  subPage(res, { done: true });
+});
 app.get('/get-involved', (req, res) => res.render('get-involved', { title: 'Get involved', INVOLVED: C.INVOLVED, ORGANISATIONS: require('./support').ORGANISATIONS, NATIONAL: require('./support').NATIONAL }));
 
 app.get('/privacy', (req, res) => res.render('privacy', { title: 'Privacy policy' }));
@@ -747,6 +760,17 @@ app.post('/admin/delete/:id', requireAdmin, checkCsrf, (req, res) => {
 });
 
 // ---------- Admin: videos for the Watch page ----------
+// ---------- Admin: approve or reject organiser submissions ----------
+app.get('/admin/submissions', requireAdmin, (req, res) => {
+  res.render('admin/submissions', { title: 'Submissions', pending: SUB.list('pending'), approved: SUB.list('approved').slice(0, 20), rejected: SUB.list('rejected').slice(0, 20), msg: String(req.query.msg || '').slice(0, 200) });
+});
+app.post('/admin/submissions/:id/approve', requireAdmin, checkCsrf, (req, res) => {
+  const t = SUB.approve(Number(req.params.id));
+  res.redirect('/admin/submissions?msg=' + encodeURIComponent(t ? `Approved and live: ${t.name} (/tournaments/${t.slug})` : 'Nothing to approve'));
+});
+app.post('/admin/submissions/:id/reject', requireAdmin, checkCsrf, (req, res) => {
+  res.redirect('/admin/submissions?msg=' + encodeURIComponent(SUB.reject(Number(req.params.id)) ? 'Rejected' : 'Nothing to reject'));
+});
 app.get('/admin/videos', requireAdmin, (req, res) => {
   res.render('admin/videos', { title: 'Videos', videos: V.all(), CATEGORIES: V.CATEGORIES, msg: req.query.msg || '' });
 });
