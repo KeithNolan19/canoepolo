@@ -149,17 +149,13 @@
   </div>
 </section>
 
-<% if (popup) { %>
-<dialog class="promo" id="promo" data-key="promo-<%= popup.slug %>" aria-labelledby="promo-title">
+<dialog class="promo" id="promo" data-key="promo-ref-quiz" aria-labelledby="promo-title">
   <button type="button" class="promo-x" data-promo-close aria-label="Close">&times;</button>
-  <p class="promo-kicker"><%= popup.start_date <= new Date().toISOString().slice(0, 10) ? 'Happening now' : 'Starts soon' %></p>
-  <h2 id="promo-title">European Club Championships (ECC)</h2>
-  <p class="promo-meta"><%= popup.city %>, <%= COUNTRIES[popup.country] || popup.country %> &middot; <%= fmtRange(popup.start_date, popup.end_date) %></p>
-  <p>The top clubs from across Europe play for the continental club title.</p>
-  <a class="btn primary big" href="/tournaments/<%= popup.slug %>">View information and schedule</a>
-  <a class="btn" href="/tournaments/<%= popup.slug %>/gazebos">Find your gazebo and the site map</a>
-  <a class="btn" href="/tournaments/<%= popup.slug %>/support">Support your club</a>
+  <p class="promo-kicker">Test yourself</p>
+  <h2 id="promo-title">Try the referee quiz</h2>
+  <p>How well do you know the canoe polo rules? Take the quiz, then see how you rank against players and referees from around the world.</p>
+  <a class="btn primary big" href="/referee/quiz">Try the referee quiz</a>
+  <a class="btn" href="/referee/leaderboard">See the international leaderboard</a>
 </dialog>
-<% } %>
 
 <%- include('partials/footer') %>
