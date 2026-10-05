@@ -121,6 +121,7 @@ function store(ev, g, firstRead) {
 async function refreshList() {
   const list = await get('/api/tournamentsv1/list', true);
   st.lastList = Date.now();
+  try { const r = require('./kayakers-import').importList(list); if (r.added || r.updated) live.logChange('KY:list', 'Kayakers.nl tournaments', `Tournament list: ${r.added} added, ${r.updated} updated`, { comp: 'Tournament list', source: 'Kayakers.nl list (cpt.kayakers.nl/api/tournamentsv1/list)' }); } catch (e) { /* the list still works without the import */ }
   const today = dublinToday(), yday = dublinToday(-1);
   st.events.clear();
   for (const t of list) {
