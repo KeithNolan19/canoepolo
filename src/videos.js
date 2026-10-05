@@ -37,6 +37,10 @@ const STARTERS = [
 if (!db.prepare("SELECT 1 FROM videos WHERE youtube_id = 'QaBpYWyEjlQ'").get() && !db.prepare("SELECT 1 FROM videos WHERE game_code = 'M108'").get()) {
   db.prepare("INSERT INTO videos (youtube_id, title, event, category, video_date, featured, game_code) VALUES ('QaBpYWyEjlQ', 'Men''s final: Málaga v Odysseus', 'European Club Championships 2026, Milan', 'games', '2026-10-04', 0, 'M108')").run();
 }
+// ECC 2026 women's final (sent by the site owner 5 October 2026), added once; edit or remove it in the admin panel
+if (!db.prepare("SELECT 1 FROM videos WHERE youtube_id = 'Lg0_VvapI1g'").get() && !db.prepare("SELECT 1 FROM videos WHERE game_code = 'F60'").get()) {
+  db.prepare("INSERT INTO videos (youtube_id, title, event, category, video_date, featured, game_code) VALUES ('Lg0_VvapI1g', 'Women''s final: MKC Duisburg v Burriana', 'European Club Championships 2026, Milan', 'games', '2026-10-04', 0, 'F60')").run();
+}
 // Made the main highlight once, at the site owner's request (4 October 2026); later changes in the admin panel are respected
 db.exec('CREATE TABLE IF NOT EXISTS app_flags (key TEXT PRIMARY KEY)');
 if (!db.prepare("SELECT 1 FROM app_flags WHERE key = 'ecc-final-featured'").get()) {
