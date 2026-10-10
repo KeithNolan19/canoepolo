@@ -212,7 +212,7 @@ const ev = (n) => { if (window.cpEvent) window.cpEvent(n); };
     if (undoStack.length > 60) undoStack.shift();
   }
   // Any change to the board puts the defence and attack pickers back to their prompt; picking one shows its name until the board changes again
-  function resetPickers() { ['tb-defence', 'tb-attack'].forEach((id) => { const e = document.getElementById(id); if (e) e.value = ''; }); }
+  function resetPickers() { ['tb-preset', 'tb-defence', 'tb-attack'].forEach((id) => { const e = document.getElementById(id); if (e) e.value = ''; }); }
   function commit() { save(); render(); resetPickers(); }
 
   // ---------- Save / load (browser storage + share links) ----------
@@ -541,7 +541,7 @@ const ev = (n) => { if (window.cpEvent) window.cpEvent(n); };
   });
   presetSel.addEventListener('change', () => {
     const p = PRESETS[presetSel.value];
-    presetSel.value = '';
+    const chosen = presetSel.value;
     if (!p) return;
     ev('tx-preset:' + Object.keys(PRESETS).find((k) => PRESETS[k] === p));
     snapshot();
@@ -549,6 +549,7 @@ const ev = (n) => { if (window.cpEvent) window.cpEvent(n); };
     selected = null;
     if (location.hash) window.history.replaceState(null, '', location.pathname);
     commit();
+    presetSel.value = chosen;
     say(`Loaded “${p.name}”. Undo brings back your previous board.`);
   });
 
@@ -563,7 +564,7 @@ const ev = (n) => { if (window.cpEvent) window.cpEvent(n); };
     });
   }
   const teamSel = $('tb-team');
-  teamSel.addEventListener('change', resetPickers); // a new team starts from the prompts again, so the same pattern can be applied to it
+  teamSel.addEventListener('change', () => { ['tb-defence', 'tb-attack'].forEach((id) => { $(id).value = ''; }); }); // a new team starts from the prompts again, so the same pattern can be applied to it
   fillSelect($('tb-defence'), 'Pick a defence…', DEFENCES);
   fillSelect($('tb-attack'), 'Pick an attack…', ATTACKS);
   $('tb-defence').addEventListener('change', (evt) => {
