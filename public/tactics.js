@@ -211,7 +211,9 @@ const ev = (n) => { if (window.cpEvent) window.cpEvent(n); };
     undoStack.push(JSON.stringify(state));
     if (undoStack.length > 60) undoStack.shift();
   }
-  function commit() { save(); render(); }
+  // Any change to the board puts the defence and attack pickers back to their prompt; picking one shows its name until the board changes again
+  function resetPickers() { ['tb-defence', 'tb-attack'].forEach((id) => { const e = document.getElementById(id); if (e) e.value = ''; }); }
+  function commit() { save(); render(); resetPickers(); }
 
   // ---------- Save / load (browser storage + share links) ----------
   const r1 = (n) => Math.round(n * 10) / 10;
@@ -561,18 +563,21 @@ const ev = (n) => { if (window.cpEvent) window.cpEvent(n); };
     });
   }
   const teamSel = $('tb-team');
+  teamSel.addEventListener('change', resetPickers); // a new team starts from the prompts again, so the same pattern can be applied to it
   fillSelect($('tb-defence'), 'Pick a defence…', DEFENCES);
   fillSelect($('tb-attack'), 'Pick an attack…', ATTACKS);
   $('tb-defence').addEventListener('change', (evt) => {
-    const k = evt.target.value; evt.target.value = '';
+    const k = evt.target.value;
     if (!k) return;
     ev('tx-def:' + k); snapshot(); applyDefence(teamSel.value, k); selected = null; commit();
+    evt.target.value = k;
     say(`${TEAMS[teamSel.value]}: ${DEFENCES[k].name}. Drag any boat to fine-tune.`);
   });
   $('tb-attack').addEventListener('change', (evt) => {
-    const k = evt.target.value; evt.target.value = '';
+    const k = evt.target.value;
     if (!k) return;
     ev('tx-atk:' + k); snapshot(); applyAttack(teamSel.value, k); selected = null; commit();
+    evt.target.value = k;
     say(`${TEAMS[teamSel.value]}: ${ATTACKS[k].name}. Drag any boat to fine-tune.`);
   });
 
